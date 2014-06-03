@@ -1,0 +1,50 @@
+#! /usr/bin/env python
+import os.path
+import sys
+import os
+import imp
+from builder import PROJECTS_ROOT_PATH
+from builder import printHelp
+from builder import runCog
+TopologyDirs = []
+firstRealArgI = 1
+#try to find the TopologyDirs right here
+if os.path.exists(os.path.join(os.getcwd(),"gernet.json")):
+    firstRealArgI = firstRealArgI - 1
+    TopologyDirs.append(os.getcwd())
+elif len(sys.argv) > firstRealArgI:
+    pPr = None
+    #try to find the TopologyDirs in the specified absolute path
+    if os.path.exists(os.path.join(sys.argv[firstRealArgI],"gernet.json")):
+        TopologyDirs.append(os.path.join(sys.argv[firstRealArgI]))
+    #try to find the TopologyDirs in the specified relative to current path
+    elif os.path.exists(os.path.join(os.getcwd(),sys.argv[firstRealArgI],"gernet.json")):
+        TopologyDirs.append(os.path.join(os.getcwd(),sys.argv[firstRealArgI]))
+    #try to find the TopologyDirs in the specified path from projects src root
+    elif os.path.exists(os.path.join(PROJECTS_ROOT_PATH,'src',sys.argv[firstRealArgI],"gernet.json")):
+        TopologyDirs.append(os.path.join(PROJECTS_ROOT_PATH,'src',sys.argv[firstRealArgI]))
+    elif sys.argv[firstRealArgI] == "." or os.path.exists(os.path.join(os.getcwd(),sys.argv[firstRealArgI])):
+        pPr = os.path.join(os.getcwd(),sys.argv[firstRealArgI])
+    elif os.path.exists(os.path.join(PROJECTS_ROOT_PATH,'src',sys.argv[firstRealArgI])):
+        pPr = os.path.join(PROJECTS_ROOT_PATH,'src',sys.argv[firstRealArgI])
+    elif os.path.exists(sys.argv[firstRealArgI]):
+        pPr = sys.argv[firstRealArgI]
+    if pPr != None:
+        for root, dirs, files in os.walk(pPr):
+            if os.path.exists(os.path.join(pPr,root,"gernet.json")):
+                TopologyDirs.append(os.path.join(pPr,root))
+    if len(TopologyDirs) == 0:
+        print "No "+os.path.join(os.getcwd(),"gernet.json")
+        print "No "+os.path.join(sys.argv[firstRealArgI],"gernet.json")
+        print "No "+os.path.join(os.getcwd(),sys.argv[firstRealArgI],"gernet.json")
+        print "No "+os.path.join(PROJECTS_ROOT_PATH,'src',sys.argv[firstRealArgI],"gernet.json")
+        print "NO gernet.json files found"
+        printHelp()
+        exit()
+else:
+    print "No gernet.json files found"
+    printHelp()
+    exit()
+
+for d in TopologyDirs:
+    runCog(firstRealArgI, sys.argv, d)

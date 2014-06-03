@@ -1,0 +1,77 @@
+<%
+import sys
+sys.path.insert(0, a.parserPath)
+
+import parsing_java as p
+p.parsingGernet(a)
+
+%>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>${a.domainName}</groupId>
+    <artifactId>${a.className}</artifactId>
+    <version>${a.version}</version>
+    <packaging>jar</packaging>
+
+
+    <name>${a.className}</name>
+    <description>${a.className}</description>
+    <url>http://${a.domainPath}</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>http://${a.domainPath}</url>
+        <connection>scm:git:https://${a.domainPath}.git</connection>
+    </scm>
+    <developers>
+        <developer>
+            <id>${a.company}</id>
+            <name>${a.company}</name>
+            <email>dev@${a.companyDomain}</email>
+            <url>http://${a.companyDomain}/devs</url>
+            <organization>${a.company}</organization>
+            <organizationUrl>http://${a.companyDomain}</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>[4.8.1,)</version>
+            <scope>test</scope>
+        </dependency>
+<!--[[[cog
+import cogging as c
+c.tpl(cog,templateFile,c.a(prefix=configFile))
+]]]-->
+<!--[[[end]]]-->
+    </dependencies>
+
+    <build>
+        <finalName>${a.className}</finalName>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
+ 

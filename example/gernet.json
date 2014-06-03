@@ -1,0 +1,156 @@
+{
+"path":"com.github.airutech.cnets.tools.gernet.example",
+"ver":"0.0.0",
+"type":"kernel",
+"args": [{
+  "name":"unsignedArr",
+  "type":"unsigned[]"
+}],
+"props":[{
+  "name":"longArr",
+  "type":"long[]",
+  "size":10
+}],
+"depends":[{
+  "path":"com.github.airutech.cnets.mapBuffer",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.queue",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.runnablesContainer",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.readerWriter",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.types",
+  "ver": "[0.0.0,)"
+}],
+"connection":{
+  "writeTo": [{
+    "description": "exported connector",
+    "type": "unsigned"
+  }],
+  "readFrom": []
+},
+"blocks":[{
+  "id":0,
+  "name": "kernelBlock0",
+  "path":"com.github.airutech.cnets.tools.gernet.block0",
+  "ver":"[0.0.0,)",
+  "args": [],
+  "connection":{
+    "writeTo": [{
+      "type": "unsigned",
+      "blockId": 1,
+      "pinId": 0
+    }, {
+      "type": "long long",
+      "blockId": 2,
+      "pinId": 0
+    }, {
+      "type": "unsigned",
+      "blockId": "export",
+      "description": "export data from 0 block",
+      "pinId": 0
+    }],
+    "readFrom": []
+  }
+},
+{
+  "id":1,
+  "type":"buffer",
+  "name":"mapBuffer1",
+  "path":"com.github.airutech.cnets.mapBuffer",
+  "ver":"[0.0.0,)",
+  "args": [{
+    "name":"buffers",
+    "value":"unsignedArr",
+    "type":"Object[]"
+  },{
+    "name": "timeout_milisec",
+    "value": "1000L"
+  },{
+    "name": "uniqueId",
+    "value": "0L"
+  },{
+    "name": "readers_grid_size",
+    "value": 1
+  }],
+  "connection": {
+    "writeTo": [{
+      "type": "unsigned",
+      "blockId": 3,
+      "pinId": 0,
+      "grid_id": 0,
+      "rwArgs":[]
+    },{
+      "type": "unsigned",
+      "blockId": 4,
+      "pinId": 0,
+      "grid_id": 0,
+      "rwArgs":[]
+    }],
+    "readFrom": [{
+      "type": "unsigned"
+    }]
+  }
+},{
+  "id":2,
+  "type":"buffer",
+  "name": "mapBuffer2",
+  "path":"com.github.airutech.cnets.mapBuffer",
+  "ver":"[0.0.0,)",
+  "args": [{
+    "name":"buffers",
+    "value":"longArr",
+    "type":"Object[]"
+  },{
+    "name": "timeout_milisec",
+    "value": "1000L"
+  },{
+    "name": "uniqueId",
+    "value": "1L"
+  },{
+    "name": "readers_grid_size",
+    "value": 1
+  }],
+  "connection":{
+    "writeTo": [{
+      "type": "long long",
+      "blockId": 3,
+      "pinId": 1
+    }],
+    "readFrom": [{
+      "type": "long long"
+    }]
+  }
+},{
+  "id":3,
+  "name": "kernelBlock3",
+  "path":"com.github.airutech.cnets.tools.gernet.block3",
+  "ver":"[0.0.0,)",
+  "args": [],
+  "connection":{
+    "writeTo": [],
+    "readFrom": [{
+      "type": "unsigned"
+    }, {
+      "type": "long long"
+    }]
+  }
+},{
+  "id":4,
+  "name": "kernelBlock4",
+  "path":"com.github.airutech.cnets.tools.gernet.block4",
+  "ver":"[0.0.0,)",
+  "args": [],
+  "connection":{
+    "writeTo": [],
+    "readFrom": [{
+      "type": "unsigned"
+    }]
+  }
+}]
+}
