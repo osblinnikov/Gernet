@@ -73,9 +73,15 @@
     "value": "1000L"
   },{
     "name": "uniqueId",
-    "value": "0L"
+    "value": "\"0L\""
   },{
     "name": "readers_grid_size",
+    "value": 1
+  },{
+    "name": "statsInterval",
+    "value": 1000
+  },{
+    "name": "maxDstNodesCount",
     "value": 1
   }],
   "connection": {
@@ -111,9 +117,15 @@
     "value": "1000L"
   },{
     "name": "uniqueId",
-    "value": "1L"
+    "value": "\"1L\""
   },{
     "name": "readers_grid_size",
+    "value": 1
+  },{
+    "name": "statsInterval",
+    "value": 1000
+  },{
+    "name": "maxDstNodesCount",
     "value": 1
   }],
   "connection":{
