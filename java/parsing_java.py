@@ -160,10 +160,31 @@ def getConstructor(a):
       elif v.has_key("size"):
         out += "\n    this."+v["name"]+" = new "+v["type"][:-2]+"["+str(v["size"])+"];"
 
-  if len(a.read_data["connection"]["readFrom"]) > 1:
-    out += "\n    reader[] arrReaders = new reader["+str(len(a.read_data["connection"]["readFrom"]))+"];"
+  selectableArgs = []
+  for i,v in enumerate(a.read_data["args"]):
+    if v.has_key("selectable") and v["selectable"] == True:
+      if v["type"] != 'reader[]':
+        raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
+      selectableArgs.append(v)
+
+  if len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0:
+    selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
+    for i,v in enumerate(selectableArgs):
+      selectablesCount += " + "+str(v["name"])+".length"
+    out += "\n    reader[] arrReaders = new reader["+selectablesCount+"];"
+
+    lastId = 0
     for i,v in enumerate(a.read_data["connection"]["readFrom"]):
       out += "\n    arrReaders["+str(i)+"] = r"+str(i)+";"
+      lastId = i
+    if len(selectableArgs)>0:
+      out += "\n    int totalLength = "+str(lastId + 1)+";"
+      for i,v in enumerate(selectableArgs):
+        out += "\n    for(int i=0;i<"+str(v["name"])+".length; i++){"
+        out += "\n      arrReaders[totalLength + i] = "+v["name"]+"[i];"
+        out += "\n    }"
+        if i+1 != len(selectableArgs):
+          out += "\n    totalLength += "+str(v["name"])+".length;"
     out += "\n    this.readersSelector = new selector(arrReaders);"
     out += "\n    this.rSelect = readersSelector.getReader(0,-1);"
   out += "\n    onCreate();"
