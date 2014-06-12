@@ -18,13 +18,13 @@ Go to your favorite projects directory. Create path to the gernet, on linux you 
 
 
     cd $PROJECTS_DIRECTORY
-    mkdir -p src/github.com/osblinnikov
-    cd src/github.com/osblinnikov
-    git clone https://github.com/osblinnikov/Gernet.git gernet
+    mkdir -p src/github.com/airutech
+    cd src/github.com/airutech
+    git clone https://github.com/airutech/Gernet.git gernet
 
 Update your PATH with the gernet:
 
-    PATH=$PATH:$PROJECTS_DIRECTORY/src/github.com/osblinnikov/gernet
+    PATH=$PATH:$PROJECTS_DIRECTORY/src/github.com/airutech/gernet
     
 or
 
@@ -54,7 +54,7 @@ gernet [GernetFilePath] [options]
 GernetFilePath can be absolute or relative to current path or 
 relative to workspace sources root directory e.g.:
 
-    gernet github.com/osblinnikov/gernet/example -lang java
+    gernet github.com/airutech/gernet/example -lang java
 
 Available Gernet options:
 
