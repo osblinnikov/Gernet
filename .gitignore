@@ -1,9 +1,9 @@
-example/java
-example/c
-block0/java
-block0/c
-block3/java
-block3/c
-block4/java
-block4/c
+test/example/java
+test/example/c
+test/block0/java
+test/block0/c
+test/block3/java
+test/block3/c
+test/block4/java
+test/block4/c
 *.pyc
