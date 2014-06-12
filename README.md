@@ -54,11 +54,7 @@ gernet [GernetFilePath] [options]
 GernetFilePath can be absolute or relative to current path or 
 relative to workspace sources root directory e.g.:
 
-<<<<<<< HEAD
     gernet github.com/airutech/gernet/test/example -lang java
-=======
-    gernet github.com/airutech/gernet/example -lang java
->>>>>>> ab8b3274ab0f0b8b9b31cfe1c6d7949dd55aac34
 
 Available Gernet options:
 
@@ -76,6 +72,8 @@ TODO
 ---
 
 Add support for C cnets library
+
+Add support for JavaScript cnets library
 
 Add support for Golang cnets library
 
