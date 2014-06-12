@@ -1,7 +1,7 @@
 {
-"path":"com.github.airutech.cnets.tools.gernet.example",
+"path":"com.github.airutech.gernet.test.example",
 "ver":"0.0.0",
-"type":"kernel",
+"type":"com.github.airutech.gernet.plugins.kernel",
 "args": [{
   "name":"unsignedArr",
   "type":"unsigned[]"
@@ -37,7 +37,7 @@
 "blocks":[{
   "id":0,
   "name": "kernelBlock0",
-  "path":"com.github.airutech.cnets.tools.gernet.block0",
+  "path":"com.github.airutech.gernet.test.block0",
   "ver":"[0.0.0,)",
   "args": [],
   "connection":{
@@ -135,7 +135,7 @@
 },{
   "id":3,
   "name": "kernelBlock3",
-  "path":"com.github.airutech.cnets.tools.gernet.block3",
+  "path":"com.github.airutech.gernet.test.block3",
   "ver":"[0.0.0,)",
   "args": [],
   "connection":{
@@ -149,7 +149,7 @@
 },{
   "id":4,
   "name": "kernelBlock4",
-  "path":"com.github.airutech.cnets.tools.gernet.block4",
+  "path":"com.github.airutech.gernet.test.block4",
   "ver":"[0.0.0,)",
   "args": [],
   "connection":{

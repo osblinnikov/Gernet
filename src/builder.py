@@ -41,7 +41,7 @@ def getArgs(firstRealArgI, argv, Types):
                 if i + 1 == len(argv) or argv[i + 1].startswith("-"):
                     raise Exception("expected language type after -lang option")
                 else:
-                    Types.append([argv[i + 1]])
+                    Types.append(argv[i + 1])
                     i = i + 1
             elif argv[i - 1] == '-lang' or i == 1:
                 continue
@@ -64,6 +64,7 @@ def getFilteredSubFolders(folder, filters):
     for root, dirs, files in os.walk(folder):
         d = dirs
         break
+
     for i in d:
         if len(filters) == 0 or i in filters:
             res.append(i)
@@ -82,6 +83,7 @@ def getPath(path):
 
 def generateMissedFiles(topology_dir, generator_dir, className, extra_args):
     json_file_to_read = join(topology_dir, "gernet.json")
+
     for root, dirs, files in os.walk(generator_dir):
         for fileName in files:
             file = os.path.join(root,fileName)
@@ -121,7 +123,8 @@ def runGernet(firstRealArgI, argv, topology_dir):
     extra_args = getArgs(firstRealArgI, argv, Types)
     read_data = readJson(topology_dir)
     Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
-
+    if len(Types) == 0:
+        raise Exception("No one generator was found")
     for i in range(0, len(Types)):
         generateMissedFiles(
             topology_dir,

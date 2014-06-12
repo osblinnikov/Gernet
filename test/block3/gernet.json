@@ -1,7 +1,7 @@
 {
-"path":"com.github.airutech.cnets.tools.gernet.block3",
+"path":"com.github.airutech.gernet.test.block3",
 "ver":"0.0.0",
-"type":"kernel",
+"type":"com.github.airutech.gernet.plugins.kernel",
 "args": [],
 "blocks":[],
 "depends":[{
