@@ -14,5 +14,7 @@
     <module>block3/java</module>
     <module>block4/java</module>
     <module>example/java</module>
+    <module>lib/java</module>
+    <module>buf/java</module>
   </modules>
 </project>

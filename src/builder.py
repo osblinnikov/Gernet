@@ -73,9 +73,10 @@ def getFilteredSubFolders(folder, filters):
             res.append(i)
     return res
 
-
-def getPath(path):
-    path = path.split('.')
+def getPath(pathSrc):
+    path = pathSrc.split('.')
+    if len(path) < 3:
+        raise Exception("path: \""+pathSrc+"\" is not a full package name")
     arr = [PROJECTS_ROOT_PATH, 'src', path[1] + "." + path[0]]
     to_delete = [0, 1]
     for offset, index in enumerate(to_delete):
@@ -84,7 +85,7 @@ def getPath(path):
     return '/'.join(arr + path)
 
 
-def generateMissedFiles(topology_dir, generator_dir, className, extra_args):
+def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra_args):
     json_file_to_read = join(topology_dir, "gernet.json")
 
     for root, dirs, files in os.walk(generator_dir):
@@ -94,7 +95,7 @@ def generateMissedFiles(topology_dir, generator_dir, className, extra_args):
                 continue
 
             generator_dirLen = (len(generator_dir))+1
-            relativeFilePath =  file[generator_dirLen:].replace("_NAME_", className)
+            relativeFilePath =  file[generator_dirLen:].replace("_NAME_", className).replace("_PATH_", classPath)
             absDstFilePath = os.path.join(topology_dir, os.path.split(generator_dir)[1], relativeFilePath)
             if not os.path.exists(absDstFilePath):
                 checkDir(absDstFilePath)
@@ -132,6 +133,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
         generateMissedFiles(
             topology_dir,
             os.path.join(getPath(read_data["type"]), Types[i]),
+            '/'.join(read_data["path"].split('.') + [""]),
             read_data["path"].split('.')[-1],
             extra_args
         )

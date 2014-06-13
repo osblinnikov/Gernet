@@ -1,0 +1,21 @@
+{
+"path":"com.github.airutech.gernet.test.lib",
+"ver":"0.0.0",
+"type":"com.github.airutech.gernet.plugins.library",
+"args": [],
+"blocks":[],
+"depends":[{
+  "path":"com.github.airutech.cnets.runnablesContainer",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.readerWriter",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.types",
+  "ver": "[0.0.0,)"
+}],
+"connection":{
+  "writeTo": [],
+  "readFrom": []
+}
+}

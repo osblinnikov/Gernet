@@ -102,7 +102,7 @@ def artifactId(path):
   fullNameList = path.split('.')
   return '_'.join(fullNameList)
 
-def artifactId(path):
+def getPath(path):
   path = path.split('.')
   arr = []
   arr.append(path[1]+"."+path[0])
