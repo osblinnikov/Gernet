@@ -1,4 +1,5 @@
-<%import parsing_java as p
+<%import parsing_java
+p = reload(parsing_java)
 p.parsingGernet(a)%>
 
         %for v in a.read_data["blocks"]+a.read_data["depends"]:

@@ -6,6 +6,7 @@
 #
 # use this if you want to include modules from a subforder
 import inspect
+import re
 import sys
 from attrs import attrs
 import json, os
@@ -40,13 +41,13 @@ def getArgs(firstRealArgI, argv, Types):
         for i in range(firstRealArgI + 1, len(argv)):
             if argv[i] == '-c':
                 compiling_arg = ['-x']
-            elif argv[i] == '-lang':
+            elif argv[i] == '-g':
                 if i + 1 == len(argv) or argv[i + 1].startswith("-"):
                     raise Exception("expected language type after -lang option")
                 else:
                     Types.append(argv[i + 1])
                     i = i + 1
-            elif argv[i - 1] == '-lang' or i == 1:
+            elif argv[i - 1] == '-g' or i == 1:
                 continue
             else:
                 all_args.push(argv[i])
@@ -55,9 +56,16 @@ def getArgs(firstRealArgI, argv, Types):
 
 def readJson(topology_dir):
     json_file_to_read = join(topology_dir, "gernet.json")
-    json_data = open(json_file_to_read)
-    read_data = json.load(json_data)
-    json_data.close()
+    read_data = None
+    with open (json_file_to_read, "r") as jsonfile:
+        json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
+        try:
+            read_data = json.loads(json_data)
+        except:
+            print json_file_to_read+" invalid"
+            jsonfile.close()
+            raise
+        jsonfile.close()
     return read_data
 
 
@@ -87,7 +95,6 @@ def getPath(pathSrc):
 
 def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra_args):
     json_file_to_read = join(topology_dir, "gernet.json")
-
     for root, dirs, files in os.walk(generator_dir):
         for fileName in files:
             file = os.path.join(root,fileName)
@@ -95,7 +102,10 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
                 continue
 
             generator_dirLen = (len(generator_dir))+1
-            relativeFilePath =  file[generator_dirLen:].replace("_NAME_", className).replace("_PATH_", classPath)
+            relativeFilePath =  file[generator_dirLen:]\
+                .replace("_NAME_", className)\
+                .replace("_PATH_", classPath)\
+                .replace("_GERNET_","gernet")
             absDstFilePath = os.path.join(topology_dir, os.path.split(generator_dir)[1], relativeFilePath)
             if not os.path.exists(absDstFilePath):
                 checkDir(absDstFilePath)
@@ -128,7 +138,8 @@ def runGernet(firstRealArgI, argv, topology_dir):
     read_data = readJson(topology_dir)
     Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
     if len(Types) == 0:
-        raise Exception("No one generator was found")
+        print ("No one generator was found")
+        return
     for i in range(0, len(Types)):
         generateMissedFiles(
             topology_dir,

@@ -2,7 +2,8 @@
 import sys
 sys.path.insert(0, a.parserPath)
 
-import parsing_c as p
+import parsing_c
+p = reload(parsing_c)
 p.parsingGernet(a)
 
 %>

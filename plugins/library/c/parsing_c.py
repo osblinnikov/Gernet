@@ -1,4 +1,6 @@
 import json
+import re
+
 
 def getReaderWriterArgumentsStrarrDel0(a):
   readerWriterArgumentsStrArr = []
@@ -113,9 +115,16 @@ def getPath(path):
   return '/'.join(arr+path)
 
 def parsingGernet(a):
-  json_data=open(a.prefix)
-  a.read_data = json.load(json_data)
-  json_data.close()
+  a.read_data = None
+  with open (a.prefix, "r") as jsonfile:
+    json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
+    try:
+        a.read_data = json.loads(json_data)
+    except:
+        print a.prefix+" invalid"
+        jsonfile.close()
+        raise
+    jsonfile.close()
 
   fullName = a.read_data["path"]
   a.fullName_ = artifactId(fullName)

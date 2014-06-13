@@ -1,4 +1,5 @@
-<%import parsing_java as p
+<%import parsing_java
+p = reload(parsing_java)
 p.parsingGernet(a)%>${p.importBlocks(a)}
 ${p.getContainerClass(a)}
 public class ${a.className} implements readerWriterInterface{

@@ -7,3 +7,4 @@ test/block3/c
 test/block4/java
 test/block4/c
 *.pyc
+*.iml

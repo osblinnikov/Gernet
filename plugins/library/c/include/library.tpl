@@ -1,4 +1,5 @@
-<%import parsing_c as p
+<%import parsing_c
+p = reload(parsing_c)
 p.parsingGernet(a)%>${p.importBlocks(a)}
 
 #undef ${a.fullName_}_EXPORT_API

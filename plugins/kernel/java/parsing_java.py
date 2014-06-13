@@ -1,4 +1,7 @@
 import json
+import re
+
+
 def getReaderWriterArgumentsStrArr(readerWriterArguments):
   readerWriterArgumentsStrArr = []
   if readerWriterArguments[0]["name"] != "grid_id":
@@ -100,9 +103,17 @@ def artifactId(path):
   return path[-1]
 
 def parsingGernet(a):
-  json_data=open(a.prefix)
-  a.read_data = json.load(json_data)
-  json_data.close()
+
+  a.read_data = None
+  with open (a.prefix, "r") as jsonfile:
+    json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
+    try:
+        a.read_data = json.loads(json_data)
+    except:
+        print a.prefix+" invalid"
+        jsonfile.close()
+        raise
+    jsonfile.close()
 
   fullName = a.read_data["path"]
   a.version = a.read_data["ver"]
@@ -241,8 +252,8 @@ def importBlocks(a):
 def declareBlocks(a):
   out = ""
   for v in a.read_data["blocks"]:
-    pathList = v["path"].split('.')
-    out += pathList[-1]+" "+v["name"]+";"
+    # pathList = v["path"].split('.')
+    out += v["path"]+" "+v["name"]+";"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -334,7 +345,7 @@ def initializeBuffers(a):
   for blockNum, v in enumerate(a.read_data["blocks"]):
     if v.get("type") == None or v["type"] != "buffer":
       continue
-    pathList = v["path"].split('.')
+    # pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -342,7 +353,7 @@ def initializeBuffers(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
     #create variables
-    out += "\n    "+v["name"]+" = new "+pathList[-1]+"("+','.join(argsList)+");"
+    out += "\n    "+v["name"]+" = new "+v["path"]+"("+','.join(argsList)+");"
     #get writer from buffer
     for i,w in enumerate(v["connection"]["writeTo"]):
       out += "\n    reader "+v["name"]+"r"+str(i)+" = "+v["name"]+".getReader("+','.join(getRwArgs(i,w))+");"
@@ -357,7 +368,7 @@ def initializeKernels(a):
   for i,v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    pathList = v["path"].split('.')
+    # pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -365,7 +376,7 @@ def initializeKernels(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
 
-    out += "\n    "+v["name"]+" = new "+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
+    out += "\n    "+v["name"]+" = new "+v["path"]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
 
   return out
 

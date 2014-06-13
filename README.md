@@ -54,24 +54,24 @@ gernet [GernetFilePath] [options]
 GernetFilePath can be absolute or relative to current path or 
 relative to workspace sources root directory e.g.:
 
-    gernet github.com/airutech/gernet/test/example -lang java
+    gernet github.com/airutech/gernet/test/example -g java
 
 Available Gernet options:
 
-    -lang {generator folder name e.g java or c}
+    -g {generator folder name e.g java, connector or c}
     -c        # execute cleaning only for chosen Topology
 
 Other options can be Cog specific.
 
 Examples:
 
-    gernet .. -lang java -c
-    gernet test/example -lang java
+    gernet .. -g java -c
+    gernet test/example -g java
     
 TODO
 ---
 
-Add support for C cnets library
+Add full support for C cnets library
 
 Add support for JavaScript cnets library
 

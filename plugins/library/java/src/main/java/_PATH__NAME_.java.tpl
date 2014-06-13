@@ -1,4 +1,5 @@
-<%import parsing_java as p
+<%import parsing_java
+p = reload(parsing_java)
 p.parsingGernet(a)%>${p.importBlocks(a)}
 public class ${a.className}{
 ${p.getProps(a)}  
