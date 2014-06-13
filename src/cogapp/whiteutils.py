@@ -6,7 +6,7 @@
 
 from __future__ import absolute_import
 import re
-
+from .backward import *
 
 def whitePrefix(strings):
     """ Determine the whitespace prefix common to all non-blank lines

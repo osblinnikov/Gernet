@@ -4,14 +4,17 @@
 # if cmd_folder not in sys.path:
 # sys.path.insert(0, cmd_folder)
 #
-# # use this if you want to include modules from a subforder
-# cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0],"../tools/cogapp")))
-# if cmd_subfolder not in sys.path:
-# sys.path.insert(0, cmd_subfolder)
-
+# use this if you want to include modules from a subforder
+import inspect
+import sys
 from attrs import attrs
 import json, os
-import cogapp
+
+cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0])))
+if cmd_subfolder not in sys.path:
+    sys.path.insert(0, cmd_subfolder)
+
+from cogapp import cogapp
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
