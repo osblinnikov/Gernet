@@ -243,8 +243,8 @@ def getReaderWriter(a):
 
 def importBlocks(a):
   out = ""
-  for v in a.read_data["blocks"]:
-    out+="\nimport "+v["path"]+".*;"
+  # for v in a.read_data["blocks"]:
+  #   out+="\nimport "+v["path"]+".*;"
   for v in a.read_data["depends"]:
     out+="\nimport "+v["path"]+".*;"
   return out
@@ -252,8 +252,8 @@ def importBlocks(a):
 def declareBlocks(a):
   out = ""
   for v in a.read_data["blocks"]:
-    # pathList = v["path"].split('.')
-    out += v["path"]+" "+v["name"]+";"
+    pathList = v["path"].split('.')
+    out += v["path"]+"."+pathList[-1]+" "+v["name"]+";"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -345,7 +345,7 @@ def initializeBuffers(a):
   for blockNum, v in enumerate(a.read_data["blocks"]):
     if v.get("type") == None or v["type"] != "buffer":
       continue
-    # pathList = v["path"].split('.')
+    pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -353,7 +353,7 @@ def initializeBuffers(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
     #create variables
-    out += "\n    "+v["name"]+" = new "+v["path"]+"("+','.join(argsList)+");"
+    out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList)+");"
     #get writer from buffer
     for i,w in enumerate(v["connection"]["writeTo"]):
       out += "\n    reader "+v["name"]+"r"+str(i)+" = "+v["name"]+".getReader("+','.join(getRwArgs(i,w))+");"
@@ -368,7 +368,7 @@ def initializeKernels(a):
   for i,v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    # pathList = v["path"].split('.')
+    pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -376,7 +376,7 @@ def initializeKernels(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
 
-    out += "\n    "+v["name"]+" = new "+v["path"]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
+    out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
 
   return out
 
