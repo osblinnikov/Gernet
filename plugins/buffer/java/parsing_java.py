@@ -1,5 +1,6 @@
 import json
 import re
+from gernetHelpers import *
 
 
 def getReaderWriterArgumentsStrArr(readerWriterArguments):
@@ -20,38 +21,12 @@ def getReaderWriterArgumentsStrarrDel0(readerWriterArguments):
 def getReaderWriterArgumentsStr(readerWriterArguments):
   return ','.join(getReaderWriterArgumentsStrArr(readerWriterArguments))
 
-def filterTypes(t):
-  isObject = True
-  isArray = False
-  if len(t)>2 and t[-2:] == '[]':
-    isArray = True
-    t = t[:-2]
-  if t in ["char*","string"]:
-    t = "String"
-  if t in ["spinlock"]:
-    t = "Lock"
-  if t in ["char","unsigned char"]:
-    t = "Char" if isArray else "char"
-    isObject = False
-  if t in ["int","int32_t", "unsigned short", "short"]:
-    t = "Integer" if isArray else "int"
-    isObject = False
-  if t in ["unsigned","unsigned int","uint32_t","long","long long","uint64_t","int64_t"]:
-    t = "Long" if isArray else "long"
-    isObject = False
-  if t in ["Object"]:
-    t = "Object"
-  if isArray:
-    t += "[]"
-    isObject = True
-  return t, isObject, isArray
-
 def getFieldsArrStr(a):
   arr = []
   props = []
   if a.read_data.has_key("props"):
     for i,v in enumerate(a.read_data["props"]):
-      t, isObject, isArray = filterTypes(v["type"])
+      t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
       v["type"] = t
       if v.has_key("size"):
         if not isArray:
@@ -65,7 +40,7 @@ def getFieldsArrStr(a):
         arr.append(t+" "+v["name"])
 
   for v in a.read_data["args"]:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
     v["type"] = t
     arr.append(v["type"]+" "+v["name"])
 
@@ -82,7 +57,7 @@ def getFieldsArrStr(a):
 def getargsArrStrs(a):
   arr = []
   for v in a.read_data["args"]:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
     v["type"] = t
     arr.append(t+" "+v["name"])
 
@@ -105,15 +80,7 @@ def artifactId(path):
 def parsingGernet(a):
 
   a.read_data = None
-  with open (a.prefix, "r") as jsonfile:
-    json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
-    try:
-        a.read_data = json.loads(json_data)
-    except:
-        print a.prefix+" invalid"
-        jsonfile.close()
-        raise
-    jsonfile.close()
+  a.read_data = readJson(a.prefix)
 
   fullName = a.read_data["path"]
   a.version = a.read_data["ver"]
@@ -401,7 +368,7 @@ def runBlocks(a):
 def getDefaultRunParameters(a):
   argsList = []
   for v in a.read_data["args"]:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
     if v.has_key("value_java"):
       argsList.append(str(v["value_java"]))
     elif v.has_key("value"):

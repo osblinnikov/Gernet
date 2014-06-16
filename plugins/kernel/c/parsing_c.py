@@ -1,6 +1,6 @@
 import json
 import re
-
+from gernetHelpers import *
 
 def getReaderWriterArgumentsStrarrDel0(a):
   readerWriterArgumentsStrArr = []
@@ -29,39 +29,13 @@ def getReaderWriterArgumentsStr(a):
 
   return ','.join(readerWriterArgumentsStrArr)
 
-def filterTypes(t):
-  isObject = False
-  isArray = False
-  if len(t)>2 and t[-2:] == '[]':
-    isArray = True
-    t = t[:-2]
-  if t in ["char*","string"]:
-    t = "char*"
-  if t in ["spinlock"]:
-    t = "pthread_spinlock_t"
-  #   t = "Char" if isArray else "char"
-  #   isObject = False
-  # if t in ["unsigned","int","uint32_t","int32_t","unsigned int", "unsigned short", "short"]:
-  #   t = "Integer" if isArray else "int"
-  #   isObject = False
-  # if t in ["long","long long","uint64_t","int64_t"]:
-  #   t = "Long" if isArray else "long"
-  #   isObject = False
-  if t in ["Object"]:
-    t = "void*"
-    isObject = True
-  if isArray:
-    t = "arrayObject"
-    isObject = True
-  return t, isObject, isArray
-
 def getFieldsArrStr(a):
   arr = []
   props = []
   if a.read_data.has_key("props"):
     props = a.read_data["props"]
   for v in a.read_data["args"]+props:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     if v.has_key("size"):
       if not isArray:
         raise Exception("getFieldsArrStr: size of property "+str(v["name"])+" was specified but type is not array!")
@@ -83,7 +57,7 @@ def getFieldsArrStr(a):
 def getargsArrStrs(a):
   arr = ["_NAME_"]
   for v in a.read_data["args"]:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     # v["type"] = t
     arr.append("_"+v["name"])
 
@@ -117,15 +91,7 @@ def getPath(path):
 def parsingGernet(a):
 
   a.read_data = None
-  with open (a.prefix, "r") as jsonfile:
-    json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
-    try:
-        a.read_data = json.loads(json_data)
-    except:
-        print a.prefix+" invalid"
-        jsonfile.close()
-        raise
-    jsonfile.close()
+  a.read_data = readJson(a.prefix)
 
   fullName = a.read_data["path"]
   a.fullName_ = artifactId(fullName)
@@ -177,7 +143,7 @@ def getConstructor(a):
 
   if a.read_data.has_key("props"):
     for value in a.read_data["props"]:
-      t, isObject, isArray = filterTypes(value["type"])
+      t, isObject, isArray = filterTypes_c(value["type"])
       if value.has_key("value"):
         out += "\\\n    _NAME_."+value["name"]+" = "+value["value"]+";"
       elif isArray:
@@ -375,7 +341,7 @@ def initializeBuffers(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes(d["type"])
+        t, isObject, isArray = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
       argValue = str(d["value"])
@@ -405,7 +371,7 @@ def initializeKernels(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes(d["type"])
+        t, isObject, isArray = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
       argsList.append(castType+str(d["value"]))
@@ -429,7 +395,7 @@ def runBlocks(a):
 def getDefaultRunParameters(a):
   argsList = ["classObj"]
   for v in a.read_data["args"]:
-    t, isObject, isArray = filterTypes(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     if v.has_key("value_java"):
       argsList.append(str(v["value_java"]))
     elif v.has_key("value"):

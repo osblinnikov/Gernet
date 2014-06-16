@@ -15,6 +15,7 @@ cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(insp
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
+from gernetHelpers import *
 from cogapp import cogapp
 from mako.template import Template
 from mako.lookup import TemplateLookup
@@ -53,20 +54,6 @@ def getArgs(firstRealArgI, argv, Types):
                 all_args.push(argv[i])
     all_args += compiling_arg
     return all_args
-
-def readJson(topology_dir):
-    json_file_to_read = join(topology_dir, "gernet.json")
-    read_data = None
-    with open (json_file_to_read, "r") as jsonfile:
-        json_data = re.sub(r'/\*.*?\*/', '', jsonfile.read())
-        try:
-            read_data = json.loads(json_data)
-        except:
-            print json_file_to_read+" invalid"
-            jsonfile.close()
-            raise
-        jsonfile.close()
-    return read_data
 
 
 def getFilteredSubFolders(folder, filters):
@@ -119,8 +106,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
                     )#args
                 ))
                 f.close()
-
-            cogapp.Cog().main(['cogging']+extra_args+[
+            args = ['cogging']+extra_args+[
                 '-I',
                 os.path.abspath(os.path.dirname(__file__)),
                 '-I',
@@ -129,13 +115,15 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
                 "-D","configFile="+json_file_to_read, #specify config as global variable
                 "-D","templateFile="+file+'.tpl', #specify config as global variable
                 absDstFilePath
-            ])
+            ]
+            # print args
+            cogapp.Cog().main(args)
 
 
 def runGernet(firstRealArgI, argv, topology_dir):
     Types = []
     extra_args = getArgs(firstRealArgI, argv, Types)
-    read_data = readJson(topology_dir)
+    read_data = readJson(join(topology_dir,"gernet.json"))
     Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
     if len(Types) == 0:
         print ("No one generator was found")
