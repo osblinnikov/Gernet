@@ -119,13 +119,8 @@ public writer getWriter(long grid_id){
   }
 
   @Override
-  public String uniqueId(bufferKernelParams params){
-    return "";
-  }
-
-  @Override
-  public long getStatsInterval(bufferKernelParams buffer) {
-    return 0;
+  public int uniqueId(bufferKernelParams params){
+    return -1;
   }
 
   @Override

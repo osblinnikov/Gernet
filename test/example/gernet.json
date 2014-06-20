@@ -57,8 +57,7 @@
     }],
     "readFrom": []
   }
-},
-{
+},{
   "id":1,
   "type":"buffer",
   "name":"mapBuffer1",
@@ -72,14 +71,8 @@
     "name": "timeout_milisec",
     "value": "1000L"
   },{
-    "name": "uniqueId",
-    "value": "\"0L\""
-  },{
     "name": "readers_grid_size",
     "value": 1
-  },{
-    "name": "statsInterval",
-    "value": 1000
   }],
   "connection": {
     "writeTo": [{
@@ -113,14 +106,8 @@
     "name": "timeout_milisec",
     "value": "1000L"
   },{
-    "name": "uniqueId",
-    "value": "\"1L\""
-  },{
     "name": "readers_grid_size",
     "value": 1
-  },{
-    "name": "statsInterval",
-    "value": 1000
   }],
   "connection":{
     "writeTo": [{
