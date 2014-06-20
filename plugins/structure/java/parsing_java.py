@@ -209,8 +209,8 @@ def getReaderWriter(a):
 
 def importBlocks(a):
   out = ""
-  # for v in a.read_data["blocks"]:
-  #   out+="\nimport "+v["path"]+".*;"
+  for v in a.read_data["blocks"]:
+    out+="\nimport "+v["path"]+".*;"
   for v in a.read_data["depends"]:
     out+="\nimport "+v["path"]+".*;"
   return out

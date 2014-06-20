@@ -39,6 +39,10 @@ def filterTypes_java(t):
         t = "long" if isArray else "long"
         isObject = False
         serializableType = True
+    if t in ["boolean", "Boolean"]:
+        t = "boolean" if isArray else "boolean"
+        isObject = False
+        serializableType = True
     if t in ["double","Double"]:
         t = "double" if isArray else "double"
         isObject = False
@@ -78,6 +82,10 @@ def filterTypes_c(t):
         serializableType = True
     if t  in ["long","Long"]:
         t = "int64_t"
+        isObject = False
+        serializableType = True
+    if t in ["boolean", "Boolean"]:
+        t = "BOOL" if isArray else "BOOL"
         isObject = False
         serializableType = True
     if t in ["double","Double"]:
