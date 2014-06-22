@@ -142,7 +142,7 @@ def getConstructor(a):
 
   if a.read_data.has_key("props"):
     for value in a.read_data["props"]:
-      t, isObject, isArray = filterTypes_c(value["type"])
+      t, isObject, isArray, isSerializable  = filterTypes_c(value["type"])
       if value.has_key("value"):
         out += "\\\n    _NAME_."+value["name"]+" = "+value["value"]+";"
       elif isArray:
@@ -340,7 +340,7 @@ def initializeBuffers(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes_c(d["type"])
+        t, isObject, isArray, isSerializable  = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
       argValue = str(d["value"])
@@ -370,7 +370,7 @@ def initializeKernels(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes_c(d["type"])
+        t, isObject, isArray, isSerializable  = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
       argsList.append(castType+str(d["value"]))

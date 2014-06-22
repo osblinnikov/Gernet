@@ -1,0 +1,31 @@
+<%
+import sys
+sys.path.insert(0, a.parserPath)
+
+import parsing_c
+p = reload(parsing_c)
+p.parsingGernet(a)
+
+%>
+from helper import *
+#           Environment
+Import( 'env', 'args' )
+
+def add_dependencies(env, args):
+  '''[[[cog
+  import cogging as c
+  c.tpl(cog,templateFile,c.a(prefix=configFile))
+  ]]]'''
+  '''[[[end]]]'''
+  AddPthreads(env, args)
+  # AddNetwork(args) 
+
+c = {}
+c['PROG_NAME'] = '${a.fullName_}'
+c['sourceFiles'] = ['${a.className}.cpp']
+c['testFiles'] = ['${a.className}Test.cpp']
+c['runFiles'] = ['main.cpp']
+c['defines'] = []
+c['inclDepsDynamic'] = add_dependencies
+c['inclDepsStatic'] = add_dependencies
+DefaultLibraryConfig(c, env, args)

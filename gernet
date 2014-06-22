@@ -8,7 +8,7 @@ from src.builder import runGernet
 
 def printHelp():
     print "**********************"
-    print "Gents is a little wrapper on Cogapp (http://nedbatchelder.com/code/cog)."
+    print "Gernet is a little wrapper on Cogapp (http://nedbatchelder.com/code/cog)."
     print "which enables you to generate full implementations of cnets/jnets topologies"
     print "Usage: gernet [TopologyFilePath] [options]"
     print "Examples:"

@@ -24,9 +24,6 @@ void ${a.fullName_}_deinitialize(struct ${a.fullName_} *that);
 ${a.fullName_}_EXPORT_API
 void ${a.fullName_}_onKernels(struct ${a.fullName_} *that);
 
-${a.fullName_}_EXPORT_API
-com_github_airutech_cnets_runnablesContainer ${a.fullName_}_getRunnables(struct ${a.fullName_} *that);
-
 #undef ${a.fullName_}_onCreateMacro
 #define ${a.fullName_}_onCreateMacro(_NAME_) /**/
 
@@ -35,5 +32,4 @@ ${p.getConstructor(a)}
 typedef struct ${a.fullName_}{
   ${p.getProps(a)}
   ${p.declareBlocks(a)}
-  com_github_airutech_cnets_runnablesContainer (*getRunnables)(struct ${a.fullName_} *that);
   void (*run)(void *that);

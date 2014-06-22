@@ -31,18 +31,6 @@ or
     cd gernet
     PATH=$PATH:`pwd`
         
-Possibly you don't have yet Cog generator and Mako template engine installed
-
-    pip install Mako
-
-Cog installation steps:
-
-  1. Download Cog from the [Python Package Index](http://pypi.python.org/pypi/cogapp)
-  2. Unpack the distribution archive somewhere
-  3. Run the setup.py script that was unpacked
-
-        python setup.py install
-
 Enjoy your crossplatform usage of the gernet!
 
 
