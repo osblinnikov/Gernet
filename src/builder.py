@@ -7,18 +7,22 @@
 # use this if you want to include modules from a subforder
 import inspect
 import re
+import subprocess
 import sys
+from cogapp import cogapp
+import mako.template
+import mako.lookup
 from attrs import attrs
 import json, os
+
+sysPathBcp = list(sys.path)
 
 cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0])))
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
 from gernetHelpers import *
-from cogapp import cogapp
-from mako.template import Template
-from mako.lookup import TemplateLookup
+# from cogapp import cogapp
 
 join = os.path.join
 
@@ -27,10 +31,10 @@ PROJECTS_ROOT_PATH = os.path.abspath(join(os.path.dirname(__file__), '..', '..',
 
 
 def tpl(strfile, args):
-    mylookup = TemplateLookup(directories=[
+    mylookup = mako.lookup.TemplateLookup(directories=[
         os.path.abspath(os.getcwd())
     ])
-    tplFromFile = Template(filename=strfile, lookup=mylookup, imports=['from src.attrs import attrs'])
+    tplFromFile = mako.template.Template(filename=strfile, lookup=mylookup, imports=['from src.attrs import attrs'])
     return tplFromFile.render(a=args)
 
 
@@ -97,6 +101,9 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
             if not os.path.exists(absDstFilePath):
                 checkDir(absDstFilePath)
 
+                #cleaning paths before copying template
+                sys.path = list(sysPathBcp)
+
                 f = open(absDstFilePath,'w')#output file
                 f.write(tpl(
                     file,#input template
@@ -106,7 +113,10 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
                     )#args
                 ))
                 f.close()
-            args = ['cogging']+extra_args+[
+
+            #cleaning paths before cogging template
+            sys.path = list(sysPathBcp)
+            args = extra_args+[
                 '-I',
                 os.path.abspath(os.path.dirname(__file__)),
                 '-I',
@@ -117,7 +127,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
                 absDstFilePath
             ]
             # print args
-            cogapp.Cog().main(args)
+            cogapp.Cog().main(["cogging"]+args)
 
 
 def runGernet(firstRealArgI, argv, topology_dir):

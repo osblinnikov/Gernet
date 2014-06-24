@@ -1,6 +1,6 @@
 import os
-from mako.template import Template
-from mako.lookup import TemplateLookup
+import mako.template
+import mako.lookup
 
 class a(dict):
     def __init__(self, *args, **kwargs):
@@ -9,7 +9,7 @@ class a(dict):
 
 def tpl(cog, strfile, args):
   strfile = os.path.abspath(os.path.join(os.getcwd(),strfile))
-  mylookup = TemplateLookup(directories=[
+  mylookup = mako.lookup.TemplateLookup(directories=[
     os.path.abspath(os.getcwd()),
     os.path.abspath(os.path.join(os.getcwd(),'..')),
     os.path.abspath(os.path.join(os.getcwd(),'..','..')),
@@ -17,5 +17,5 @@ def tpl(cog, strfile, args):
     os.path.abspath(os.path.join(os.getcwd(),'..','..','..','..')),
     os.path.abspath(os.path.join(os.getcwd(),'..','..','..','..','..'))
   ])
-  tplFromFile = Template(filename=strfile, lookup=mylookup, imports=['from attrs import attrs'])
+  tplFromFile = mako.template.Template(filename=strfile, lookup=mylookup, imports=['from attrs import attrs'])
   cog.out(tplFromFile.render(a=args,p=args.prefix))
