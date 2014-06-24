@@ -9,9 +9,6 @@ import inspect
 import re
 import subprocess
 import sys
-from cogapp import cogapp
-import mako.template
-import mako.lookup
 from attrs import attrs
 import json, os
 
@@ -22,7 +19,9 @@ if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 
 from gernetHelpers import *
-# from cogapp import cogapp
+from cogapp import cogapp
+import mako.template
+import mako.lookup
 
 join = os.path.join
 
