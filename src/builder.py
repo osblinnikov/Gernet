@@ -15,7 +15,7 @@ import mako.lookup
 from attrs import attrs
 import json, os
 
-sysPathBcp = list(sys.path)
+sysPathBcp = list(sys.path+[os.path.dirname(__file__)])
 
 cmd_subfolder = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile( inspect.currentframe() ))[0])))
 if cmd_subfolder not in sys.path:
@@ -135,9 +135,9 @@ def runGernet(firstRealArgI, argv, topology_dir):
     extra_args = getArgs(firstRealArgI, argv, Types)
     read_data = readJson(join(topology_dir,"gernet.json"))
     Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
-    if len(Types) == 0:
-        print ("No one generator was found")
-        return
+    # if len(Types) == 0:
+        # print ("No one generator was found")
+        # return
     for i in range(0, len(Types)):
         generateMissedFiles(
             topology_dir,
