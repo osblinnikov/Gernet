@@ -45,7 +45,7 @@ def getFieldsArrStr(a):
       # else:
       #   raise Exception("prop "+v["type"]+" "+v["name"]+" is Array, but size was not specified")
     # v["type"] = t
-    arr.append(t+" "+v["name"])
+    arr.append(artifactId(t)+" "+v["name"])
 
   for i,v in enumerate(a.read_data["connection"]["writeTo"]):
     arr.append("writer w"+str(i))
@@ -143,7 +143,7 @@ def getConstructor(a):
 
   if a.read_data.has_key("props"):
     for value in a.read_data["props"]:
-      t, isObject, isArray = filterTypes_c(value["type"])
+      t, isObject, isArray, isSerializable = filterTypes_c(value["type"])
       if value.has_key("value"):
         out += "\\\n    _NAME_."+value["name"]+" = "+value["value"]+";"
       elif isArray:
@@ -341,7 +341,7 @@ def initializeBuffers(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes_c(d["type"])
+        t, isObject, isArray ,isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
       argValue = str(d["value"])
@@ -371,10 +371,13 @@ def initializeKernels(a):
     for d in v["args"]:
       castType = ""
       if d.has_key("type"):
-        t, isObject, isArray = filterTypes_c(d["type"])
+        t, isObject, isArray, isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+t+")"
-      argsList.append(castType+str(d["value"]))
+      argValue = str(d["value"])
+      if searchPropertyAndArgName(a,d["value"]):
+        argValue = "_NAME_."+argValue
+      argsList.append(castType+argValue)
 
     out += "\\\n    "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
     out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
