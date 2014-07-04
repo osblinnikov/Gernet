@@ -48,7 +48,11 @@ def getFieldsArrStr(a):
 
   for i,v in enumerate(a.read_data["connection"]["readFrom"]):
     arr.append("reader r"+str(i))
-  if len(a.read_data["connection"]["readFrom"]) > 1:
+
+  noSelectors = False
+  if a.read_data["connection"].has_key("noSelectors"):
+      noSelectors = a.read_data["connection"]["noSelectors"]
+  if len(a.read_data["connection"]["readFrom"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
     arr.append("selector readersSelector")
   return arr
@@ -144,7 +148,11 @@ def getConstructor(a):
         raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
       selectableArgs.append(v)
 
-  if len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0:
+  noSelectors = False
+  if a.read_data["connection"].has_key("noSelectors"):
+      noSelectors = a.read_data["connection"]["noSelectors"]
+
+  if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
     selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
     for i,v in enumerate(selectableArgs):
       selectablesCount += " + "+str(v["name"])+".length"
