@@ -122,6 +122,8 @@ def getProps(a):
 def getConstructor(a):
   out = ""
   argsArray = getargsArrStrs(a)
+  if len(argsArray) == 0:
+      return out
   out += "  public "+a.className+"("+','.join(argsArray)+"){"
   for value in a.read_data["args"]:
     out += "\n    this."+value["name"]+" = "+value["name"]+";"
