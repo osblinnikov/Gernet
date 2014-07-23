@@ -83,7 +83,10 @@ def getPath(pathSrc):
     return '/'.join(arr + path)
 
 
-def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra_args):
+def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
+    classPathList = classPath.split('.')
+    fullName_ = '_'.join(classPathList)
+    className = classPathList[-1]
     json_file_to_read = join(topology_dir, "gernet.json")
     for root, dirs, files in os.walk(generator_dir):
         for fileName in files:
@@ -93,8 +96,10 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, className, extra
 
             generator_dirLen = (len(generator_dir))+1
             relativeFilePath =  file[generator_dirLen:]\
-                .replace("_NAME_", className)\
-                .replace("_PATH_", classPath)\
+                .replace("_NAME_", className) \
+                .replace("_FULLNAME_", fullName_) \
+                .replace("_FULLNAMEDIR_", os.path.join(*[fullName_, ""])) \
+                .replace("_PATH_", os.path.join(*(classPathList+[""])))\
                 .replace("_GERNET_","gernet")
             absDstFilePath = os.path.join(topology_dir, os.path.split(generator_dir)[1], relativeFilePath)
             if not os.path.exists(absDstFilePath):
@@ -141,8 +146,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
         generateMissedFiles(
             topology_dir,
             os.path.join(getPath(read_data["type"]), Types[i]),
-            '/'.join(read_data["path"].split('.') + [""]),
-            read_data["path"].split('.')[-1],
+            read_data["path"],
             extra_args
         )
 

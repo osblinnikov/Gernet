@@ -216,12 +216,13 @@ def getReaderWriter(a):
   return out
 
 def importBlocks(a):
-  out = ""
-  for v in a.read_data["blocks"]:
-    out+="\nimport "+v["path"]+".*;"
-  for v in a.read_data["depends"]:
-    out+="\nimport "+v["path"]+".*;"
-  return out
+    out = ""
+    dependenciesList = []
+    for v in a.read_data["blocks"]+a.read_data["depends"]:
+        dependenciesList.append(v["path"])
+    for v in set(dependenciesList):
+        out+="\nimport "+v+".*;"
+    return out
 
 def declareBlocks(a):
   out = ""

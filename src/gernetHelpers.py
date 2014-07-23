@@ -1,9 +1,9 @@
 import json
 import re
-from os.path import join
+import os
 
 def readJson(filename):
-    json_file_to_read = join(filename)
+    json_file_to_read = os.path.join(filename)
     read_data = None
     with open (json_file_to_read, "r") as jsonfile:
         pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
@@ -102,3 +102,44 @@ def filterTypes_c(t):
         t = "arrayObject"
         isObject = True
     return t, isObject, isArray, serializableType
+
+
+def getClassName(path):
+    fullNameList = path.split('.')
+    return fullNameList[-1]
+
+def getCompany(path):
+    fullNameList = path.split('.')
+    return fullNameList[1]
+
+def getCompanyDomain(path):
+    fullNameList = path.split('.')
+    return fullNameList[1]+'.'+fullNameList[0]
+
+def getDomainName(path):
+    fullNameList = path.split('.')
+    del fullNameList[-1]
+    return '.'.join(fullNameList)
+
+def getDomainPath(path):
+    fullNameList = path.split('.')
+    to_delete = [0,1]
+    for offset, index in enumerate(to_delete):
+        index -= offset
+        del fullNameList[index]
+    return getCompanyDomain(path)+'/'+('/'.join(fullNameList))
+
+def getFullName_(path):
+    return '_'.join(path.split('.'))
+
+def getRootPath(path):
+    countstepsup = len(path.split('.')) -2
+    if countstepsup < 0:
+        countstepsup = 0
+    countstepsup += 2
+
+    rd = []
+    for v in range(0, countstepsup):
+        rd.append("..")
+    rd = os.path.join(*rd)
+    return rd
