@@ -3,7 +3,8 @@ Gernet
 
 Gernet is:
 
-0. Generator of Java and C code from json file
+0. Generator of Java, JavaScript, C or any other code from single gernet.json file
+1. Uses plugin-architecture - simply write your own generator-plugin and point gernet in "type" field of gernet.json
 1. Integrated into golang-like workspace structure (http://golang.org/doc/code.html), but can be easily configured
 2. Able to build source files from gernet.json file (see example/gernet.json)
 
@@ -33,6 +34,8 @@ or
         
 Enjoy your crossplatform usage of the gernet!
 
+    gernet test -g java
+
 
 Usage
 ---
@@ -46,7 +49,7 @@ relative to workspace sources root directory e.g.:
 
 Available Gernet options:
 
-    -g {generator folder name e.g java, connector or c}
+    -g {generator folder name e.g java, js, c, connector}
     -c        # execute cleaning only for chosen Topology
 
 Other options can be Cog specific.
