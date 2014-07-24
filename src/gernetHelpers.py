@@ -2,6 +2,8 @@ import json
 import re
 import os
 
+DefaultMapBuffer = 'com.github.airutech.cnets.mapBuffer'
+
 def readJson(filename):
     json_file_to_read = os.path.join(filename)
     read_data = None

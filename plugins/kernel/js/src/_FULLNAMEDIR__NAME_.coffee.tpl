@@ -7,14 +7,30 @@ if isNode
 else
   s = self
 
-${p.importBlocks(a)}
+${'\n'.join(p.importBlocks(a))}
+
+customCallbacks = {}
 
 s.${a.fullName_} =
-  wrk: null
-  blocks: []
-  create: ->
+  create: (${','.join(p.getargsArrStrs(a))})->
+    self = this
     #constructor
+    ${'\n    '.join(p.getFieldsArrStr(a))}
     %if len(a.read_data["blocks"])==0:
-    this.wrk = new s.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
+    wrk = new s.types.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
+    ${'\n    '.join(p.registerConnections(a))}
     %endif
-    ${p.initializeBuffers(a)}
+    ${'\n    '.join(p.initializeBuffers(a))}
+    ${'\n    '.join(p.initializeKernels(a))}
+    self.onStart = ->
+      if customCallbacks.onStart
+        customCallbacks.onStart()
+      ${'\n      '.join(p.syncBuffers(a))}
+
+    self.onStop = ->
+      %if len(a.read_data["blocks"])==0:
+      wrk.postMessage({type:'stop'})
+      %endif
+      ${'\n      '.join(p.stopKernels(a))}
+      if customCallbacks.onStop
+        customCallbacks.onStop()

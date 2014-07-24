@@ -13,7 +13,7 @@ p.parsingGernet(a)
 #c.tpl(cog,templateFile,c.a(prefix=configFile))
 #]]]
 #[[[end]]]
-
+    true
 
 #IMPLEMENTATION GOES HERE
 

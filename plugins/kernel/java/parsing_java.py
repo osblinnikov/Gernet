@@ -337,7 +337,7 @@ def initializeBuffers(a):
     for i,w in enumerate(v["connection"]["readFrom"]):
       out += "\n    writer "+v["name"]+"w"+str(i)+" = "+v["name"]+".getWriter("+','.join(getRwArgs(i,w))+");"
   return out
-def initializeKernels(a):
+def getReadersWriters(a):
   out = ""
   #kernels
   for i,v in enumerate(a.read_data["blocks"]):

@@ -4,16 +4,25 @@ import os
 from gernetHelpers import *
 
 def importBlocks(a):
-    out = ""
+    out = []
     dependenciesList = []
     for v in a.read_data["blocks"]+a.read_data["depends"]:
         dependenciesList.append(v["path"])
     for v in set(dependenciesList):
         fname = getFullName_(v)
         cname = getClassName(v)
-        out+="\n  s."+cname+" = s."+fname+" = require(__dirname + \""+os.path.join(*['/../../dist', fname, cname+'.js'])+"\")"
-    if out != "":
-        return "if isNode"+out
+        out.append("  s."+cname+" = s."+fname+" = require(__dirname + \""+os.path.join(*['/../../dist', fname, cname+'.js'])+"\")")
+    if len(out) != 0:
+        out.reverse()
+        out.append("if isNode")
+        out.reverse()
+    return out
+
+def importBlocksForTest(a):
+    fname = getFullName_(a.read_data["path"])
+    cname = getClassName(a.read_data["path"])
+    out = importBlocks(a)
+    out.append("  s."+cname+" = s."+fname+" = require(__dirname + \""+os.path.join(*['/../../dist', fname, cname+'.js'])+"\")")
     return out
 
 def parsingGernet(a):

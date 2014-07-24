@@ -7,7 +7,7 @@ if isNode
 else
   s = self
 
-${p.importBlocks(a)}
+${'\n'.join(p.importBlocks(a))}
 
 s.${a.fullName_} =
   create: ->
