@@ -26,6 +26,10 @@ s.${a.fullName_} =
       if customCallbacks.onStart
         customCallbacks.onStart()
       ${'\n      '.join(p.syncBuffers(a))}
+      %if len(a.read_data["blocks"])==0:
+      wrk.postMessage({type:'start'})
+      %endif
+      ${'\n      '.join(p.startKernels(a))}
 
     self.onStop = ->
       %if len(a.read_data["blocks"])==0:

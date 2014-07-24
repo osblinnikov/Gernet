@@ -159,10 +159,17 @@ def stopKernels(a):
             continue
         out.append(v["name"]+".onStop()")
     #reverse order
-    _out = []
-    for i in range(len(out)-1,-1,-1):
-        _out.append(out[i])
-    return _out
+    out.reverse()
+    return out
+
+def startKernels(a):
+    out = []
+    #kernels
+    for i,v in enumerate(a.read_data["blocks"]):
+        if v.has_key("type") and v["type"] == "buffer":
+            continue
+        out.append(v["name"]+".onStart()")
+    return out
 
 def syncBuffers(a):
     out = []
