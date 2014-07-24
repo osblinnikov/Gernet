@@ -9,6 +9,6 @@ else
 
 ${p.importBlocks(a)}
 
-${a.className} = s.${a.className} = s.${a.fullName_} =
+s.${a.fullName_} =
   create: ->
     #dummy

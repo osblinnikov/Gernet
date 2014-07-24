@@ -9,7 +9,9 @@ def importBlocks(a):
     for v in a.read_data["blocks"]+a.read_data["depends"]:
         dependenciesList.append(v["path"])
     for v in set(dependenciesList):
-        out+="\n  s."+getFullName_(v)+" = require(__dirname + \""+os.path.join(*['/../../dist', getFullName_(v), getClassName(v)+'.js'])+"\")"
+        fname = getFullName_(v)
+        cname = getClassName(v)
+        out+="\n  s."+cname+" = s."+fname+" = require(__dirname + \""+os.path.join(*['/../../dist', fname, cname+'.js'])+"\")"
     if out != "":
         return "if isNode"+out
     return out
