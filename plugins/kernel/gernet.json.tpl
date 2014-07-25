@@ -15,13 +15,7 @@
   "ver": "[0.0.0,)"
 }],
 "connection":{
-  "writeTo": [{
-    "type": "unsigned"
-  }, {
-    "type": "long long"
-  }, {
-    "type": "unsigned"
-  }],
+  "writeTo": [],
   "readFrom": []
 }
 }

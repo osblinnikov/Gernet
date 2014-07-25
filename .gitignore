@@ -16,5 +16,6 @@ test/buf/js
 test/lib/java
 test/lib/c
 test/lib/js
+test/ui/js
 *.pyc
 *.iml
