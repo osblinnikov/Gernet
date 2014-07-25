@@ -1,6 +1,13 @@
+<%import parsing_js
+from gernetHelpers import getFullName_, getClassName
+p = reload(parsing_js)
+p.parsingGernet(a)
+%>
+
 var path = require("path");
 var webpack = require("webpack");
 module.exports = {
+  resolveLoader: { root: path.join(__dirname, "node_modules") },
   // This is the main file that should include all other JS files
   entry: "./src/scripts/main.coffee",
   target: "web",
@@ -18,7 +25,7 @@ module.exports = {
   },
   resolve: {
     // Tell webpack to look for required files in bower and node
-    modulesDirectories: ['bower_components', 'node_modules'],
+    modulesDirectories: ['bower_components', 'node_modules', 'dist', "${p.rootRelativePath(a)}"],
   },
   module: {
     loaders: [

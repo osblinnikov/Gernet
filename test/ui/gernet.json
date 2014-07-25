@@ -4,7 +4,25 @@
 "type":"com.github.airutech.gernet.plugins.ui",
 "args": [],
 "blocks":[],
-"depends":[],
+"depends":[{
+  "path":"com.github.airutech.cnets.mapBuffer",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.queue",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.runnablesContainer",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.readerWriter",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.cnets.types",
+  "ver": "[0.0.0,)"
+},{
+  "path":"com.github.airutech.gernet.test.block0",
+  "ver": "[0.0.0,)"
+}],
 "connection":{
   "writeTo": [],
   "readFrom": []

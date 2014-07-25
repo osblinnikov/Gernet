@@ -25,6 +25,9 @@ def importBlocksForTest(a):
     out.append("  s."+cname+" = s."+fname+" = require(__dirname + \""+os.path.join(*['/../../dist', fname, cname+'.js'])+"\")")
     return out
 
+def rootRelativePath(a):
+    return getRootPath(a.read_data["path"])
+
 def parsingGernet(a):
 
     a.read_data = None

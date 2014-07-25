@@ -2,7 +2,6 @@ path = require('path')
 gulp = require('gulp')
 gutil = require('gulp-util')
 express = require('express')
-http = require("http")
 node_static = require('node-static')
 sass = require('gulp-sass')
 minifyCSS = require('gulp-minify-css')
@@ -16,6 +15,7 @@ sockjs = require('sockjs')
 args   = require('yargs').argv
 
 isProduction = if args.production then true else false
+isTestNoRun = if args.testnorun then true else false
 
 webpackConfig = require("./webpack.config.js")
 if isProduction  # i.e. we were executed with a --production option
@@ -59,6 +59,10 @@ gulp.task 'webpack', (callback) ->
   callback()
 
 gulp.task 'default', ['build'], ->
+gulp.task 'build', ['webpack', 'sass', 'copy', 'vendor'], ->
+gulp.task 'test', ['build'], ->
+  if isTestNoRun
+    return
   servers = createServers(4000, 35729)
   # When /src changes, fire off a rebuild
   gulp.watch ['./src/**/*','./test/specs-coffee/*'], (evt) -> gulp.run 'build'
@@ -68,9 +72,6 @@ gulp.task 'default', ['build'], ->
     servers.lr.changed
       body:
         files: [evt.path]
-
-gulp.task 'build', ['webpack', 'sass', 'copy', 'vendor'], ->
-gulp.task 'test', ['build'], ->
 gulp.task 'build-tests', ['build'], ->
   # Give first-time users a little help
   setTimeout ->
