@@ -1,7 +1,7 @@
 <%import parsing_js
 p = reload(parsing_js)
 p.parsingGernet(a)%>
-isNode = typeof module isnt "undefined" and module.exports
+isNode = typeof module isnt "undefined" and module.exports and process and process.title != 'browser'
 if isNode
   s = {}
 else

@@ -65,7 +65,7 @@ gulp.task 'test', ['build'], ->
     return
   servers = createServers(4000, 35729)
   # When /src changes, fire off a rebuild
-  gulp.watch ['./src/**/*','./test/specs-coffee/*'], (evt) -> gulp.run 'build'
+  gulp.watch ['./dist/**/*', './src/**/*','./test/specs-coffee/*'], (evt) -> gulp.run 'build'
   # When /ui changes, tell the browser to reload
   gulp.watch ['./ui/**/*'], (evt) ->
     gutil.log(gutil.colors.cyan(evt.path), 'changed')
