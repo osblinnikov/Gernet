@@ -11,32 +11,37 @@ App = React.createClass
   getInitialState: ->
     orientation = window.orientation
     orientation = 0 unless orientation
-    state =
-      previousOrientation: orientation
-      style: 
-        height: window.innerHeight
-        width: window.innerWidth
-
+    state = _.merge({previousOrientation: orientation}, @getDimensions())
     return state
+
+  getDimensions: ->
+    try
+      node = $(@getDOMNode()).parent()
+      parentNode = 
+        innerHeight: node.height()
+        innerWidth: node.width()
+    catch
+      parentNode = window
+      
+    style: 
+      height: parentNode.innerHeight
+      width: parentNode.innerWidth
+      
+  updateDimensions: ->
+    @setState _.merge(@state, @getDimensions())
 
   checkOrientation: ->
     orientation = window.orientation
     orientation = 0 unless orientation
     if orientation isnt @state.previousOrientation
-      @setState 
-        previousOrientation: orientation
+      @state.previousOrientation = orientation
       @updateDimensions()
-
-  updateDimensions: ->
-    @setState
-      style:
-        height: window.innerHeight
-        width: window.innerWidth
 
   componentDidMount: ->
     window.addEventListener "resize", @updateDimensions
     window.addEventListener "orientationchange", @updateDimensions
     @setInterval @checkOrientation, 2000
+    @updateDimensions()
 
   componentWillUnmount: ->
     window.removeEventListener "resize", @updateDimensions
@@ -45,7 +50,7 @@ App = React.createClass
   render: () ->
     `(
       <div style={this.state.style} className="container">
-        Hello World
+        Hello World!
       </div>
     )`
 
