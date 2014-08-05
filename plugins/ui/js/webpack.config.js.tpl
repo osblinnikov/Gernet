@@ -17,7 +17,7 @@ module.exports = {
   // watchDelay: 300,
   output: {
     path: path.join(__dirname, "ui", "assets"),
-    publicPath: "/assets/",
+    publicPath: "/ui/assets/",
     // If you want to generate a filename with a hash of the content (for cache-busting)
     // filename: "main-[hash].js",
     filename: "main.js",
