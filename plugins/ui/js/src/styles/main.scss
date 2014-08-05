@@ -1,9 +1,28 @@
+<%
+import sys
+sys.path.insert(0, a.parserPath)
+
+import parsing_js
+p = reload(parsing_js)
+p.parsingGernet(a)
+
+%>
+/*[[[cog
+import cogging as c
+c.tpl(cog,templateFile,c.a(prefix=configFile))
+]]]*/
+/*[[[end]]]*/
+
 html{
   height: 100%;
+  width: 100%;
 }
 body {
   background: #fff;
   min-height: 100%;
+  min-width: 100%;
+  overflow-x:hidden;
+  overflow-y:hidden;  
 }
 .clear{
   clear:both;

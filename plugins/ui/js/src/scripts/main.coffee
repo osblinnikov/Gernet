@@ -15,6 +15,8 @@ require("bootstrap/dist/fonts/glyphicons-halflings-regular.woff")
 require("bootstrap/dist/css/bootstrap.css")
 require("bootstrap/dist/css/bootstrap-theme.css")
 
+require("!style!css!sass!../styles/app.scss")
+
 window.addEventListener('load', ->
   FastClick.attach(document.body);
 , false)

@@ -38,7 +38,8 @@ module.exports = {
       { test: /\.eot$/,    loader: "file-loader" },
       { test: /\.svg$/,    loader: "file-loader" },
       { test: /\.js$/, loader: "jsx-loader" },
-      { test: /\.coffee$/, loader: "jsx-loader!coffee-loader" }
+      { test: /\.coffee$/, loader: "jsx-loader!coffee-loader" },
+      { test: /\.scss$/, loader: "style!css!sass?outputStyle=expanded" }
     ],
     noParse: /\.min\.js/
   },
