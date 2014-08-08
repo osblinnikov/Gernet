@@ -39,7 +39,8 @@ module.exports = {
       { test: /\.svg$/,    loader: "file-loader" },
       { test: /\.js$/, loader: "jsx-loader" },
       { test: /\.coffee$/, loader: "jsx-loader!coffee-loader" },
-      { test: /\.scss$/, loader: "style!css!sass?outputStyle=expanded" }
+      { test: /\.scss$/, loader: "style!css!sass?outputStyle=expanded" },
+      { test: /\.less$/, loader: "style-loader!css-loader!less-loader" }
     ],
     noParse: /\.min\.js/
   },

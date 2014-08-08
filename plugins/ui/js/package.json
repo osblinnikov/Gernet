@@ -30,6 +30,7 @@ p.parsingGernet(a)
     "jsx-loader": "git://github.com/petehunt/jsx-loader",
     "node-static": "^0.7.3",
     "sass-loader": "^0.2.0",
+    "less-loader": "^0.7.6",
     "rbytes": "^1.0.0",
     "script-loader": "~0.5.1",
     "sockjs": "^0.3.4",

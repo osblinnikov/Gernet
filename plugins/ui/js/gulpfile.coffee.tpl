@@ -3,8 +3,8 @@ gulp = require('gulp')
 gutil = require('gulp-util')
 express = require('express')
 node_static = require('node-static')
-sass = require('gulp-sass')
-minifyCSS = require('gulp-minify-css')
+# sass = require('gulp-sass')
+# minifyCSS = require('gulp-minify-css')
 clean = require('gulp-clean')
 watch = require('gulp-watch')
 rev = require('gulp-rev')
@@ -21,7 +21,7 @@ webpackConfig = require("./webpack.config.js")
 if isProduction  # i.e. we were executed with a --production option
   webpackConfig.plugins = webpackConfig.plugins.concat(new webpack.optimize.UglifyJsPlugin())
   webpackConfig.output.filename = "main.js"
-sassConfig = { includePaths : ['src/styles'] }
+# sassConfig = { includePaths : ['src/styles'] }
 
 # paths to files in bower_components that should be copied to ui/assets/vendor
 vendorPaths = ['es5-shim/es5-sham.min.js', 'es5-shim/es5-shim.min.js', 'es5-shim/es5-sham.map',
@@ -35,12 +35,12 @@ gulp.task 'clean', ->
   .pipe(clean())
 
 # main.scss should @include any other CSS you want
-gulp.task 'sass', ->
-  gulp.src('src/styles/main.scss')
-  .pipe(sass(sassConfig).on('error', gutil.log))
-  .pipe(if isProduction then minifyCSS() else gutil.noop())
-  # .pipe(if isProduction then rev() else gutil.noop())
-  .pipe(gulp.dest('ui/assets'))
+# gulp.task 'sass', ->
+#   gulp.src('src/styles/main.scss')
+#   .pipe(sass(sassConfig).on('error', gutil.log))
+#   .pipe(if isProduction then minifyCSS() else gutil.noop())
+#   # .pipe(if isProduction then rev() else gutil.noop())
+#   .pipe(gulp.dest('ui/assets'))
 
 # Some JS and CSS files we want to grab from Bower and put them in a ui/assets/vendor directory
 # For example, the es5-sham.js is loaded in the HTML only for IE via a conditional comment.
@@ -59,7 +59,7 @@ gulp.task 'webpack', (callback) ->
   callback()
 
 gulp.task 'default', ['build'], ->
-gulp.task 'build', ['webpack', 'sass', 'copy', 'vendor'], ->
+gulp.task 'build', ['webpack', 'copy', 'vendor'], -> #'sass', 
 gulp.task 'test', ['build'], ->
   if isTestNoRun
     return

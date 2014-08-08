@@ -8,14 +8,8 @@ require("script!fastclick/lib/fastclick.js")
 require("script!json2/json2.js")
 require("script!lodash/dist/lodash.js")
 
-require("bootstrap/dist/fonts/glyphicons-halflings-regular.eot")
-require("bootstrap/dist/fonts/glyphicons-halflings-regular.svg")
-require("bootstrap/dist/fonts/glyphicons-halflings-regular.ttf")
-require("bootstrap/dist/fonts/glyphicons-halflings-regular.woff")
-require("bootstrap/dist/css/bootstrap.css")
-require("bootstrap/dist/css/bootstrap-theme.css")
-
-require("!style!css!sass!../styles/app.scss")
+require("!style!css!less!../styles/main.less")
+require("!style!css!less!../styles/app.less")
 
 window.addEventListener('load', ->
   FastClick.attach(document.body);
