@@ -25,7 +25,7 @@ module.exports = {
   },
   resolve: {
     // Tell webpack to look for required files in bower and node
-    modulesDirectories: ['bower_components', 'node_modules', 'dist', "${p.rootRelativePath(a).replace('\\','\\\\')}"],
+    modulesDirectories: ['bower_components', 'node_modules', 'dist', "${p.rootRelativePath(a).replace('/','\\\\').replace('\\','\\\\')}", "${p.rootRelativePath(a)}"],
   },
   module: {
     loaders: [
