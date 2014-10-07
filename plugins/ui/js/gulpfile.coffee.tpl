@@ -5,7 +5,7 @@ express = require('express')
 node_static = require('node-static')
 # sass = require('gulp-sass')
 # minifyCSS = require('gulp-minify-css')
-rimraf = require('gulp-rimraf')
+del = require('del')
 watch = require('gulp-watch')
 rev = require('gulp-rev')
 tiny_lr = require('tiny-lr')
@@ -30,9 +30,8 @@ vendorPaths = ['es5-shim/es5-sham.min.js', 'es5-shim/es5-shim.min.js', 'es5-shim
 # TASKS
 #
 
-gulp.task 'clean', ->
-  gulp.src('ui', {read: false})
-  .pipe(rimraf())
+gulp.task 'clean', (cb)->
+  del(['ui'], cb)
 
 # main.scss should @include any other CSS you want
 # gulp.task 'sass', ->
