@@ -54,7 +54,7 @@ def getArgs(firstRealArgI, argv, Types):
             elif argv[i - 1] == '-g' or i == 1:
                 continue
             else:
-                all_args.push(argv[i])
+                all_args.append(argv[i])
     all_args += compiling_arg
     return all_args
 
