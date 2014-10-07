@@ -3,6 +3,7 @@ var React = require('react');
 
 var fs = require("fs");
 var App = fs.readFileSync("ui/assets/main.js","utf-8");
+var indexHtml = fs.readFileSync("ui/index.html","utf-8");
 
 var jsdom = require("jsdom")
 
@@ -17,7 +18,7 @@ http.createServer(function(req, res) {
   }else{
     jsdom.env({
       features : { QuerySelector : true }, 
-      html: '<html><head></head><body><div id="app"><p>If you can see this, something is broken (or JS is not enabled)..</p></div><script type="text/javascript" src="assets/main.js"></script></body>',
+      html: indexHtml,
       src: [App],
       /*created: function(err, win){
         console.log("created");
