@@ -24,8 +24,8 @@ App = React.createClass
       parentNode = window
       
     style: 
-      height: parentNode.innerHeight
-      width: parentNode.innerWidth
+      height: if parentNode.innerHeight then parentNode.innerHeight else 768
+      width: if parentNode.innerWidth then parentNode.innerWidth else 1024
       
   updateDimensions: ->
     @setState _.merge(@state, @getDimensions())
