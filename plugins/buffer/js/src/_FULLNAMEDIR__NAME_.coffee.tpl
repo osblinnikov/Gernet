@@ -10,5 +10,7 @@ else
 ${'\n'.join(p.importBlocks(a))}
 
 s.${a.fullName_} =
-  create: ->
+  create: ${p.getargsStr(a)}->
+    that = this
+    ${p.getProps(a)}
     #dummy

@@ -51,3 +51,46 @@ def parsingGernet(a):
     a.rwArguments = [{"name":"grid_id","type":"unsigned"}]
     if a.read_data.get("rwArgs")!=None:
         a.rwArguments+=a.read_data["rwArgs"]
+
+def getargsStr(a):
+    arr = []
+    for v in a.read_data["args"]:
+        arr.append(v["name"])
+
+    for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("w"+str(i)+name)
+
+    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("r"+str(i)+name)
+
+    return "("+','.join(arr)+")"
+
+def getProps(a):
+  arr = []
+  if a.read_data.has_key("props"):
+    for i,v in enumerate(a.read_data["props"]):
+      if v.has_key("size"):
+        if not isArray:
+          raise Exception("getFieldsArrStr: size of property "+str(i)+" was specified but type is not array!")
+        arr.append("that."+v["name"]+" = []")
+        arr.append("that."+v["name"]+".length = "+str(v["size"]))
+      elif isArray:
+        raise Exception("getFieldsArrStr: failed because type of property "+str(i)+" is Array but `size` was not specified")
+      elif v.has_key("value"):
+        arr.append("that."+v["name"]+" = "+str(v["value"]))
+      else:
+        arr.append("that."+v["name"])
+
+  for v in a.read_data["args"]:
+    arr.append("that."+v["name"]+" = "+v["name"])
+
+  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+    name = v["name"] if v.has_key("name") else ""
+    arr.append("that.w"+str(i)+name+" = w"+str(i)+name)
+
+  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    name = v["name"] if v.has_key("name") else ""
+    arr.append("that.r"+str(i)+name+" = r"+str(i)+name)
+  return '\n    '.join(arr)
