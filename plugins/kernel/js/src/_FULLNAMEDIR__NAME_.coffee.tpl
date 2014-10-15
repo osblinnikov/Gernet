@@ -17,11 +17,12 @@ s.${a.fullName_} =
     #constructor
     ${'\n    '.join(p.getFieldsArrStr(a))}
     %if len(a.read_data["blocks"])==0:
-    wrk = new s.types.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
+    wrk = new s.com_github_airutech_cnets_types.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
     ${'\n    '.join(p.registerConnections(a))}
     %endif
     ${'\n    '.join(p.initializeBuffers(a))}
     ${'\n    '.join(p.initializeKernels(a))}
+    
     self.onStart = ->
       if customCallbacks.onStart
         customCallbacks.onStart()

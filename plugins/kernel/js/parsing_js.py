@@ -102,10 +102,12 @@ def getargsArrStrs(a):
         arr.append(v["name"])
 
     for i,v in enumerate(a.read_data["connection"]["writeTo"]):
-        arr.append("w"+str(i))
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("w"+str(i)+name)
 
     for i,v in enumerate(a.read_data["connection"]["readFrom"]):
-        arr.append("r"+str(i))
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("r"+str(i)+name)
 
     return arr
 
@@ -114,18 +116,14 @@ def registerConnections(a):
         return ""
     arr = []
     for i,v in enumerate(a.read_data["connection"]["writeTo"]):
-        name = str(i)
-        if v.has_key("name"):
-            name = v["name"]
-        arr.append("if w"+name)
-        arr.append("  w"+name+".registerSrc(wrk,"+str(i)+")")
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("if w"+str(i)+name)
+        arr.append("  w"+str(i)+name+".registerSrc(wrk,"+str(i)+")")
 
     for i,v in enumerate(a.read_data["connection"]["readFrom"]):
-        name = str(i)
-        if v.has_key("name"):
-            name = v["name"]
-        arr.append("if r"+name)
-        arr.append("  r"+name+".registerDst(wrk,"+str(i)+")")
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("if r"+str(i)+name)
+        arr.append("  r"+str(i)+name+".registerDst(wrk,"+str(i)+")")
 
     return arr
 
@@ -194,6 +192,13 @@ def initializeKernels(a):
             argsList.append(str(d["value"]))
 
         out.append(v["name"]+" = new s."+getFullName_(v["path"])+".create("+','.join(argsList+getReadersWriters(a,v,i))+")")
+    
+    #no kernels, need to start itself
+    if len(out) is 0:
+        argsList = ["type:'props'"]
+        for d in a.read_data["args"]:
+            argsList.append(d["name"]+":"+d["name"])        
+        out.append("wrk.postMessage({"+','.join(argsList)+"})")
     return out
 
 def getReadersWriters(a,v, curBlock):
@@ -242,21 +247,17 @@ def createWorkerBuffers(a):
     arr = []
     lastI = 0
     for i,v in enumerate(a.read_data["connection"]["writeTo"]):
-        name = str(i)
-        if v.has_key("name"):
-            name = v["name"]
-        arr.append("bufW"+name+" = new mapBuffer.create()")
-        arr.append("bufW"+name+".setDispatcher(" + str(i) +", _this)")
-        arr.append("w"+name+" = bufW"+name+".getWriter(onRun)")
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("bufW"+str(i)+name+" = new mapBuffer.create()")
+        arr.append("bufW"+str(i)+name+".setDispatcher(" + str(i) +", _this)")
+        arr.append("w"+str(i)+name+" = bufW"+str(i)+name+".getWriter(onRun)")
         lastI = i
 
     for i,v in enumerate(a.read_data["connection"]["readFrom"]):
-        name = str(i)
-        if v.has_key("name"):
-            name = v["name"]
-        arr.append("bufR"+name+" = new mapBuffer.create()")
-        arr.append("bufR"+name+".setDispatcher(" + str(lastI+i) +", _this)")
-        arr.append("r"+name+" = bufR"+name+".getReader(onRun)")
+        name = v["name"] if v.has_key("name") else ""
+        arr.append("bufR"+str(i)+name+" = new mapBuffer.create()")
+        arr.append("bufR"+str(i)+name+".setDispatcher(" + str(lastI+i) +", _this)")
+        arr.append("r"+str(i)+name+" = bufR"+str(i)+name+".getReader(onRun)")
 
     return "\n".join(arr)
 
