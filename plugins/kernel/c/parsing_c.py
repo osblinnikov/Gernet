@@ -239,15 +239,22 @@ def declareBlocks(a):
   return out
 
 def checkPinId(arrPins, pinId):
-  for i,pin in enumerate(arrPins):
-    if pin.get("grid_id"):
-      grid_id = pin["grid_id"]
-      if grid_id == pinId:
-        return i
-  if len(arrPins)>pinId:
-    return pinId
-  else:
-    return -1
+    for i,pin in enumerate(arrPins):
+        if pin.has_key("grid_id"):
+            grid_id = pin["grid_id"]
+            if grid_id == pinId:
+                if pin.has_key("is_busy"):
+                    return -1
+                pin["is_busy"] = True
+                return i
+    if len(arrPins)>pinId:
+        pin = arrPins[pinId]
+        if pin.has_key("is_busy"):
+            return -1
+        pin["is_busy"] = True
+        return pinId
+    else:
+        return -1
 
 def getReadersWriters(a,v, curBlock):
   arr = []
