@@ -11,6 +11,10 @@ p.parsingGernet(a) %>
 #]]]
 #[[[end]]]
 
+initOnCreate = (p)->
+  console.log "initOnCreate"
+  console.log p
+
 _this.onStart = ->
   console.log "onStart"
 

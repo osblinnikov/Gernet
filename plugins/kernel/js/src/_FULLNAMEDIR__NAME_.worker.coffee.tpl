@@ -13,6 +13,8 @@ _this = new Dispatcher(this)
 props = undefined
 _this.onCreate = (_props)->
   props = _props
+  if initOnCreate
+    initOnCreate(_props)
 
 ${p.createWorkerBuffers(a)}
 
