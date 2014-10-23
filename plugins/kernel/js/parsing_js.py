@@ -42,7 +42,7 @@ def parsingGernet(a):
     a.domainName = getDomainName(fullName)
     a.domainPath = getDomainPath(fullName)
 
-    if a.read_data.get("type")==None or a.read_data["type"]!="buffer":
+    if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
         if len(a.read_data["blocks"])==0:
             a.classImplements = "Runnable"
         else:
@@ -50,9 +50,9 @@ def parsingGernet(a):
     else:
         a.classImplements = "readerWriterInterface"
 
-    a.defaulRwArguments = [{"name":"grid_id","type":"unsigned"}]
-    a.rwArguments = [{"name":"grid_id","type":"unsigned"}]
-    if a.read_data.get("rwArgs")!=None:
+    a.defaulRwArguments = [{"name":"gridId","type":"unsigned"}]
+    a.rwArguments = [{"name":"gridId","type":"unsigned"}]
+    if a.read_data.has_key("rwArgs"):
         a.rwArguments+=a.read_data["rwArgs"]
 
 def importScripts(a):
@@ -131,7 +131,7 @@ def initializeBuffers(a):
     out = []
     #buffers
     for blockNum, v in enumerate(a.read_data["blocks"]):
-        if v.get("type") == None or v["type"] != "buffer":
+        if not v.has_key("type") or v["type"] != "buffer":
             continue
         argsList = []
         for d in v["args"]:
@@ -173,7 +173,7 @@ def syncBuffers(a):
     out = []
     #buffers
     for blockNum, v in enumerate(a.read_data["blocks"]):
-        if v.get("type") == None or v["type"] != "buffer":
+        if not v.has_key("type") or v["type"] != "buffer":
             continue
         #create variables
         out.append(v["name"]+".syncRegister()")
@@ -263,9 +263,9 @@ def createWorkerBuffers(a):
 
 def checkPinId(arrPins, pinId):
     for i,pin in enumerate(arrPins):
-        if pin.has_key("grid_id"):
-            grid_id = pin["grid_id"]
-            if grid_id == pinId:
+        if pin.has_key("gridId"):
+            gridId = pin["gridId"]
+            if gridId == pinId:
                 if pin.has_key("is_busy"):
                     return -1
                 pin["is_busy"] = True
@@ -280,16 +280,16 @@ def checkPinId(arrPins, pinId):
         return -1
 
 def getRwArgs(i,w):
-    grid_id = i
-    if w.get("grid_id"):
-        grid_id = w["grid_id"]
+    gridId = i
+    if w.has_key("gridId"):
+        gridId = w["gridId"]
     rwArgs = []
     if w.has_key("rwArgs"):
         for arg in w["rwArgs"]:
-            if arg.get("value") == None:
+            if not arg.has_key("value"):
                 raise Exception("rwArgs is specified but `value` field was not set")
             rwArgs.append(str(arg["value"]))
-    return [str(grid_id)]+rwArgs
+    return [str(gridId)]+rwArgs
 
 def connectBufferToReader(a, blockNum, i, w):
     blockId = w["blockId"]
@@ -303,7 +303,7 @@ def connectBufferToReader(a, blockNum, i, w):
         if arr_id == -1:
             raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
         if w["pinId"] != arr_id:
-            raise Exception("wrong parameter grid_id!=pinId in the block "+str(blockNum)+", pin "+str(i))
+            raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
         pinObject = wblock["connection"]["readFrom"][arr_id]
         if pinObject.has_key("blockId") and pinObject.has_key("pinId") and pinObject["blockId"] != "export":

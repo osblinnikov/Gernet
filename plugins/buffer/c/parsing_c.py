@@ -6,8 +6,8 @@ def getReaderWriterArgumentsStrarrDel0(a):
   readerWriterArgumentsStrArr = []
 
   readerWriterArguments = a.rwArguments
-  if readerWriterArguments[0]["name"] != "grid_id":
-    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"grid_id\"")
+  if readerWriterArguments[0]["name"] != "gridId":
+    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
   for value in readerWriterArguments:
     if value["type"] == "unsigned":
       value["type"] = "int"
@@ -20,8 +20,8 @@ def getReaderWriterArgumentsStr(a):
   readerWriterArgumentsStrArr = ["_NAME_","_that"]
 
   readerWriterArguments = a.rwArguments
-  if readerWriterArguments[0]["name"] != "grid_id":
-    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"grid_id\"")
+  if readerWriterArguments[0]["name"] != "gridId":
+    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
   for value in readerWriterArguments:
     if value["type"] == "unsigned":
       value["type"] = "int"
@@ -112,7 +112,7 @@ def parsingGernet(a):
     del fullNameList[index]
   a.domainPath = a.companyDomain+'/'+('/'.join(fullNameList))
 
-  if a.read_data.get("type")==None or a.read_data["type"]!="buffer":
+  if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
     if len(a.read_data["blocks"])==0:
       a.classImplements = "Runnable"
     else:
@@ -120,9 +120,9 @@ def parsingGernet(a):
   else:
     a.classImplements = "readerWriterInterface"
 
-  a.defaulRwArguments = [{"name":"grid_id","type":"unsigned"}]
-  a.rwArguments = [{"name":"grid_id","type":"unsigned"}]
-  if a.read_data.get("rwArgs")!=None:
+  a.defaulRwArguments = [{"name":"gridId","type":"unsigned"}]
+  a.rwArguments = [{"name":"gridId","type":"unsigned"}]
+  if a.read_data.has_key("rwArgs"):
     a.rwArguments+=a.read_data["rwArgs"]
   # a.arrDel0 = getReaderWriterArgumentsStrarrDel0(a.rwArguments)
   a.rwArgumentsStr = getReaderWriterArgumentsStr(a)
@@ -187,11 +187,11 @@ def getReaderWriter(a):
   elif len(a.rwArguments) > 1:
     out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
     for value in a.rwArguments:
-      if value['name'] != "grid_id":
+      if value['name'] != "gridId":
         out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
-    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,(void*)&_NAME_##_container,_grid_id);"
+    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,(void*)&_NAME_##_container,_gridId);"
   else:
-    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,NULL,_grid_id);"
+    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,NULL,_gridId);"
   
 
   out += "\n\n#define "+a.fullName_+"_createWriter("+a.rwArgumentsStr+")"
@@ -200,11 +200,11 @@ def getReaderWriter(a):
   elif len(a.rwArguments) > 1:
     out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
     for value in a.rwArguments:
-      if value['name'] != "grid_id":
+      if value['name'] != "gridId":
         out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
-    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,(void*)&_NAME_##_container,_grid_id);"
+    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,(void*)&_NAME_##_container,_gridId);"
   else:
-    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,NULL,_grid_id);"
+    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,NULL,_gridId);"
 
   return out
 
@@ -241,9 +241,9 @@ def declareBlocks(a):
 
 def checkPinId(arrPins, pinId):
   for i,pin in enumerate(arrPins):
-    if pin.get("grid_id"):
-      grid_id = pin["grid_id"]
-      if grid_id == pinId:
+    if pin.has_key("gridId"):
+      gridId = pin["gridId"]
+      if gridId == pinId:
         return i
   if len(arrPins)>pinId:
     return pinId
@@ -301,7 +301,7 @@ def connectBufferToReader(a, blockNum, i, w):
     if arr_id == -1:
       raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
     if w["pinId"] != arr_id:
-      raise Exception("wrong parameter grid_id!=pinId in the block "+str(blockNum)+", pin "+str(i))
+      raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
     pinObject = wblock["connection"]["readFrom"][arr_id]
     if pinObject.has_key("blockId") and pinObject.has_key("pinId") and pinObject["blockId"] != "export":
@@ -311,16 +311,16 @@ def connectBufferToReader(a, blockNum, i, w):
     pinObject.update({"pinId":i})
 
 def getRwArgs(i,w):
-  grid_id = i
-  if w.get("grid_id"):
-    grid_id = w["grid_id"]
+  gridId = i
+  if w.has_key("gridId"):
+    gridId = w["gridId"]
   rwArgs = []
   if w.has_key("rwArgs"):
     for arg in w["rwArgs"]:
-      if arg.get("value") == None:
+      if not arg.has_key("value"):
         raise Exception("rwArgs is specified but `value` field was not set")
       rwArgs.append(str(arg["value"]))
-  return [str(grid_id)]+rwArgs
+  return [str(gridId)]+rwArgs
 
 def searchPropertyAndArgName(a, propName):
   props = []
@@ -335,7 +335,7 @@ def initializeBuffers(a):
   out = ""
   #buffers
   for blockNum, v in enumerate(a.read_data["blocks"]):
-    if v.get("type") == None or v["type"] != "buffer":
+    if not v.has_key("type") or v["type"] != "buffer":
       continue
     pathList = v["path"].split('.')
     argsList = []
