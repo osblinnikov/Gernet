@@ -72,6 +72,8 @@ def getProps(a):
   arr = []
   if a.read_data.has_key("props"):
     for i,v in enumerate(a.read_data["props"]):
+      t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
+      v["type"] = t
       if v.has_key("size"):
         if not isArray:
           raise Exception("getFieldsArrStr: size of property "+str(i)+" was specified but type is not array!")
