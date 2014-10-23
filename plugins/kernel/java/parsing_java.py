@@ -237,16 +237,19 @@ def checkPinId(arrPins, pinId):
       grid_id = pin["grid_id"]
       if grid_id == pinId:
         if pin.has_key("is_busy"):
+          print arrPins[pinId]
           return -1
         pin["is_busy"] = True
         return i
   if len(arrPins)>pinId:
     pin = arrPins[pinId]
     if pin.has_key("is_busy"):
+      print arrPins[pinId]
       return -1
     pin["is_busy"] = True
     return pinId
   else:
+    print "len(arrPins)>pinId : "+str(len(arrPins))+">"+str(pinId)
     return -1
     
 def getReadersWriters(a,v, curBlock):
@@ -258,7 +261,7 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(a.read_data["connection"]["writeTo"], w["pinId"]) != -1:
         arr.append("this.w"+str(w["pinId"]))
       else:
-        raise Exception("pinId this.w."+str(w["pinId"])+" was not found in the exported connection")
+        raise Exception("pinId this.w"+str(w["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
       rblock = a.read_data["blocks"][int(blockId)]
       if rblock["type"] != "buffer":
@@ -267,7 +270,7 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
         arr.append(rblock["name"]+"w"+str(w["pinId"]))
       else:
-        raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
+        raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
 
   #get reader from buffer
   for i,r in enumerate(v["connection"]["readFrom"]):
@@ -276,7 +279,7 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(a.read_data["connection"]["readFrom"], r["pinId"]) != -1:
         arr.append("this.r"+str(r["pinId"]))
       else:
-        raise Exception("pinId this.r."+str(r["pinId"])+" was not found in the exported connection")
+        raise Exception("pinId this.r"+str(r["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
       wblock = a.read_data["blocks"][int(blockId)]
       if wblock["type"] != "buffer":
@@ -285,7 +288,7 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(wblock["connection"]["writeTo"], r["pinId"]) != -1:
         arr.append(wblock["name"]+"r"+str(r["pinId"]))
       else:
-        raise Exception("pinId r."+str(r["pinId"])+" was not found in the destination buffer")
+        raise Exception("pinId r"+str(r["pinId"])+" was not found in the destination buffer "+str(blockId))
   return arr
 
 def connectBufferToReader(a, blockNum, i, w):
@@ -298,7 +301,8 @@ def connectBufferToReader(a, blockNum, i, w):
       raise Exception("Interconnections of buffers ["+str(blockNum)+" and "+str(blockId)+"] are forbidden")
     arr_id = checkPinId(wblock["connection"]["readFrom"],w["pinId"])
     if arr_id == -1:
-      raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
+      # print wblock["connection"]["readFrom"]
+      raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
     if w["pinId"] != arr_id:
       raise Exception("wrong parameter grid_id!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
