@@ -16,10 +16,10 @@ p.parsingGernet(a)%>${p.importBlocks(a)}
 struct ${a.fullName_};
 
 ${a.fullName_}_EXPORT_API
-reader ${a.fullName_}_getReader(struct ${a.fullName_} *that, void* container, int grid_id);
+reader ${a.fullName_}_getReader(struct ${a.fullName_} *that, void* container, int gridId);
 
 ${a.fullName_}_EXPORT_API
-writer ${a.fullName_}_getWriter(struct ${a.fullName_} *that, void* container, int grid_id);
+writer ${a.fullName_}_getWriter(struct ${a.fullName_} *that, void* container, int gridId);
 
 ${a.fullName_}_EXPORT_API
 void ${a.fullName_}_initialize(struct ${a.fullName_} *that);

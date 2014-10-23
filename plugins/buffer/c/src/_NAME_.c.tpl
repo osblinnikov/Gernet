@@ -16,14 +16,14 @@ int ${a.fullName_}_addSelector(bufferKernelParams *params, void* selectorContain
 void ${a.fullName_}_onCreate(${a.fullName_} *that);
 void ${a.fullName_}_onDestroy(${a.fullName_} *that);
 
-reader ${a.fullName_}_getReader(${a.fullName_} *that, void* container, int grid_id){
-  bufferKernelParams_create(params, that, grid_id, container,${a.fullName_}_)
+reader ${a.fullName_}_getReader(${a.fullName_} *that, void* container, int gridId){
+  bufferKernelParams_create(params, that, gridId, container,${a.fullName_}_)
   reader_create(res,params)
   return res;
 }
 
-writer ${a.fullName_}_getWriter(${a.fullName_} *that, void* container, int grid_id){
-  bufferKernelParams_create(params, that, grid_id, container,${a.fullName_}_)
+writer ${a.fullName_}_getWriter(${a.fullName_} *that, void* container, int gridId){
+  bufferKernelParams_create(params, that, gridId, container,${a.fullName_}_)
   writer_create(res,params)
   return res;
 }

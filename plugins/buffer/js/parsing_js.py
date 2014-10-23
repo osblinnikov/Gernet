@@ -39,7 +39,7 @@ def parsingGernet(a):
     a.domainName = getDomainName(fullName)
     a.domainPath = getDomainPath(fullName)
 
-    if a.read_data.get("type")==None or a.read_data["type"]!="buffer":
+    if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
         if len(a.read_data["blocks"])==0:
             a.classImplements = "Runnable"
         else:
@@ -47,9 +47,9 @@ def parsingGernet(a):
     else:
         a.classImplements = "readerWriterInterface"
 
-    a.defaulRwArguments = [{"name":"grid_id","type":"unsigned"}]
-    a.rwArguments = [{"name":"grid_id","type":"unsigned"}]
-    if a.read_data.get("rwArgs")!=None:
+    a.defaulRwArguments = [{"name":"gridId","type":"unsigned"}]
+    a.rwArguments = [{"name":"gridId","type":"unsigned"}]
+    if a.read_data.has_key("rwArgs"):
         a.rwArguments+=a.read_data["rwArgs"]
 
 
