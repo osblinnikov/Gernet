@@ -140,6 +140,12 @@ def getConstructor(a):
         out += "\n    this."+v["name"]+" = "+str(v["value"])+";"
       elif v.has_key("size"):
         out += "\n    this."+v["name"]+" = new "+v["type"][:-2]+"["+str(v["size"])+"];"
+        t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
+        if isObject:
+            out += "\n    for(int j=0;j<this."+v["name"]+".length;j++){"
+            out += "\n      this."+v["name"]+"[j] = new "+v["type"][:-2]+"();"
+            out += "\n    }"
+
 
   selectableArgs = []
   for i,v in enumerate(a.read_data["args"]):
@@ -150,7 +156,7 @@ def getConstructor(a):
 
   noSelectors = False
   if a.read_data["connection"].has_key("noSelectors"):
-      noSelectors = a.read_data["connection"]["noSelectors"]
+    noSelectors = a.read_data["connection"]["noSelectors"]
 
   if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
     selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
@@ -228,7 +234,10 @@ def declareBlocks(a):
   out = ""
   for v in a.read_data["blocks"]:
     pathList = v["path"].split('.')
-    out += v["path"]+"."+pathList[-1]+" "+v["name"]+";"
+    if v.has_key("parallel"):
+        out += v["path"]+"."+pathList[-1]+" "+v["name"]+"[];"
+    else:
+        out += v["path"]+"."+pathList[-1]+" "+v["name"]+";"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -252,7 +261,7 @@ def checkPinId(arrPins, pinId):
     print "len(arrPins)>pinId : "+str(len(arrPins))+">"+str(pinId)
     return -1
     
-def getReadersWriters(a,v, curBlock):
+def getReadersWriters(a,v, makeCopies):
   arr = []
   #set writer to the buffer
   for i,w in enumerate(v["connection"]["writeTo"]):
@@ -291,6 +300,9 @@ def getReadersWriters(a,v, curBlock):
         arr.append(wblock["name"]+"r"+str(r["pinId"]))
       else:
         raise Exception("pinId r"+str(r["pinId"])+" was not found in the destination buffer "+str(blockId))
+  if makeCopies:
+      for i,r in enumerate(arr):
+          arr[i] = r+".copy()"
   return arr
 
 def connectBufferToReader(a, blockNum, i, w):
@@ -365,7 +377,13 @@ def initializeKernels(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
 
-    out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
+    if v.has_key("parallel"):
+        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"["+str(v["parallel"])+"];"
+        out += "\n    for(int j=0;j<"+str(v["parallel"])+";j++){"
+        out += "\n      "+v["name"]+"[j] = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,True))+");"
+        out += "\n    }"
+    else:
+        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,False))+");"
 
   return out
 
@@ -436,16 +454,23 @@ def testRunnables(a):
   return out
 
 def getRunnables(a):
-  sizeRunnables = 0
+  sizeRunnables = "0"
   out = ""
 
   for blockNum, v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    out += "    arrContainers["+str(sizeRunnables)+"] = "+v["name"]+".getRunnables();\n"
-    sizeRunnables += 1
+    if v.has_key("parallel"):
+        out += "    for(int j=0;j<"+str(v["parallel"])+";j++){\n"
+        out += "      arrContainers["+str(sizeRunnables)+"+j] = "+v["name"]+"[j].getRunnables();\n"
+        out += "    }\n"
+        sizeRunnables += "+"+str(v["parallel"])
+    else:
+        out += "    arrContainers["+str(sizeRunnables)+"] = "+v["name"]+".getRunnables();\n"
+        sizeRunnables += "+1"
 
-  if sizeRunnables == 0:
+
+  if sizeRunnables == "0":
     return '''
     runnablesContainer runnables = new runnablesContainer();
     runnables.setCore(this);
