@@ -274,8 +274,6 @@ def getReadersWriters(a,v, makeCopies):
     elif blockId != "internal":
       rblock = a.read_data["blocks"][int(blockId)]
       if not rblock.has_key("type") or rblock["type"] != "buffer":
-        print "\ncurBlock:"+str(curBlock)
-        print rblock
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
       # r = rblock["connection"]["readFrom"]
       if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
