@@ -451,6 +451,13 @@ def testRunnables(a):
     '''
   return out
 
+def evalSize(sizeRunnables):
+    try:
+        evaluated = str(eval(sizeRunnables))
+    except:
+        evaluated = sizeRunnables
+    return evaluated
+
 def getRunnables(a):
   sizeRunnables = "0"
   out = ""
@@ -460,11 +467,12 @@ def getRunnables(a):
       continue
     if v.has_key("parallel"):
         out += "    for(int j=0;j<"+str(v["parallel"])+";j++){\n"
-        out += "      arrContainers["+str(sizeRunnables)+"+j] = "+v["name"]+"[j].getRunnables();\n"
+        out += "      arrContainers["+str(evalSize(sizeRunnables))+"+j] = "+v["name"]+"[j].getRunnables();\n"
         out += "    }\n"
         sizeRunnables += "+"+str(v["parallel"])
     else:
-        out += "    arrContainers["+str(sizeRunnables)+"] = "+v["name"]+".getRunnables();\n"
+
+        out += "    arrContainers["+str(evalSize(sizeRunnables))+"] = "+v["name"]+".getRunnables();\n"
         sizeRunnables += "+1"
 
 
@@ -476,6 +484,6 @@ def getRunnables(a):
   else:
     return  '''
     runnablesContainer runnables = new runnablesContainer();
-    runnablesContainer[] arrContainers = new runnablesContainer['''+str(sizeRunnables)+"];\n"+out+'''
+    runnablesContainer[] arrContainers = new runnablesContainer['''+str(evalSize(sizeRunnables))+"];\n"+out+'''
     runnables.setContainers(arrContainers);
     return runnables;'''
