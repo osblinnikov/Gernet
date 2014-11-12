@@ -26,7 +26,7 @@ import mako.lookup
 join = os.path.join
 
 #PLEASE change it if you don't want the standard workspace root folder location
-PROJECTS_ROOT_PATH = os.path.abspath(join(os.path.dirname(__file__), '..', '..', '..', '..', '..'))
+PROJECTS_ROOT_PATH = os.path.abspath(join(os.path.dirname(__file__), '..', '..', '..', '..'))
 
 
 def tpl(strfile, args):
@@ -75,7 +75,7 @@ def getPath(pathSrc):
     path = pathSrc.split('.')
     if len(path) < 3:
         raise Exception("path: \""+pathSrc+"\" is not a full package name")
-    arr = [PROJECTS_ROOT_PATH, 'src', path[1] + "." + path[0]]
+    arr = [PROJECTS_ROOT_PATH, path[1] + "." + path[0]]
     to_delete = [0, 1]
     for offset, index in enumerate(to_delete):
         index -= offset
@@ -138,6 +138,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
     Types = []
     extra_args = getArgs(firstRealArgI, argv, Types)
     read_data = readJson(join(topology_dir,"gernet.json"))
+    print(getPath(read_data["type"]))
     Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
     # if len(Types) == 0:
         # print ("No one generator was found")
