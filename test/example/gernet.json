@@ -5,6 +5,9 @@
 "args": [{
   "name":"unsignedArr",
   "type":"unsigned[]"
+},{
+  "name":"parallelBlock",
+  "type":"unsigned"
 }],
 "props":[{
   "name":"longArr",
@@ -36,6 +39,7 @@
 },
 "blocks":[{
   "id":0,
+  "parallel":3,
   "name": "kernelBlock0",
   "path":"com.github.airutech.gernet.test.block0",
   "ver":"[0.0.0,)",
@@ -135,6 +139,7 @@
   }
 },{
   "id":4,
+  "parallel":"parallelBlock",
   "name": "kernelBlock4",
   "path":"com.github.airutech.gernet.test.block4",
   "ver":"[0.0.0,)",

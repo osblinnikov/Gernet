@@ -319,17 +319,26 @@ def importBlocks(a):
 
 def declareBlocks(a):
   out = ""
+  hasParallel = False
   for v in a.read_data["blocks"]:
     pathList = v["path"].split('.')
-    out += "_".join(pathList)+" "+v["name"]+";"
+    if v.has_key("parallel"):
+      hasParallel = True
+      out += "_".join(pathList)+"* "+v["name"]+";"
+    else:
+      out += "_".join(pathList)+" "+v["name"]+";"
 
-  sizeRunnables = 0
+  a.sizeRunnables = 0
   for k,v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    sizeRunnables += 1
-  if sizeRunnables > 0:
-    out += "\ncom_github_airutech_cnets_runnablesContainer arrContainers["+str(sizeRunnables)+"];"
+    a.sizeRunnables += 1
+
+  if a.sizeRunnables > 0:
+    if hasParallel:
+      out += "\ncom_github_airutech_cnets_runnablesContainer* arrContainers;"
+    else:
+      out += "\ncom_github_airutech_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -464,6 +473,7 @@ def initializeBuffers(a):
 def initializeKernels(a):
   out = ""
   #kernels
+  hasParallel = "0"
   for i,v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
@@ -479,19 +489,45 @@ def initializeKernels(a):
       if searchPropertyAndArgName(a,d["value"]):
         argValue = "_NAME_."+argValue
       argsList.append(castType+argValue)
-
-    out += "\\\n    "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
-    out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
-
+    if v.has_key("parallel"):
+      prefixParallel = ""
+      if not isinstance(v["parallel"], int ):
+        prefixParallel = "_NAME_."
+      hasParallel += "+"+prefixParallel+str(v["parallel"])
+      out += "\\\n    "+'_'.join(pathList)+" _NAME_##_"+v["name"]+str(i)+"_##Container["+prefixParallel+str(v["parallel"])+"];"
+      out += "\\\n    _NAME_."+v["name"]+" = _NAME_##_"+v["name"]+str(i)+"_##Container;"
+      out += "\\\n    int _NAME_##_"+v["name"]+"_##_i;"
+      out += "\\\n    for(_NAME_##_"+v["name"]+"_##_i=0;_NAME_##_"+v["name"]+"_##_i<"+prefixParallel+str(v["parallel"])+";_NAME_##_"+v["name"]+"_##_i++){"
+      out += "\\\n      "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
+      out += "\\\n      _NAME_."+v["name"]+"[_NAME_##_"+v["name"]+"_##_i] = "+v["name"]+";"
+      out += "\\\n    }"
+    else:
+      out += "\\\n    "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
+      out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
+  if hasParallel != "0":
+    out += "\\\n    com_github_airutech_cnets_runnablesContainer _NAME_##arrContainers["+hasParallel+"];"
+    out += "\\\n    _NAME_.arrContainers = _NAME_##arrContainers;"
   return out
 
 def runBlocks(a):
   out = []
+  hasParallel = False
   #kernels
   for i,v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    out.append ("    that->"+v["name"]+".run(&that->"+v["name"]+");")
+    if v.has_key("parallel"):
+      prefixParallel = ""
+      if not isinstance(v["parallel"], int ):
+        prefixParallel = "that->"
+      if not hasParallel:
+        hasParallel = True
+        out.append("    int j;")
+      out.append("    for(j=0;j<"+prefixParallel+str(v["parallel"])+";j++){")
+      out.append("      that->"+v["name"]+"[j].run(&that->"+v["name"]+");")
+      out.append("    }")
+    else:
+      out.append("    that->"+v["name"]+".run(&that->"+v["name"]+");")
   if len(out) > 0:
     return "    "+a.fullName_+" *that = ("+a.fullName_+"*)t;\n"+'\n'.join(out)
   return ''
@@ -544,17 +580,37 @@ def testRunnables(a):
     '''
   return out
 
-def getRunnables(a):
-  sizeRunnables = 0
-  out = "\n"
+def evalSize(sizeRunnables):
+  try:
+    evaluated = str(eval(sizeRunnables))
+  except:
+    evaluated = sizeRunnables
+  return evaluated
 
+
+def getRunnables(a):
+  sizeRunnables = "0"
+  out = "\n"
+  hasParallel = False
   for blockNum, v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    out += "    that->arrContainers["+str(sizeRunnables)+"] = that->"+v["name"]+".getRunnables(&that->"+v["name"]+");\n"
-    sizeRunnables += 1
+    if v.has_key("parallel"):
+      prefixParallel = ""
+      if not isinstance(v["parallel"], int ):
+        prefixParallel = "that->"
+      if not hasParallel:
+        out += "    int j;\n"
+        hasParallel = True
+      out += "    for(j=0;j<"+prefixParallel+str(v["parallel"])+";j++){\n"
+      out += "      that->arrContainers["+str(evalSize(sizeRunnables))+"+j] = that->"+v["name"]+"[j].getRunnables(&that->"+v["name"]+"[j]);\n"
+      out += "    }\n"
+      sizeRunnables += "+"+prefixParallel+str(v["parallel"])
+    else:
+      out += "    that->arrContainers["+str(sizeRunnables)+"] = that->"+v["name"]+".getRunnables(&that->"+v["name"]+");\n"
+      sizeRunnables += "+1"
 
-  if sizeRunnables == 0:
+  if sizeRunnables == "0":
     return '''
     com_github_airutech_cnets_runnablesContainer_create(runnables)
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
@@ -566,7 +622,7 @@ def getRunnables(a):
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)&that->arrContainers;
-    arr.length = '''+str(sizeRunnables)+''';
+    arr.length = '''+str(evalSize(sizeRunnables))+''';
     arr.itemSize = sizeof(com_github_airutech_cnets_runnablesContainer);
     runnables.setContainers(&runnables,arr);
     return runnables;'''
