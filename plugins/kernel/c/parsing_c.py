@@ -497,15 +497,16 @@ def initializeKernels(a):
       out += "\\\n    "+'_'.join(pathList)+" _NAME_##_"+v["name"]+str(i)+"_##Container["+prefixParallel+str(v["parallel"])+"];"
       out += "\\\n    _NAME_."+v["name"]+" = _NAME_##_"+v["name"]+str(i)+"_##Container;"
       out += "\\\n    int _NAME_##_"+v["name"]+"_##_i;"
-      out += "\\\n    for(_NAME_##_"+v["name"]+"_##_i=0;_NAME_##_"+v["name"]+"_##_i<"+prefixParallel+str(v["parallel"])+";_NAME_##_"+v["name"]+"_##_i++){"
+      out += "\\\n    for(_NAME_##_"+v["name"]+"_##_i=0;_NAME_##_"+v["name"]+"_##_i<(int)"+prefixParallel+str(v["parallel"])+";_NAME_##_"+v["name"]+"_##_i++){"
       out += "\\\n      "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
       out += "\\\n      _NAME_."+v["name"]+"[_NAME_##_"+v["name"]+"_##_i] = "+v["name"]+";"
       out += "\\\n    }"
     else:
       out += "\\\n    "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList+getReadersWriters(a,v,i))+");"
       out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
+      hasParallel += "+1"
   if hasParallel != "0":
-    out += "\\\n    com_github_airutech_cnets_runnablesContainer _NAME_##arrContainers["+hasParallel+"];"
+    out += "\\\n    com_github_airutech_cnets_runnablesContainer _NAME_##arrContainers["+evalSize(hasParallel)+"];"
     out += "\\\n    _NAME_.arrContainers = _NAME_##arrContainers;"
   return out
 
@@ -523,7 +524,7 @@ def runBlocks(a):
       if not hasParallel:
         hasParallel = True
         out.append("    int j;")
-      out.append("    for(j=0;j<"+prefixParallel+str(v["parallel"])+";j++){")
+      out.append("    for(j=0;j<(int)"+prefixParallel+str(v["parallel"])+";j++){")
       out.append("      that->"+v["name"]+"[j].run(&that->"+v["name"]+");")
       out.append("    }")
     else:
@@ -602,7 +603,7 @@ def getRunnables(a):
       if not hasParallel:
         out += "    int j;\n"
         hasParallel = True
-      out += "    for(j=0;j<"+prefixParallel+str(v["parallel"])+";j++){\n"
+      out += "    for(j=0;j<(int)"+prefixParallel+str(v["parallel"])+";j++){\n"
       out += "      that->arrContainers["+str(evalSize(sizeRunnables))+"+j] = that->"+v["name"]+"[j].getRunnables(&that->"+v["name"]+"[j]);\n"
       out += "    }\n"
       sizeRunnables += "+"+prefixParallel+str(v["parallel"])
