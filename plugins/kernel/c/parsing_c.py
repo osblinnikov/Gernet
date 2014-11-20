@@ -1,6 +1,49 @@
 import json
 import re
 from gernetHelpers import *
+import operator
+
+def recurseDependencies(dependenciesDict):
+  newDependenciesDict = dict()
+  hasNewData = False
+  for k,v in dependenciesDict.items():
+    read_data = readJson(os.path.join(PROJECTS_ROOT_PATH,getPath(v["path"]),'gernet.json') )
+    if read_data == None:
+      continue
+    for v in read_data["blocks"]+read_data["depends"]:
+      if not dependenciesDict.has_key(v["path"]) and not newDependenciesDict.has_key(v["path"]):
+        newDependenciesDict[v["path"]] = v
+        hasNewData = True
+  if hasNewData:
+    newDependenciesDict = recurseDependencies(newDependenciesDict)
+    i = len(dependenciesDict)
+    for k,v in newDependenciesDict.items():
+      if not dependenciesDict.has_key(v["path"]):
+        dependenciesDict[v["path"]] = v
+        dependenciesDict[v["path"]]['_order'] = i
+        i = i + 1
+  return dependenciesDict
+
+def getDependenciesList(a):
+  dependenciesDict = dict()
+
+
+  i = len(dependenciesDict)
+  for v in a.read_data["blocks"]+a.read_data["depends"]:
+    if not dependenciesDict.has_key(v["path"]):
+      dependenciesDict[v["path"]] = v
+      dependenciesDict[v["path"]]['_order'] = i
+      i = i + 1
+
+  dependenciesDict = recurseDependencies(dependenciesDict)
+
+  #sorting
+  dictToSort = dict()
+  for k,v in dependenciesDict.items():
+    dictToSort[v["_order"]] = v
+  
+  return sorted(dictToSort.items(), key=operator.itemgetter(0))
+
 
 def getReaderWriterArgumentsStrarrDel0(a):
   readerWriterArgumentsStrArr = []
@@ -52,6 +95,15 @@ def getFieldsArrStr(a):
 
   for i,v in enumerate(a.read_data["connection"]["readFrom"]):
     arr.append("reader r"+str(i))
+
+
+  noSelectors = False
+  if a.read_data["connection"].has_key("noSelectors"):
+      noSelectors = a.read_data["connection"]["noSelectors"]
+  if len(a.read_data["connection"]["readFrom"]) > 1 and not noSelectors:
+    arr.append("reader rSelect")
+    arr.append("com_github_airutech_cnets_selector readersSelector")
+
   return arr
 
 def getargsArrStrs(a):
@@ -139,6 +191,45 @@ def getConstructor(a):
   for value in a.read_data["args"]:
     out += "\\\n    _NAME_."+value["name"]+" = _"+value["name"]+";"
 
+  #SELECTABLE
+
+  selectableArgs = []
+  for i,v in enumerate(a.read_data["args"]):
+    if v.has_key("selectable") and v["selectable"] == True:
+      if v["type"] != 'reader[]':
+        raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
+      selectableArgs.append(v)
+
+  noSelectors = False
+  if a.read_data["connection"].has_key("noSelectors"):
+    noSelectors = a.read_data["connection"]["noSelectors"]
+
+  if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
+    selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
+    for i,v in enumerate(selectableArgs):
+      selectablesCount += " + "+str(v["name"])+".length"
+    out += "\\\n    arrayObject_create(_NAME_##_arrReaders_, reader, "+selectablesCount+")"
+
+    lastId = 0
+    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+      out += "\\\n    ((reader*)_NAME_##_arrReaders_.array)["+str(i)+"] = _r"+str(i)+";"
+      lastId = i
+    if len(selectableArgs)>0:
+      out += "\\\n    int totalLength = "+str(lastId + 1)+";"
+      for i,v in enumerate(selectableArgs):
+        out += "\\\n    for(int i=0;i<"+str(v["name"])+".length; i++){"
+        out += "\\\n      ((reader*)_NAME_##_arrReaders_.array)[totalLength + i] = "+v["name"]+"[i];"
+        out += "\\\n    }"
+        if i+1 != len(selectableArgs):
+          out += "\\\n    totalLength += "+str(v["name"])+".length;"
+    out += "\\\n    com_github_airutech_cnets_selector_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
+    out += "\\\n    _NAME_.readersSelector = _NAME_##readersSelector;"
+    out += "\\\n    com_github_airutech_cnets_selector_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
+    out += "\\\n    _NAME_.rSelect = _NAME_##_rSelect_;"
+
+  #END OF ARGS AND SELECTABLE ARG
+
+
   out += "\\\n    "+a.fullName_+"_onCreateMacro(_NAME_)"
 
   if a.read_data.has_key("props"):
@@ -218,8 +309,11 @@ def directoryFromBlockPath(path):
   return '/'.join([domain]+pathList+["c","include",fileName])
 
 def importBlocks(a):
-  out = ""
+  dependenciesDict = dict()
   for v in a.read_data["blocks"]+a.read_data["depends"]:
+    dependenciesDict[v["path"]] = v
+  out = ""
+  for k,v  in dependenciesDict.items():
     out+="\n#include \""+directoryFromBlockPath(v["path"])+".h\""
   return out
 

@@ -25,9 +25,6 @@ import mako.lookup
 
 join = os.path.join
 
-#PLEASE change it if you don't want the standard workspace root folder location
-PROJECTS_ROOT_PATH = os.path.abspath(join(os.path.dirname(__file__), '..', '..', '..', '..'))
-
 
 def tpl(strfile, args):
     mylookup = mako.lookup.TemplateLookup(directories=[

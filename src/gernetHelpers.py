@@ -2,21 +2,26 @@ import json
 import re
 import os
 
+#PLEASE change it if you don't want the standard workspace root folder location
+PROJECTS_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+
 DefaultMapBuffer = 'com.github.airutech.cnets.mapBuffer'
 
 def readJson(filename):
     json_file_to_read = os.path.join(filename)
     read_data = None
-    with open (json_file_to_read, "r") as jsonfile:
-        pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
-        json_data = re.sub(pat, '', jsonfile.read())
-        try:
+    try:
+        with open (json_file_to_read, "r") as jsonfile:
+            pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
+            json_data = re.sub(pat, '', jsonfile.read())
             read_data = json.loads(json_data)
-        except:
-            print json_file_to_read+" invalid"
             jsonfile.close()
-            raise
-        jsonfile.close()
+    except:
+        # print json_file_to_read+" invalid"
+        try:
+            jsonfile.close()
+        except:
+            return read_data
     return read_data
 
 def filterTypes_java(t):
