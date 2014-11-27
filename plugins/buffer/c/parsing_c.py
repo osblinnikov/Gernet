@@ -148,9 +148,10 @@ def getConstructor(a):
       if value.has_key("value"):
         out += "\\\n    _NAME_."+value["name"]+" = "+value["value"]+";"
       elif isArray:
+        arrItemType, itemIsObject, itemIsArray, itemisSerializable = filterTypes_c(value["type"][:-2])
         if isinstance(value["size"], basestring):
           value["size"] = "_"+value["size"]
-        out += "\\\n    arrayObject_create(_NAME_##_"+value["name"]+"_, "+'_'.join(value["type"][:-2].split('.'))+", "+str(value["size"])+")"
+        out += "\\\n    arrayObject_create(_NAME_##_"+value["name"]+"_, "+'_'.join(arrItemType.split('.'))+", "+str(value["size"])+")"
         out += "\\\n    _NAME_."+value["name"]+" = _NAME_##_"+value["name"]+"_;"
 
 
