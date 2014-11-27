@@ -3,7 +3,7 @@ p = reload(parsing_c)
 p.parsingGernet(a)%>${p.importBlocks(a)}
 
 #undef ${a.fullName_}_EXPORT_API
-#if defined WIN32 && !defined __MINGW32__ && !defined(CYGWIN) && !defined(${a.fullName_}_STATIC)
+#if defined WIN32 && !defined __MINGW32__ && !defined(CYGWIN) && !defined(${(a.fullName_+"_static").upper()})
   #ifdef ${a.fullName_}_EXPORT
     #define ${a.fullName_}_EXPORT_API __declspec(dllexport)
   #else
