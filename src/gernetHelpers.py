@@ -34,27 +34,31 @@ def filterTypes_java(t):
     if t in ["string","String"]:
         t = "String"
         serializableType = True
-    if t in ["char","Char"]:
+    if t in ["byte"]:
+        t = "byte" if isArray else "byte"
+        isObject = False
+        serializableType = True
+    if t in ["char"]:
         t = "char" if isArray else "char"
         isObject = False
         serializableType = True
-    if t in ["int","Integer"]:
+    if t in ["int"]:
         t = "int" if isArray else "int"
         isObject = False
         serializableType = True
-    if t in ["unsigned","long","Long"]:
+    if t in ["unsigned","long"]:
         t = "long" if isArray else "long"
         isObject = False
         serializableType = True
-    if t in ["boolean", "Boolean"]:
+    if t in ["boolean"]:
         t = "boolean" if isArray else "boolean"
         isObject = False
         serializableType = True
-    if t in ["double","Double"]:
+    if t in ["double"]:
         t = "double" if isArray else "double"
         isObject = False
         serializableType = True
-    if t in ["float","Float"]:
+    if t in ["float"]:
         t = "float" if isArray else "float"
         isObject = False
         serializableType = True
@@ -72,14 +76,14 @@ def filterTypes_c(t):
     if len(t)>2 and t[-2:] == '[]':
         isArray = True
         t = t[:-2]
-    if t in ["string","String","char*"]:
+    if t in ["string","char*"]:
         t = "char*"
         serializableType = True
-    if t in ["char","Char"]:
+    if t in ["char"]:
         t = "char"
         isObject = False
         serializableType = True
-    if t in ["int","Integer"]:
+    if t in ["int"]:
         t = "int32_t"
         isObject = False
         serializableType = True
@@ -87,19 +91,19 @@ def filterTypes_c(t):
         t = "uint32_t"
         isObject = False
         serializableType = True
-    if t  in ["long","Long"]:
+    if t  in ["long"]:
         t = "int64_t"
         isObject = False
         serializableType = True
-    if t in ["boolean", "Boolean"]:
+    if t in ["boolean"]:
         t = "BOOL" if isArray else "BOOL"
         isObject = False
         serializableType = True
-    if t in ["double","Double"]:
+    if t in ["double"]:
         t = "double"
         isObject = False
         serializableType = True
-    if t in ["float","Float"]:
+    if t in ["float"]:
         t = "float"
         isObject = False
         serializableType = True

@@ -39,7 +39,7 @@ def getFieldsArrStr(a):
         arr.append(t+" "+v["name"])
 
   for v in a.read_data["args"]:
-    t, isObject, isArray, serialize = filterTypes_java(v["type"])
+    t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
     v["type"] = t
     arr.append(v["type"]+" "+v["name"])
 
@@ -51,11 +51,10 @@ def getFieldsArrStr(a):
 
   noSelectors = False
   if a.read_data["connection"].has_key("noSelectors"):
-    noSelectors = a.read_data["connection"]["noSelectors"]
+      noSelectors = a.read_data["connection"]["noSelectors"]
   if len(a.read_data["connection"]["readFrom"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
     arr.append("selector readersSelector")
-
   return arr
 
 def getargsArrStrs(a):
@@ -77,6 +76,7 @@ def groupId(path):
   path = path.split(".")
   del path[-1]
   return '.'.join(path)
+
 def artifactId(path):
   path = path.split(".")
   return path[-1]
@@ -91,6 +91,8 @@ def parsingGernet(a):
   fullNameList = fullName.split('.')
   a.fullName_ = '_'.join(fullNameList)
   a.className = fullNameList[-1]
+  a.targetClassName = ".".join(fullNameList[:-1])
+  a.targetClassName = ".".join([a.targetClassName]+[fullNameList[-2]])
   a.companyDomain = fullNameList[1]+'.'+fullNameList[0]
   a.company = fullNameList[1]
 
@@ -141,6 +143,14 @@ def getConstructor(a):
         out += "\n    this."+v["name"]+" = "+str(v["value"])+";"
       elif v.has_key("size"):
         out += "\n    this."+v["name"]+" = new "+v["type"][:-2]+"["+str(v["size"])+"];"
+        t, isObject, isArray, isSerializable = filterTypes_java(v["type"])
+        if isArray:
+          _t, isObject, _isArray, _isSerializable = filterTypes_java(v["type"][:-2])
+        if isObject and (not v.has_key("init") or v["init"]==True):
+            out += "\n    for(int j=0;j<this."+v["name"]+".length;j++){"
+            out += "\n      this."+v["name"]+"[j] = new "+v["type"][:-2]+"();"
+            out += "\n    }"
+
 
   selectableArgs = []
   for i,v in enumerate(a.read_data["args"]):
@@ -151,7 +161,7 @@ def getConstructor(a):
 
   noSelectors = False
   if a.read_data["connection"].has_key("noSelectors"):
-      noSelectors = a.read_data["connection"]["noSelectors"]
+    noSelectors = a.read_data["connection"]["noSelectors"]
 
   if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
     selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
@@ -220,7 +230,7 @@ def importBlocks(a):
   out = ""
   dependenciesList = []
   for v in a.read_data["blocks"]+a.read_data["depends"]:
-      dependenciesList.append(v["path"])
+    dependenciesList.append(v["path"])
   for v in set(dependenciesList):
     out+="\nimport "+v+".*;"
   return out
@@ -229,7 +239,10 @@ def declareBlocks(a):
   out = ""
   for v in a.read_data["blocks"]:
     pathList = v["path"].split('.')
-    out += v["path"]+"."+pathList[-1]+" "+v["name"]+";"
+    out += v["path"]+"."+pathList[-1]+" "+v["name"]
+    if v.has_key("parallel"):
+      out += "[]"
+    out += ";"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -237,13 +250,23 @@ def checkPinId(arrPins, pinId):
     if pin.has_key("gridId"):
       gridId = pin["gridId"]
       if gridId == pinId:
+        if pin.has_key("is_busy"):
+          print arrPins[pinId]
+          return -1
+        pin["is_busy"] = True
         return i
   if len(arrPins)>pinId:
+    pin = arrPins[pinId]
+    if pin.has_key("is_busy"):
+      print arrPins[pinId]
+      return -1
+    pin["is_busy"] = True
     return pinId
   else:
+    print "len(arrPins)>pinId : "+str(len(arrPins))+">"+str(pinId)
     return -1
     
-def getReadersWriters(a,v, curBlock):
+def getReadersWriters(a,v, makeCopies):
   arr = []
   #set writer to the buffer
   for i,w in enumerate(v["connection"]["writeTo"]):
@@ -252,16 +275,16 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(a.read_data["connection"]["writeTo"], w["pinId"]) != -1:
         arr.append("this.w"+str(w["pinId"]))
       else:
-        raise Exception("pinId this.w."+str(w["pinId"])+" was not found in the exported connection")
+        raise Exception("pinId this.w"+str(w["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
       rblock = a.read_data["blocks"][int(blockId)]
-      if rblock["type"] != "buffer":
+      if not rblock.has_key("type") or rblock["type"] != "buffer":
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
       # r = rblock["connection"]["readFrom"]
       if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
         arr.append(rblock["name"]+"w"+str(w["pinId"]))
       else:
-        raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
+        raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
 
   #get reader from buffer
   for i,r in enumerate(v["connection"]["readFrom"]):
@@ -270,7 +293,7 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(a.read_data["connection"]["readFrom"], r["pinId"]) != -1:
         arr.append("this.r"+str(r["pinId"]))
       else:
-        raise Exception("pinId this.r."+str(r["pinId"])+" was not found in the exported connection")
+        raise Exception("pinId this.r"+str(r["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
       wblock = a.read_data["blocks"][int(blockId)]
       if wblock["type"] != "buffer":
@@ -279,7 +302,10 @@ def getReadersWriters(a,v, curBlock):
       if checkPinId(wblock["connection"]["writeTo"], r["pinId"]) != -1:
         arr.append(wblock["name"]+"r"+str(r["pinId"]))
       else:
-        raise Exception("pinId r."+str(r["pinId"])+" was not found in the destination buffer")
+        raise Exception("pinId r"+str(r["pinId"])+" was not found in the destination buffer "+str(blockId))
+  if makeCopies:
+      for i,r in enumerate(arr):
+          arr[i] = r+".copy()"
   return arr
 
 def connectBufferToReader(a, blockNum, i, w):
@@ -292,7 +318,8 @@ def connectBufferToReader(a, blockNum, i, w):
       raise Exception("Interconnections of buffers ["+str(blockNum)+" and "+str(blockId)+"] are forbidden")
     arr_id = checkPinId(wblock["connection"]["readFrom"],w["pinId"])
     if arr_id == -1:
-      raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
+      # print wblock["connection"]["readFrom"]
+      raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
     if w["pinId"] != arr_id:
       raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
@@ -338,6 +365,7 @@ def initializeBuffers(a):
     for i,w in enumerate(v["connection"]["readFrom"]):
       out += "\n    writer "+v["name"]+"w"+str(i)+" = "+v["name"]+".getWriter("+','.join(getRwArgs(i,w))+");"
   return out
+
 def initializeKernels(a):
   out = ""
   #kernels
@@ -352,7 +380,13 @@ def initializeKernels(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
 
-    out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,i))+");"
+    if v.has_key("parallel"):
+        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"["+str(v["parallel"])+"];"
+        out += "\n    for(int j=0;j<"+str(v["parallel"])+";j++){"
+        out += "\n      "+v["name"]+"[j] = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,True))+");"
+        out += "\n    }"
+    else:
+        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,False))+");"
 
   return out
 
@@ -422,17 +456,32 @@ def testRunnables(a):
     '''
   return out
 
+def evalSize(sizeRunnables):
+    try:
+        evaluated = str(eval(sizeRunnables))
+    except:
+        evaluated = sizeRunnables
+    return evaluated
+
 def getRunnables(a):
-  sizeRunnables = 0
+  sizeRunnables = "0"
   out = ""
 
   for blockNum, v in enumerate(a.read_data["blocks"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    out += "    arrContainers["+str(sizeRunnables)+"] = "+v["name"]+".getRunnables();\n"
-    sizeRunnables += 1
+    if v.has_key("parallel"):
+        out += "    for(int j=0;j<"+str(v["parallel"])+";j++){\n"
+        out += "      arrContainers["+str(evalSize(sizeRunnables))+"+j] = "+v["name"]+"[j].getRunnables();\n"
+        out += "    }\n"
+        sizeRunnables += "+"+str(v["parallel"])
+    else:
 
-  if sizeRunnables == 0:
+        out += "    arrContainers["+str(evalSize(sizeRunnables))+"] = "+v["name"]+".getRunnables();\n"
+        sizeRunnables += "+1"
+
+
+  if sizeRunnables == "0":
     return '''
     runnablesContainer runnables = new runnablesContainer();
     runnables.setCore(this);
@@ -440,6 +489,109 @@ def getRunnables(a):
   else:
     return  '''
     runnablesContainer runnables = new runnablesContainer();
-    runnablesContainer[] arrContainers = new runnablesContainer['''+str(sizeRunnables)+"];\n"+out+'''
+    runnablesContainer[] arrContainers = new runnablesContainer['''+str(evalSize(sizeRunnables))+"];\n"+out+'''
     runnables.setContainers(arrContainers);
     return runnables;'''
+
+def serializeWith(a, serializerPostfix):
+    out = ""
+    for v in a.read_data["props"]+a.read_data["args"]:
+        t, isObject, isArray, serializableType = filterTypes_java(v["type"])
+        if isArray:
+            t = t[:-2]
+        if serializableType:
+            if len(v["type"])>2 and isArray:
+                out += '''
+      if (!s.serializeValue((int)that.'''+v["name"]+'''.length)) { return false; }
+      for(int i=0; i<that.'''+v["name"]+'''.length; i++) {
+        if (!s.serializeValue(that.'''+v["name"]+'''[i])) { return false; }
+      }'''
+            else:
+                out += '''
+      if(!s.serializeValue(that.'''+v["name"]+''')){ return false; }'''
+        else:
+            tPrefix = ".".join((t.split(".")[:-1]))
+            if len(v["type"])>2 and isArray:
+                out += '''
+      if (!s.serializeValue((int)that.'''+v["name"]+'''.length)) { return false; }
+      for(int i=0; i<that.'''+v["name"]+'''.length; i++) {
+        if (!(new '''+tPrefix+serializerPostfix+"()).serializeWith(s,that."+v["name"]+'''[i])) { return false;}
+      }'''
+            else:
+                out += '''
+      if (!(new '''+tPrefix+serializerPostfix+"()).serializeWith(s,that."+v["name"]+''')) { return false;}'''
+    return out
+
+def deserializeWith(a, deserializerPostfix):
+    out = ""
+    for v in a.read_data["props"]+a.read_data["args"]:
+        t, isObject, isArray, serializableType = filterTypes_java(v["type"])
+        if isArray:
+            t = t[:-2]
+        if serializableType:
+            if len(v["type"])>2 and isArray:
+                out += '''
+      that.'''+v["name"]+''' = new '''+t+'''[d.deserializeValue(int.class)];
+      for(int i=0; i<that.'''+v["name"]+'''.length; i++) {
+        that.'''+v["name"]+'''[i] = d.deserializeValue('''+t+'''.class);
+      }'''
+            else:
+                out += '''
+      that.'''+v["name"]+''' = d.deserializeValue('''+t+'''.class);'''
+        else:
+            tPrefix = ".".join((t.split(".")[:-1]))
+            if len(v["type"])>2 and isArray:
+                out += '''
+      that.'''+v["name"]+''' = new '''+t+'''[d.deserializeValue(int.class)];
+      for(int i=0; i<that.'''+v["name"]+'''.length; i++) {
+        that.'''+v["name"]+'''[i] = new '''+t+'''();
+        if (!(new '''+tPrefix+deserializerPostfix+"()).deserializeWith(d,that."+v["name"]+'''[i])) { return false;}
+      }'''
+            else:
+                out+= '''
+      if (!(new '''+tPrefix+deserializerPostfix+"()).deserializeWith(d,that."+v["name"]+''')) { return false;}'''
+
+    return out
+
+
+def fillConnectorsNames(a):
+    if a.read_data.has_key("serializatorPath"):
+      serializatorPath = a.read_data["serializatorPath"]
+    else:
+      serializatorPath = "com.github.airutech.cnetsTransports.msgpack.msgPackSerializer"
+
+    if a.read_data.has_key("deserializatorPath"):
+      deserializatorPath = a.read_data["deserializatorPath"]
+    else:
+      deserializatorPath = "com.github.airutech.cnetsTransports.msgpack.msgPackDeserializer"
+
+    if a.read_data.has_key("serializePackagePostfix"):
+      serializePackagePostfix = a.read_data["serializePackagePostfix"]
+    else:
+      serializePackagePostfix = ".msgpack.msgpack"
+
+    out = ["/* +1 everywhere for repo receivers and senders*/"]
+    if len(a.read_data["connection"]["writeTo"]) - 1 > 0:
+        out.append("subscribedBuffersNames = new String["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
+        out.append("allWriters = new writer["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
+        out.append("allWriters_callbacks = new deserializeStreamCallback["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
+        out.append("subscribedBuffersNames[0] = \"nodeRepository\";")
+        out.append("allWriters_callbacks[0] = new "+deserializatorPath+"(new com.github.airutech.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
+        for i, v in enumerate(a.read_data["connection"]["writeTo"][1:]):
+            out.append("subscribedBuffersNames["+str(i + 1)+"] = \""+v["name"]+"\";")
+            out.append("allWriters["+str(i+1)+"] = w"+str(i+1)+";")
+            out.append("allWriters_callbacks["+str(i+1)+"] = new "+deserializatorPath+"(new "+".".join(v["type"].split(".")[:-1])+serializePackagePostfix+"());")
+
+    if len(a.read_data["connection"]["readFrom"]) - 1 > 0:
+        out.append("publishedBuffersNames = new String["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
+        out.append("allReaders = new reader["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
+        out.append("allReaders_callbacks = new serializeStreamCallback["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
+        out.append("publishedBuffersNames[0] = \"nodeRepository\";")
+        out.append("allReaders_callbacks[0] = new "+serializatorPath+"(new com.github.airutech.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
+        for i, v in enumerate(a.read_data["connection"]["readFrom"][1:]):
+            out.append("publishedBuffersNames["+str(i + 1)+"] = \""+v["name"]+"\";")
+            out.append("allReaders["+str(i+1)+"] = r"+str(i+1)+";")
+            out.append("allReaders_callbacks["+str(i+1)+"] = new "+serializatorPath+"(new "+".".join(v["type"].split(".")[:-1])+serializePackagePostfix+"());")
+
+
+    return "\n    ".join(out)
