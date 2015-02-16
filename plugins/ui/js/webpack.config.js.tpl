@@ -29,11 +29,13 @@ module.exports = {
   },
   module: {
     loaders: [
+      { test: /bootstrap/, loader: 'imports?jQuery=jquery' },
       { test: /\.css/, loader: "style-loader!css-loader" },
       { test: /\.gif/, loader: "url-loader?limit=10000&minetype=image/gif" },
       { test: /\.jpg/, loader: "url-loader?limit=10000&minetype=image/jpg" },
       { test: /\.png/, loader: "url-loader?limit=10000&minetype=image/png" },
       { test: /\.woff$/,   loader: "url-loader?limit=10000&minetype=application/font-woff" },
+      { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff2" },
       { test: /\.ttf$/,    loader: "file-loader" },
       { test: /\.eot$/,    loader: "file-loader" },
       { test: /\.svg$/,    loader: "file-loader" },

@@ -13,11 +13,10 @@ c.tpl(cog,templateFile,c.a(prefix=configFile))
 ]]]*/
 /*[[[end]]]*/
 
-.bs3{
-  @import url('../../bower_components/bootstrap/less/bootstrap.less');
-  @import url('../../bower_components/bootstrap/less/theme.less');
-  @icon-font-path: "../../bower_components/bootstrap/dist/fonts/";
-}
+
+@import url('../../node_modules/bootstrap/less/bootstrap.less');
+@import url('../../node_modules/bootstrap/less/theme.less');
+@icon-font-path: "../../node_modules/bootstrap/fonts/";
 
 html{
   height: 100%;
@@ -27,26 +26,23 @@ body {
   background: #fff;
   min-height: 100%;
   min-width: 100%;
-  overflow-x:hidden;
-  overflow-y:hidden;  
 }
 .clear{
   clear:both;
 }
 
 #app{
-  width: 1024px;
-  height: 768px;
+  width: 100%;
+  height: auto;
 }
 
 .container{
   padding:0 !important;
   background: #dedede;
-  overflow: scroll;
-  overflow-x:hidden;
-  overflow-y:hidden;
   position:relative;
   float:left;
   width:100%;
   height: auto;
 }
+
+@import url('./app.less');
