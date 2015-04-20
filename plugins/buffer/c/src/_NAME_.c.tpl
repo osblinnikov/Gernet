@@ -3,13 +3,13 @@ p = reload(parsing_c)
 p.parsingGernet(a)%>
 #include "../include/${a.className}.h"
 
-void* ${a.fullName_}_readNext(bufferKernelParams *params, BOOL make_timeout);
-bufferReadData ${a.fullName_}_readNextWithMeta(bufferKernelParams *params, BOOL make_timeout);
+void* ${a.fullName_}_readNext(bufferKernelParams *params, int waitThreshold);
+bufferReadData ${a.fullName_}_readNextWithMeta(bufferKernelParams *params, int waitThreshold);
 int ${a.fullName_}_readFinished(bufferKernelParams *params);
-void* ${a.fullName_}_writeNext(bufferKernelParams *params, BOOL make_timeout);
+void* ${a.fullName_}_writeNext(bufferKernelParams *params, int waitThreshold);
 int ${a.fullName_}_writeFinished(bufferKernelParams *params);
 int ${a.fullName_}_size(bufferKernelParams *params);
-int ${a.fullName_}_timeout(bufferKernelParams *params);
+int64_t ${a.fullName_}_timeout(bufferKernelParams *params);
 int ${a.fullName_}_gridSize(bufferKernelParams *params);
 int ${a.fullName_}_uniqueId(bufferKernelParams *params);
 int ${a.fullName_}_addSelector(bufferKernelParams *params, void* selectorContainer);

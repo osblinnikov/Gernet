@@ -59,6 +59,15 @@ def checkStructure(read_data):
     if not read_data.has_key("topology"):
         read_data["topology"] = []
 
+    for t in read_data["topology"]:
+        checkStructure(t)
+
+    if not read_data.has_key("channels"):
+        read_data["channels"] = []
+
+    for t in read_data["channels"]:
+        checkStructure(t)
+
     if not read_data.has_key("depends"):
         read_data["depends"] = []
 

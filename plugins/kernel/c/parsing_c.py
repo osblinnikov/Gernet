@@ -444,9 +444,9 @@ def searchPropertyAndArgName(a, propName):
 def initializeBuffers(a):
   out = ""
   #buffers
-  for blockNum, v in enumerate(a.read_data["topology"]):
-    if not v.has_key("type") or v["type"] != "buffer":
-      continue
+  for blockNum, v in enumerate(a.read_data["channels"]):
+    # if not v.has_key("type") or v["type"] != "buffer":
+    #   continue
     pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
