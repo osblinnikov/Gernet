@@ -4,5 +4,5 @@ p.parsingGernet(a)
 dependenciesDict = p.getDependenciesList(a)
 %>
   %for k,v  in dependenciesDict:
-  AddDependency(args,'${p.artifactId(v["path"])}',join(args['PROJECTS_ROOT_PATH'],'src/${p.getPath(v["path"])}/c'))
+  AddDependency(env,'${p.artifactId(v["path"])}','${p.getPath(v["path"])}/c')
   %endfor 

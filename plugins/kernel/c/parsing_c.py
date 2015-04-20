@@ -10,7 +10,7 @@ def recurseDependencies(dependenciesDict):
     read_data = readJson(os.path.join(PROJECTS_ROOT_PATH,getPath(v["path"]),'gernet.json') )
     if read_data == None:
       continue
-    for v in read_data["blocks"]+read_data["depends"]:
+    for v in read_data["topology"]+read_data["depends"]:
       if not dependenciesDict.has_key(v["path"]) and not newDependenciesDict.has_key(v["path"]):
         newDependenciesDict[v["path"]] = v
         hasNewData = True
@@ -29,7 +29,7 @@ def getDependenciesList(a):
 
 
   i = len(dependenciesDict)
-  for v in a.read_data["blocks"]+a.read_data["depends"]:
+  for v in a.read_data["topology"]+a.read_data["depends"]:
     if not dependenciesDict.has_key(v["path"]):
       dependenciesDict[v["path"]] = v
       dependenciesDict[v["path"]]['_order'] = i
@@ -90,19 +90,19 @@ def getFieldsArrStr(a):
     # v["type"] = t
     arr.append(artifactId(t)+" "+v["name"])
 
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     arr.append("writer w"+str(i))
 
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     arr.append("reader r"+str(i))
 
 
   noSelectors = False
-  if a.read_data["connection"].has_key("noSelectors"):
-      noSelectors = a.read_data["connection"]["noSelectors"]
-  if len(a.read_data["connection"]["readFrom"]) > 1 and not noSelectors:
+  if a.read_data.has_key("noSelectors"):
+      noSelectors = a.read_data["noSelectors"]
+  if len(a.read_data["receive"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
-    arr.append("com_github_airutech_cnets_selector readersSelector")
+    arr.append("com_github_osblinnikov_cnets_selector readersSelector")
 
   return arr
 
@@ -113,10 +113,10 @@ def getargsArrStrs(a):
     # v["type"] = t
     arr.append("_"+v["name"])
 
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     arr.append("_w"+str(i))
 
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     arr.append("_r"+str(i))
 
   return arr
@@ -147,7 +147,7 @@ def parsingGernet(a):
 
   fullName = a.read_data["path"]
   a.fullName_ = artifactId(fullName)
-  a.version = a.read_data["ver"]
+  # a.version = a.read_data["ver"]
   fullNameList = fullName.split('.')
   a.className = fullNameList[-1]
   a.companyDomain = fullNameList[1]+'.'+fullNameList[0]
@@ -164,7 +164,7 @@ def parsingGernet(a):
   a.domainPath = a.companyDomain+'/'+('/'.join(fullNameList))
 
   if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
-    if len(a.read_data["blocks"])==0:
+    if len(a.read_data["topology"])==0:
       a.classImplements = "Runnable"
     else:
       a.classImplements = "" #GetRunnables
@@ -201,17 +201,17 @@ def getConstructor(a):
       selectableArgs.append(v)
 
   noSelectors = False
-  if a.read_data["connection"].has_key("noSelectors"):
-    noSelectors = a.read_data["connection"]["noSelectors"]
+  if a.read_data.has_key("noSelectors"):
+    noSelectors = a.read_data["noSelectors"]
 
-  if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
-    selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
+  if not noSelectors and (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0):
+    selectablesCount = str(len(a.read_data["receive"]))
     for i,v in enumerate(selectableArgs):
       selectablesCount += " + "+str(v["name"])+".length"
     out += "\\\n    arrayObject_create(_NAME_##_arrReaders_, reader, "+selectablesCount+")"
 
     lastId = 0
-    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    for i,v in enumerate(a.read_data["receive"]):
       out += "\\\n    ((reader*)_NAME_##_arrReaders_.array)["+str(i)+"] = _r"+str(i)+";"
       lastId = i
     if len(selectableArgs)>0:
@@ -222,9 +222,9 @@ def getConstructor(a):
         out += "\\\n    }"
         if i+1 != len(selectableArgs):
           out += "\\\n    totalLength += "+str(v["name"])+".length;"
-    out += "\\\n    com_github_airutech_cnets_selector_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
+    out += "\\\n    com_github_osblinnikov_cnets_selector_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
     out += "\\\n    _NAME_.readersSelector = _NAME_##readersSelector;"
-    out += "\\\n    com_github_airutech_cnets_selector_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
+    out += "\\\n    com_github_osblinnikov_cnets_selector_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
     out += "\\\n    _NAME_.rSelect = _NAME_##_rSelect_;"
 
   #END OF ARGS AND SELECTABLE ARG
@@ -245,9 +245,9 @@ def getConstructor(a):
         out += "\\\n    _NAME_."+value["name"]+" = _NAME_##_"+value["name"]+"_;"
 
 
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     out += "\\\n    _NAME_.w"+str(i)+" = _w"+str(i)+";"
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     out += "\\\n    _NAME_.r"+str(i)+" = _r"+str(i)+";"
   
   if a.read_data.has_key("props"):
@@ -311,7 +311,7 @@ def directoryFromBlockPath(path):
 
 def importBlocks(a):
   dependenciesDict = dict()
-  for v in a.read_data["blocks"]+a.read_data["depends"]:
+  for v in a.read_data["topology"]+a.read_data["depends"]:
     dependenciesDict[v["path"]] = v
   out = ""
   for k,v  in dependenciesDict.items():
@@ -321,7 +321,7 @@ def importBlocks(a):
 def declareBlocks(a):
   out = ""
   hasParallel = False
-  for v in a.read_data["blocks"]:
+  for v in a.read_data["topology"]:
     pathList = v["path"].split('.')
     if v.has_key("parallel"):
       hasParallel = True
@@ -330,16 +330,16 @@ def declareBlocks(a):
       out += "_".join(pathList)+" "+v["name"]+";"
 
   a.sizeRunnables = 0
-  for k,v in enumerate(a.read_data["blocks"]):
+  for k,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     a.sizeRunnables += 1
 
   if a.sizeRunnables > 0:
     if hasParallel:
-      out += "\ncom_github_airutech_cnets_runnablesContainer* arrContainers;"
+      out += "\ncom_github_osblinnikov_cnets_runnablesContainer* arrContainers;"
     else:
-      out += "\ncom_github_airutech_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];"
+      out += "\ncom_github_osblinnikov_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -363,37 +363,37 @@ def checkPinId(arrPins, pinId):
 def getReadersWriters(a,v, curBlock):
   arr = []
   #set writer to the buffer
-  for i,w in enumerate(v["connection"]["writeTo"]):
+  for i,w in enumerate(v["emit"]):
     blockId = w["blockId"]
     if blockId == "export":
-      if checkPinId(a.read_data["connection"]["writeTo"], w["pinId"]) != -1:
+      if checkPinId(a.read_data["emit"], w["pinId"]) != -1:
         arr.append("_NAME_.w"+str(w["pinId"]))
       else:
         raise Exception("pinId _NAME_.w."+str(w["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
-      rblock = a.read_data["blocks"][int(blockId)]
+      rblock = a.read_data["topology"][int(blockId)]
       if rblock["type"] != "buffer":
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
-      # r = rblock["connection"]["readFrom"]
-      if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
+      # r = rblock["receive"]
+      if checkPinId(rblock["receive"], w["pinId"]) != -1:
         arr.append("_NAME_##"+rblock["name"]+"w"+str(w["pinId"]))
       else:
         raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
 
   #get reader from buffer
-  for i,r in enumerate(v["connection"]["readFrom"]):
+  for i,r in enumerate(v["receive"]):
     blockId = r["blockId"]
     if blockId == "export":
-      if checkPinId(a.read_data["connection"]["readFrom"], r["pinId"]) != -1:
+      if checkPinId(a.read_data["receive"], r["pinId"]) != -1:
         arr.append("_NAME_.r"+str(r["pinId"]))
       else:
         raise Exception("pinId _NAME_.r."+str(r["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
-      wblock = a.read_data["blocks"][int(blockId)]
+      wblock = a.read_data["topology"][int(blockId)]
       if wblock["type"] != "buffer":
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
-      # r = wblock["connection"]["writeTo"]
-      if checkPinId(wblock["connection"]["writeTo"], r["pinId"]) != -1:
+      # r = wblock["emit"]
+      if checkPinId(wblock["emit"], r["pinId"]) != -1:
         arr.append("_NAME_##"+wblock["name"]+"r"+str(r["pinId"]))
       else:
         raise Exception("pinId r."+str(r["pinId"])+" was not found in the destination buffer")
@@ -404,16 +404,16 @@ def connectBufferToReader(a, blockNum, i, w):
   if blockId == "export":
     raise Exception("Export readerWriter from buffer is forbidden! only kernels can do it [block id = "+str(blockNum)+"]")
   elif blockId != "internal":
-    wblock = a.read_data["blocks"][int(blockId)]
+    wblock = a.read_data["topology"][int(blockId)]
     if wblock.has_key("type") and wblock["type"] == "buffer":
       raise Exception("Interconnections of buffers ["+str(blockNum)+" and "+str(blockId)+"] are forbidden")
-    arr_id = checkPinId(wblock["connection"]["readFrom"],w["pinId"])
+    arr_id = checkPinId(wblock["receive"],w["pinId"])
     if arr_id == -1:
       raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
     if w["pinId"] != arr_id:
       raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
-    pinObject = wblock["connection"]["readFrom"][arr_id]
+    pinObject = wblock["receive"][arr_id]
     if pinObject.has_key("blockId") and pinObject.has_key("pinId") and pinObject["blockId"] != "export":
       if int(pinObject["blockId"])!=blockNum or int(pinObject["pinId"])!=i:
         raise Exception("Connection of block "+str(blockNum)+", pin "+str(i)+" with "+str(blockId)+", pin "+str(w["pinId"])+" failed because the last already connected to "+str(pinObject["blockId"])+", "+str(pinObject["pinId"]))
@@ -444,7 +444,7 @@ def searchPropertyAndArgName(a, propName):
 def initializeBuffers(a):
   out = ""
   #buffers
-  for blockNum, v in enumerate(a.read_data["blocks"]):
+  for blockNum, v in enumerate(a.read_data["topology"]):
     if not v.has_key("type") or v["type"] != "buffer":
       continue
     pathList = v["path"].split('.')
@@ -463,11 +463,11 @@ def initializeBuffers(a):
     out += "\\\n    "+'_'.join(pathList)+"_create("+','.join([v["name"]]+argsList)+")"
     out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
     #get writer from buffer
-    for i,w in enumerate(v["connection"]["writeTo"]):
+    for i,w in enumerate(v["emit"]):
       out += "\\\n    "+'_'.join(pathList)+"_createReader("+','.join([ "_NAME_##"+v["name"]+"r"+str(i),  "&_NAME_."+v["name"]] + getRwArgs(i,w))+")"
       connectBufferToReader(a, blockNum, i, w)
     #get reader from buffer
-    for i,w in enumerate(v["connection"]["readFrom"]):
+    for i,w in enumerate(v["receive"]):
       out += "\\\n    "+'_'.join(pathList)+"_createWriter("+','.join([ "_NAME_##"+v["name"]+"w"+str(i),  "&_NAME_."+v["name"]] + getRwArgs(i,w))+")"
   return out
 
@@ -475,7 +475,7 @@ def initializeKernels(a):
   out = ""
   #kernels
   hasParallel = "0"
-  for i,v in enumerate(a.read_data["blocks"]):
+  for i,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     pathList = v["path"].split('.')
@@ -507,7 +507,7 @@ def initializeKernels(a):
       out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
       hasParallel += "+1"
   if hasParallel != "0":
-    out += "\\\n    com_github_airutech_cnets_runnablesContainer _NAME_##arrContainers["+evalSize(hasParallel)+"];"
+    out += "\\\n    com_github_osblinnikov_cnets_runnablesContainer _NAME_##arrContainers["+evalSize(hasParallel)+"];"
     out += "\\\n    _NAME_.arrContainers = _NAME_##arrContainers;"
   return out
 
@@ -515,7 +515,7 @@ def runBlocks(a):
   out = []
   hasParallel = False
   #kernels
-  for i,v in enumerate(a.read_data["blocks"]):
+  for i,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     if v.has_key("parallel"):
@@ -549,9 +549,9 @@ def getDefaultRunParameters(a):
       argsList.append("arrayObjectNULL()")
     else:
       argsList.append("0")
-  for v in a.read_data["connection"]["writeTo"]:
+  for v in a.read_data["emit"]:
     argsList.append("writerNULL()")
-  for v in a.read_data["connection"]["readFrom"]:
+  for v in a.read_data["receive"]:
     argsList.append("readerNULL()")
   return ','.join(argsList)
 
@@ -563,7 +563,7 @@ def startRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_airutech_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,TRUE);
     '''
   return out
@@ -576,7 +576,7 @@ def testRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_airutech_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,FALSE);
     runnables.stop(&runnables);
     '''
@@ -594,7 +594,7 @@ def getRunnables(a):
   sizeRunnables = "0"
   out = "\n"
   hasParallel = False
-  for blockNum, v in enumerate(a.read_data["blocks"]):
+  for blockNum, v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     if v.has_key("parallel"):
@@ -614,17 +614,17 @@ def getRunnables(a):
 
   if sizeRunnables == "0":
     return '''
-    com_github_airutech_cnets_runnablesContainer_create(runnables)
+    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
     runnables.setCore(&runnables,runnableStoppableObj);
     return runnables;'''
   else:
     return  '''
-    com_github_airutech_cnets_runnablesContainer_create(runnables)
+    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)&that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
-    arr.itemSize = sizeof(com_github_airutech_cnets_runnablesContainer);
+    arr.itemSize = sizeof(com_github_osblinnikov_cnets_runnablesContainer);
     runnables.setContainers(&runnables,arr);
     return runnables;'''

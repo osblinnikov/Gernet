@@ -7,7 +7,7 @@ p.parsingGernet(a)
 %>{
   "author": "${a.domainName}",
   "name": "${a.read_data["path"]}",
-  "version": "${a.read_data["ver"]}",
+  "version": "0.0.0",
   "repository":"https://${a.domainPath}.git",
   "homepage": "https://${a.domainPath}",
   "dependencies": {

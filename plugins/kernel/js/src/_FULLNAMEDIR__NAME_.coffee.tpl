@@ -16,8 +16,8 @@ s.${a.fullName_} =
     self = this
     #constructor
     ${'\n    '.join(p.getFieldsArrStr(a))}
-    %if len(a.read_data["blocks"])==0:
-    wrk = new s.com_github_airutech_cnets_types.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
+    %if len(a.read_data["topology"])==0:
+    wrk = new s.com_github_osblinnikov_cnets_types.Worker('/dist/${a.fullName_}/${a.className}.worker.js')
     ${'\n    '.join(p.registerConnections(a))}
     %endif
     ${'\n    '.join(p.initializeBuffers(a))}
@@ -27,13 +27,13 @@ s.${a.fullName_} =
       if customCallbacks.onStart
         customCallbacks.onStart()
       ${'\n      '.join(p.syncBuffers(a))}
-      %if len(a.read_data["blocks"])==0:
+      %if len(a.read_data["topology"])==0:
       wrk.postMessage({type:'start'})
       %endif
       ${'\n      '.join(p.startKernels(a))}
 
     self.onStop = ->
-      %if len(a.read_data["blocks"])==0:
+      %if len(a.read_data["topology"])==0:
       wrk.postMessage({type:'stop'})
       %endif
       ${'\n      '.join(p.stopKernels(a))}

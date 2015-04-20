@@ -1,30 +1,21 @@
 {
-"path":"com.github.airutech.gernet.test.ui",
-"ver":"0.0.0",
-"type":"com.github.airutech.gernet.plugins.ui",
+"path":"com.github.osblinnikov.gernet.test.ui",
+"gen":["com.github.osblinnikov.gernet.plugins.ui","com.github.osblinnikov.gernet.plugins.build"],
 "args": [],
 "blocks":[],
 "depends":[{
-  "path":"com.github.airutech.cnets.mapBuffer",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.cnets.mapBuffer"
 },{
-  "path":"com.github.airutech.cnets.queue",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.cnets.queue"
 },{
-  "path":"com.github.airutech.cnets.runnablesContainer",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.cnets.runnablesContainer"
 },{
-  "path":"com.github.airutech.cnets.readerWriter",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.cnets.readerWriter"
 },{
-  "path":"com.github.airutech.cnets.types",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.cnets.types"
 },{
-  "path":"com.github.airutech.gernet.test.block0",
-  "ver": "[0.0.0,)"
+  "path":"com.github.osblinnikov.gernet.test.block0"
 }],
-"connection":{
-  "writeTo": [],
-  "readFrom": []
-}
+  "emit": [],
+  "receive": []
 }

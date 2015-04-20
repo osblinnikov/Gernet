@@ -134,19 +134,23 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
 def runGernet(firstRealArgI, argv, topology_dir):
     Types = []
     extra_args = getArgs(firstRealArgI, argv, Types)
-    read_data = readJson(join(topology_dir,"gernet.json"))
-    print(getPath(read_data["type"]))
-    Types = getFilteredSubFolders(getPath(read_data["type"]), Types)
-    # if len(Types) == 0:
-        # print ("No one generator was found")
-        # return
-    for i in range(0, len(Types)):
-        generateMissedFiles(
-            topology_dir,
-            os.path.join(getPath(read_data["type"]), Types[i]),
-            read_data["path"],
-            extra_args
-        )
+    read_data = readYaml(join(topology_dir,"gernet.yaml"))
+    if read_data == None:
+        read_data = readJson(join(topology_dir,"gernet.json"))
+    for p in read_data["gen"]:
+        p0 = getPath(p)
+        print p0
+        Types = getFilteredSubFolders(p0, Types)
+        # if len(Types) == 0:
+            # print ("No one generator was found")
+            # return
+        for i in range(0, len(Types)):
+            generateMissedFiles(
+                topology_dir,
+                os.path.join(p0, Types[i]),
+                read_data["path"],
+                extra_args
+            )
 
 
 def checkDir(directory):

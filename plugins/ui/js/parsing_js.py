@@ -6,7 +6,7 @@ from gernetHelpers import *
 def importBlocks(a):
     out = []
     dependenciesList = []
-    for v in a.read_data["blocks"]+a.read_data["depends"]:
+    for v in a.read_data["topology"]+a.read_data["depends"]:
         dependenciesList.append(v["path"])
     for v in set(dependenciesList):
         fname = getFullName_(v)
@@ -34,7 +34,7 @@ def parsingGernet(a):
     a.read_data = readJson(a.prefix)
 
     fullName = a.read_data["path"]
-    a.version = a.read_data["ver"]
+    # a.version = a.read_data["ver"]
     a.fullName_ = getFullName_(fullName)
     a.className = getClassName(fullName)
     a.companyDomain = getCompanyDomain(fullName)
@@ -43,7 +43,7 @@ def parsingGernet(a):
     a.domainPath = getDomainPath(fullName)
 
     if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
-        if len(a.read_data["blocks"])==0:
+        if len(a.read_data["topology"])==0:
             a.classImplements = "Runnable"
         else:
             a.classImplements = "" #GetRunnables

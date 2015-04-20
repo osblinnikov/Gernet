@@ -9,7 +9,7 @@ def importBlocks(a):
 
     dependenciesList.append(DefaultMapBuffer)
 
-    for v in a.read_data["blocks"]+a.read_data["depends"]:
+    for v in a.read_data["topology"]+a.read_data["depends"]:
         dependenciesList.append(v["path"])
     for v in set(dependenciesList):
         fname = getFullName_(v)
@@ -34,7 +34,7 @@ def parsingGernet(a):
     a.read_data = readJson(a.prefix)
 
     fullName = a.read_data["path"]
-    a.version = a.read_data["ver"]
+    # a.version = a.read_data["ver"]
     a.fullName_ = getFullName_(fullName)
     a.className = getClassName(fullName)
     a.companyDomain = getCompanyDomain(fullName)
@@ -43,7 +43,7 @@ def parsingGernet(a):
     a.domainPath = getDomainPath(fullName)
 
     if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
-        if len(a.read_data["blocks"])==0:
+        if len(a.read_data["topology"])==0:
             a.classImplements = "Runnable"
         else:
             a.classImplements = "" #GetRunnables
@@ -56,7 +56,7 @@ def parsingGernet(a):
         a.rwArguments+=a.read_data["rwArgs"]
 
 def importScripts(a):
-    if len(a.read_data["blocks"]) > 0:
+    if len(a.read_data["topology"]) > 0:
         return ""
     out = []
     dependenciesList = []
@@ -101,26 +101,26 @@ def getargsArrStrs(a):
         v["type"] = t
         arr.append(v["name"])
 
-    for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+    for i,v in enumerate(a.read_data["emit"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("w"+str(i)+name)
 
-    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    for i,v in enumerate(a.read_data["receive"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("r"+str(i)+name)
 
     return arr
 
 def registerConnections(a):
-    if len(a.read_data["blocks"]) > 0:
+    if len(a.read_data["topology"]) > 0:
         return ""
     arr = []
-    for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+    for i,v in enumerate(a.read_data["emit"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("if w"+str(i)+name)
         arr.append("  w"+str(i)+name+".registerSrc(wrk,"+str(i)+")")
 
-    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    for i,v in enumerate(a.read_data["receive"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("if r"+str(i)+name)
         arr.append("  r"+str(i)+name+".registerDst(wrk,"+str(i)+")")
@@ -130,7 +130,7 @@ def registerConnections(a):
 def initializeBuffers(a):
     out = []
     #buffers
-    for blockNum, v in enumerate(a.read_data["blocks"]):
+    for blockNum, v in enumerate(a.read_data["topology"]):
         if not v.has_key("type") or v["type"] != "buffer":
             continue
         argsList = []
@@ -141,18 +141,18 @@ def initializeBuffers(a):
         #create variables
         out.append(v["name"]+" = new s."+getFullName_(v["path"])+".create("+','.join(argsList)+")")
         #get writer from buffer
-        for i,w in enumerate(v["connection"]["writeTo"]):
+        for i,w in enumerate(v["emit"]):
             #out.append("reader "+v["name"]+"r"+str(i)+" = "+v["name"]+".getReader("+','.join(getRwArgs(i,w))+")")
             connectBufferToReader(a, blockNum, i, w)
         #get reader from buffer
-        #for i,w in enumerate(v["connection"]["readFrom"]):
+        #for i,w in enumerate(v["receive"]):
             #out.append("writer "+v["name"]+"w"+str(i)+" = "+v["name"]+".getWriter("+','.join(getRwArgs(i,w))+")")
     return out
 
 def stopKernels(a):
     out = []
     #kernels
-    for i,v in enumerate(a.read_data["blocks"]):
+    for i,v in enumerate(a.read_data["topology"]):
         if v.has_key("type") and v["type"] == "buffer":
             continue
         out.append(v["name"]+".onStop()")
@@ -163,7 +163,7 @@ def stopKernels(a):
 def startKernels(a):
     out = []
     #kernels
-    for i,v in enumerate(a.read_data["blocks"]):
+    for i,v in enumerate(a.read_data["topology"]):
         if v.has_key("type") and v["type"] == "buffer":
             continue
         out.append(v["name"]+".onStart()")
@@ -172,7 +172,7 @@ def startKernels(a):
 def syncBuffers(a):
     out = []
     #buffers
-    for blockNum, v in enumerate(a.read_data["blocks"]):
+    for blockNum, v in enumerate(a.read_data["topology"]):
         if not v.has_key("type") or v["type"] != "buffer":
             continue
         #create variables
@@ -182,7 +182,7 @@ def syncBuffers(a):
 def initializeKernels(a):
     out = []
     #kernels
-    for i,v in enumerate(a.read_data["blocks"]):
+    for i,v in enumerate(a.read_data["topology"]):
         if v.has_key("type") and v["type"] == "buffer":
             continue
         argsList = []
@@ -204,37 +204,37 @@ def initializeKernels(a):
 def getReadersWriters(a,v, curBlock):
     arr = []
     #set writer to the buffer
-    for i,w in enumerate(v["connection"]["writeTo"]):
+    for i,w in enumerate(v["emit"]):
         blockId = w["blockId"]
         if blockId == "export":
-            if checkPinId(a.read_data["connection"]["writeTo"], w["pinId"]) != -1:
+            if checkPinId(a.read_data["emit"], w["pinId"]) != -1:
                 arr.append("w"+str(w["pinId"]))
             else:
                 raise Exception("pinId w."+str(w["pinId"])+" was not found in the exported connection")
         elif blockId != "internal":
-            rblock = a.read_data["blocks"][int(blockId)]
+            rblock = a.read_data["topology"][int(blockId)]
             if rblock["type"] != "buffer":
                 raise Exception("Connection from the block allowed only to the block with type='buffer'")
-            # r = rblock["connection"]["readFrom"]
-            if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
+            # r = rblock["receive"]
+            if checkPinId(rblock["receive"], w["pinId"]) != -1:
                 arr.append(rblock["name"])#+"w"+str(w["pinId"])
             else:
                 raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
 
     #get reader from buffer
-    for i,r in enumerate(v["connection"]["readFrom"]):
+    for i,r in enumerate(v["receive"]):
         blockId = r["blockId"]
         if blockId == "export":
-            if checkPinId(a.read_data["connection"]["readFrom"], r["pinId"]) != -1:
+            if checkPinId(a.read_data["receive"], r["pinId"]) != -1:
                 arr.append("r"+str(r["pinId"]))
             else:
                 raise Exception("pinId r."+str(r["pinId"])+" was not found in the exported connection")
         elif blockId != "internal":
-            wblock = a.read_data["blocks"][int(blockId)]
+            wblock = a.read_data["topology"][int(blockId)]
             if wblock["type"] != "buffer":
                 raise Exception("Connection from the block allowed only to the block with type='buffer'")
-            # r = wblock["connection"]["writeTo"]
-            if checkPinId(wblock["connection"]["writeTo"], r["pinId"]) != -1:
+            # r = wblock["emit"]
+            if checkPinId(wblock["emit"], r["pinId"]) != -1:
                 arr.append(wblock["name"])#+"r"+str(r["pinId"])
             else:
                 raise Exception("pinId r."+str(r["pinId"])+" was not found in the destination buffer")
@@ -242,18 +242,18 @@ def getReadersWriters(a,v, curBlock):
 
 
 def createWorkerBuffers(a):
-    if len(a.read_data["blocks"]) > 0:
+    if len(a.read_data["topology"]) > 0:
         return ""
     arr = []
     lastI = 0
-    for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+    for i,v in enumerate(a.read_data["emit"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("bufW"+str(i)+name+" = new mapBuffer.create()")
         arr.append("bufW"+str(i)+name+".setDispatcher(" + str(i) +", _this)")
         arr.append("w"+str(i)+name+" = bufW"+str(i)+name+".getWriter(onRun)")
         lastI = i
 
-    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    for i,v in enumerate(a.read_data["receive"]):
         name = v["name"] if v.has_key("name") else ""
         arr.append("bufR"+str(i)+name+" = new mapBuffer.create()")
         arr.append("bufR"+str(i)+name+".setDispatcher(" + str(lastI+i) +", _this)")
@@ -296,16 +296,16 @@ def connectBufferToReader(a, blockNum, i, w):
     if blockId == "export":
         raise Exception("Export readerWriter from buffer is forbidden! only kernels can do it [block id = "+str(blockNum)+"]")
     elif blockId != "internal":
-        wblock = a.read_data["blocks"][int(blockId)]
+        wblock = a.read_data["topology"][int(blockId)]
         if wblock.has_key("type") and wblock["type"] == "buffer":
             raise Exception("Interconnections of buffers ["+str(blockNum)+" and "+str(blockId)+"] are forbidden")
-        arr_id = checkPinId(wblock["connection"]["readFrom"],w["pinId"])
+        arr_id = checkPinId(wblock["receive"],w["pinId"])
         if arr_id == -1:
             raise Exception("pinId w."+str(w["pinId"])+" was not found in the destination buffer")
         if w["pinId"] != arr_id:
             raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
-        pinObject = wblock["connection"]["readFrom"][arr_id]
+        pinObject = wblock["receive"][arr_id]
         if pinObject.has_key("blockId") and pinObject.has_key("pinId") and pinObject["blockId"] != "export":
             if int(pinObject["blockId"])!=blockNum or int(pinObject["pinId"])!=i:
                 raise Exception("Connection of block "+str(blockNum)+", pin "+str(i)+" with "+str(blockId)+", pin "+str(w["pinId"])+" failed because the last already connected to "+str(pinObject["blockId"])+", "+str(pinObject["pinId"]))

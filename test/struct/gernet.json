@@ -1,6 +1,6 @@
 {
 "path":"com.github.osblinnikov.gernet.test.lib",
-"gen":["com.github.osblinnikov.gernet.plugins.library","com.github.osblinnikov.gernet.plugins.build"],
+"gen":["com.github.osblinnikov.gernet.plugins.structure","com.github.osblinnikov.gernet.plugins.build"],
 "args": [],
 "blocks":[],
 "depends":[{

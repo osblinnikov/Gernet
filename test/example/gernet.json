@@ -1,7 +1,6 @@
 {
-"path":"com.github.airutech.gernet.test.example",
-"ver":"0.0.0",
-"type":"com.github.airutech.gernet.plugins.kernel",
+"path": "com.github.osblinnikov.gernet.test.example",
+"gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
 "args": [{
   "name":"unsignedArr",
   "type":"unsigned[]"
@@ -15,58 +14,25 @@
   "size":10
 }],
 "depends":[{
-  "path":"com.github.airutech.cnets.mapBuffer",
-  "ver": "[0.0.0,)"
+  "path": "com.github.osblinnikov.cnets.mapBuffer"
 },{
-  "path":"com.github.airutech.cnets.queue",
-  "ver": "[0.0.0,)"
+  "path": "com.github.osblinnikov.cnets.queue"
 },{
-  "path":"com.github.airutech.cnets.runnablesContainer",
-  "ver": "[0.0.0,)"
+  "path": "com.github.osblinnikov.cnets.runnablesContainer"
 },{
-  "path":"com.github.airutech.cnets.readerWriter",
-  "ver": "[0.0.0,)"
+  "path": "com.github.osblinnikov.cnets.readerWriter"
 },{
-  "path":"com.github.airutech.cnets.types",
-  "ver": "[0.0.0,)"
+  "path": "com.github.osblinnikov.cnets.types"
 }],
-"connection":{
-  "writeTo": [{
-    "description": "exported connector",
-    "type": "unsigned"
-  }],
-  "readFrom": []
-},
-"blocks":[{
-  "id":0,
-  "parallel":3,
-  "name": "kernelBlock0",
-  "path":"com.github.airutech.gernet.test.block0",
-  "ver":"[0.0.0,)",
-  "args": [],
-  "connection":{
-    "writeTo": [{
-      "type": "unsigned",
-      "blockId": 1,
-      "pinId": 0
-    }, {
-      "type": "long long",
-      "blockId": 2,
-      "pinId": 0
-    }, {
-      "type": "unsigned",
-      "blockId": "export",
-      "description": "export data from 0 block",
-      "pinId": 0
-    }],
-    "readFrom": []
-  }
-},{
-  "id":1,
-  "type":"buffer",
+"emit": [{
+  "description": "exported connector",
+  "type": "unsigned",
+  "name":"exportChannel"
+}],
+"receive": [],
+"channels": [{
   "name":"mapBuffer1",
-  "path":"com.github.airutech.cnets.mapBuffer",
-  "ver":"[0.0.0,)",
+  "path": "com.github.osblinnikov.cnets.mapBuffer",
   "args": [{
     "name":"buffers",
     "value":"unsignedArr",
@@ -77,31 +43,10 @@
   },{
     "name": "readers_grid_size",
     "value": 1
-  }],
-  "connection": {
-    "writeTo": [{
-      "type": "unsigned",
-      "blockId": 3,
-      "pinId": 0,
-      "gridId": 0,
-      "rwArgs":[]
-    },{
-      "type": "unsigned",
-      "blockId": 4,
-      "pinId": 0,
-      "gridId": 0,
-      "rwArgs":[]
-    }],
-    "readFrom": [{
-      "type": "unsigned"
-    }]
-  }
+  }]
 },{
-  "id":2,
-  "type":"buffer",
   "name": "mapBuffer2",
-  "path":"com.github.airutech.cnets.mapBuffer",
-  "ver":"[0.0.0,)",
+  "path": "com.github.osblinnikov.cnets.mapBuffer",
   "args": [{
     "name":"buffers",
     "value":"longArr",
@@ -112,43 +57,42 @@
   },{
     "name": "readers_grid_size",
     "value": 1
-  }],
-  "connection":{
-    "writeTo": [{
-      "type": "long long",
-      "blockId": 3,
-      "pinId": 1
-    }],
-    "readFrom": [{
-      "type": "long long"
-    }]
-  }
+  }]
+}],
+"topology":[{
+  "parallel":3,
+  "name": "kernelBlock0",
+  "path": "com.github.osblinnikov.gernet.test.block0",
+  "emit": [{
+    "type": "unsigned",
+    "channel": "mapBuffer1"
+  }, {
+    "type": "long long",
+    "channel": "mapBuffer2"
+  }, {
+    "type": "unsigned",
+    "channel": "exportChannel",
+    "description": "export data from 0 block"
+  }]
 },{
   "id":3,
   "name": "kernelBlock3",
-  "path":"com.github.airutech.gernet.test.block3",
-  "ver":"[0.0.0,)",
-  "args": [],
-  "connection":{
-    "writeTo": [],
-    "readFrom": [{
-      "type": "unsigned"
-    }, {
-      "type": "long long"
-    }]
-  }
+  "path": "com.github.osblinnikov.gernet.test.block3",
+  "receive": [{
+    "channel": "mapBuffer1",
+    "type": "unsigned"
+  }, {
+    "channel": "mapBuffer2",
+    "type": "long long"
+  }]
 },{
   "id":4,
   "parallel":"parallelBlock",
   "name": "kernelBlock4",
-  "path":"com.github.airutech.gernet.test.block4",
-  "ver":"[0.0.0,)",
-  "args": [],
-  "connection":{
-    "writeTo": [],
-    "readFrom": [{
-      "type": "unsigned"
-    }]
-  }
+  "path": "com.github.osblinnikov.gernet.test.block4",
+  "receive": [{
+    "channel": "mapBuffer1",
+    "type": "unsigned"
+  }]
 }]
 }

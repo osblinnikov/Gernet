@@ -16,7 +16,7 @@ def printHelp():
     print "  gernet icanchangethisdomain/SomeProjectName  #generate with every available generator"
     print "TopologyFilePath can be absolute, relative to current path, or "
     print "relative to projects root path e.g.:"
-    print "  gernet github.com\\airutech\\gernet\\example -g java"
+    print "  gernet github.com\\osblinnikov\\gernet\\example -g java"
     print "**********************"
     print "Available options:"
     print "  -g {generator folder name e.g java, connector or c}"

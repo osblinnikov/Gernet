@@ -5,7 +5,7 @@ import os
 #PLEASE change it if you don't want the standard workspace root folder location
 PROJECTS_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
 
-DefaultMapBuffer = 'com.github.airutech.cnets.mapBuffer'
+DefaultMapBuffer = 'com.github.osblinnikov.cnets.mapBuffer'
 
 def readJson(filename):
     json_file_to_read = os.path.join(filename)
@@ -22,7 +22,58 @@ def readJson(filename):
             jsonfile.close()
         except:
             return read_data
+
+        return read_data
+
+    checkStructure(read_data)
     return read_data
+
+
+def readYaml(filename):
+    file_to_read = os.path.join(filename)
+    read_data = None
+    try:
+        with open (file_to_read, "r") as infile:
+            pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
+            read_data = yaml.load(re.sub(pat, '', infile.read()))
+            infile.close()
+    except:
+        # print json_file_to_read+" invalid"
+        try:
+            infile.close()
+        except:
+            return read_data
+
+        return read_data
+
+    checkStructure(read_data)
+    return read_data
+
+def checkStructure(read_data):
+    if not read_data.has_key("path"):
+        read_data["path"] = ""
+
+    if not read_data.has_key("parallel"):
+        read_data["parallel"] = 1
+
+    if not read_data.has_key("topology"):
+        read_data["topology"] = []
+
+    if not read_data.has_key("depends"):
+        read_data["depends"] = []
+
+    if not read_data.has_key("props"):
+        read_data["props"] = []
+
+    if not read_data.has_key("args"):
+        read_data["args"] = []
+
+    if not read_data.has_key("emit"):
+        read_data["emit"] = []
+
+    if not read_data.has_key("receive"):
+        read_data["receive"] = []
+
 
 def filterTypes_java(t):
     serializableType = False

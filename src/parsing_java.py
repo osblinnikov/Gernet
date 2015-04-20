@@ -43,16 +43,16 @@ def getFieldsArrStr(a):
     v["type"] = t
     arr.append(v["type"]+" "+v["name"])
 
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     arr.append("writer w"+str(i))
 
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     arr.append("reader r"+str(i))
 
   noSelectors = False
-  if a.read_data["connection"].has_key("noSelectors"):
-      noSelectors = a.read_data["connection"]["noSelectors"]
-  if len(a.read_data["connection"]["readFrom"]) > 1 and not noSelectors:
+  if a.read_data.has_key("noSelectors"):
+      noSelectors = a.read_data["noSelectors"]
+  if len(a.read_data["receive"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
     arr.append("selector readersSelector")
   return arr
@@ -64,10 +64,10 @@ def getargsArrStrs(a):
     v["type"] = t
     arr.append(t+" "+v["name"])
 
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     arr.append("writer w"+str(i))
 
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     arr.append("reader r"+str(i))
 
   return arr
@@ -87,7 +87,7 @@ def parsingGernet(a):
   a.read_data = readJson(a.prefix)
 
   fullName = a.read_data["path"]
-  a.version = a.read_data["ver"]
+  # a.version = a.read_data["ver"]
   fullNameList = fullName.split('.')
   a.fullName_ = '_'.join(fullNameList)
   a.className = fullNameList[-1]
@@ -107,7 +107,7 @@ def parsingGernet(a):
   a.domainPath = a.companyDomain+'/'+('/'.join(fullNameList))
 
   if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
-    if len(a.read_data["blocks"])==0:
+    if len(a.read_data["topology"])==0:
       a.classImplements = "Runnable"
     else:
       a.classImplements = "" #GetRunnables
@@ -132,9 +132,9 @@ def getConstructor(a):
   out += "  public "+a.className+"("+','.join(argsArray)+"){"
   for value in a.read_data["args"]:
     out += "\n    this."+value["name"]+" = "+value["name"]+";"
-  for i,v in enumerate(a.read_data["connection"]["writeTo"]):
+  for i,v in enumerate(a.read_data["emit"]):
     out += "\n    this.w"+str(i)+" = w"+str(i)+";"
-  for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+  for i,v in enumerate(a.read_data["receive"]):
     out += "\n    this.r"+str(i)+" = r"+str(i)+";"
 
   if a.read_data.has_key("props"):
@@ -160,17 +160,17 @@ def getConstructor(a):
       selectableArgs.append(v)
 
   noSelectors = False
-  if a.read_data["connection"].has_key("noSelectors"):
-    noSelectors = a.read_data["connection"]["noSelectors"]
+  if a.read_data.has_key("noSelectors"):
+    noSelectors = a.read_data["noSelectors"]
 
-  if not noSelectors and (len(a.read_data["connection"]["readFrom"]) > 1 or len(selectableArgs)>0):
-    selectablesCount = str(len(a.read_data["connection"]["readFrom"]))
+  if not noSelectors and (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0):
+    selectablesCount = str(len(a.read_data["receive"]))
     for i,v in enumerate(selectableArgs):
       selectablesCount += " + "+str(v["name"])+".length"
     out += "\n    reader[] arrReaders = new reader["+selectablesCount+"];"
 
     lastId = 0
-    for i,v in enumerate(a.read_data["connection"]["readFrom"]):
+    for i,v in enumerate(a.read_data["receive"]):
       out += "\n    arrReaders["+str(i)+"] = r"+str(i)+";"
       lastId = i
     if len(selectableArgs)>0:
@@ -229,7 +229,7 @@ def getReaderWriter(a):
 def importBlocks(a):
   out = ""
   dependenciesList = []
-  for v in a.read_data["blocks"]+a.read_data["depends"]:
+  for v in a.read_data["topology"]+a.read_data["depends"]:
     dependenciesList.append(v["path"])
   for v in set(dependenciesList):
     out+="\nimport "+v+".*;"
@@ -237,7 +237,7 @@ def importBlocks(a):
 
 def declareBlocks(a):
   out = ""
-  for v in a.read_data["blocks"]:
+  for v in a.read_data["topology"]:
     pathList = v["path"].split('.')
     out += v["path"]+"."+pathList[-1]+" "+v["name"]
     if v.has_key("parallel"):
@@ -269,37 +269,37 @@ def checkPinId(arrPins, pinId):
 def getReadersWriters(a,v, makeCopies):
   arr = []
   #set writer to the buffer
-  for i,w in enumerate(v["connection"]["writeTo"]):
+  for i,w in enumerate(v["emit"]):
     blockId = w["blockId"]
     if blockId == "export":
-      if checkPinId(a.read_data["connection"]["writeTo"], w["pinId"]) != -1:
+      if checkPinId(a.read_data["emit"], w["pinId"]) != -1:
         arr.append("this.w"+str(w["pinId"]))
       else:
         raise Exception("pinId this.w"+str(w["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
-      rblock = a.read_data["blocks"][int(blockId)]
+      rblock = a.read_data["topology"][int(blockId)]
       if not rblock.has_key("type") or rblock["type"] != "buffer":
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
-      # r = rblock["connection"]["readFrom"]
-      if checkPinId(rblock["connection"]["readFrom"], w["pinId"]) != -1:
+      # r = rblock["receive"]
+      if checkPinId(rblock["receive"], w["pinId"]) != -1:
         arr.append(rblock["name"]+"w"+str(w["pinId"]))
       else:
         raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
 
   #get reader from buffer
-  for i,r in enumerate(v["connection"]["readFrom"]):
+  for i,r in enumerate(v["receive"]):
     blockId = r["blockId"]
     if blockId == "export":
-      if checkPinId(a.read_data["connection"]["readFrom"], r["pinId"]) != -1:
+      if checkPinId(a.read_data["receive"], r["pinId"]) != -1:
         arr.append("this.r"+str(r["pinId"]))
       else:
         raise Exception("pinId this.r"+str(r["pinId"])+" was not found in the exported connection")
     elif blockId != "internal":
-      wblock = a.read_data["blocks"][int(blockId)]
+      wblock = a.read_data["topology"][int(blockId)]
       if wblock["type"] != "buffer":
         raise Exception("Connection from the block allowed only to the block with type='buffer'")
-      # r = wblock["connection"]["writeTo"]
-      if checkPinId(wblock["connection"]["writeTo"], r["pinId"]) != -1:
+      # r = wblock["emit"]
+      if checkPinId(wblock["emit"], r["pinId"]) != -1:
         arr.append(wblock["name"]+"r"+str(r["pinId"]))
       else:
         raise Exception("pinId r"+str(r["pinId"])+" was not found in the destination buffer "+str(blockId))
@@ -313,17 +313,17 @@ def connectBufferToReader(a, blockNum, i, w):
   if blockId == "export":
     raise Exception("Export readerWriter from buffer is forbidden! only kernels can do it [block id = "+str(blockNum)+"]")
   elif blockId != "internal":
-    wblock = a.read_data["blocks"][int(blockId)]
+    wblock = a.read_data["topology"][int(blockId)]
     if wblock.has_key("type") and wblock["type"] == "buffer":
       raise Exception("Interconnections of buffers ["+str(blockNum)+" and "+str(blockId)+"] are forbidden")
-    arr_id = checkPinId(wblock["connection"]["readFrom"],w["pinId"])
+    arr_id = checkPinId(wblock["receive"],w["pinId"])
     if arr_id == -1:
-      # print wblock["connection"]["readFrom"]
+      # print wblock["receive"]
       raise Exception("pinId w"+str(w["pinId"])+" was not found in the destination buffer "+str(blockId))
     if w["pinId"] != arr_id:
       raise Exception("wrong parameter gridId!=pinId in the block "+str(blockNum)+", pin "+str(i))
 
-    pinObject = wblock["connection"]["readFrom"][arr_id]
+    pinObject = wblock["receive"][arr_id]
     if pinObject.has_key("blockId") and pinObject.has_key("pinId") and pinObject["blockId"] != "export":
       if int(pinObject["blockId"])!=blockNum or int(pinObject["pinId"])!=i:
         raise Exception("Connection of block "+str(blockNum)+", pin "+str(i)+" with "+str(blockId)+", pin "+str(w["pinId"])+" failed because the last already connected to "+str(pinObject["blockId"])+", "+str(pinObject["pinId"]))
@@ -345,7 +345,7 @@ def getRwArgs(i,w):
 def initializeBuffers(a):
   out = ""
   #buffers
-  for blockNum, v in enumerate(a.read_data["blocks"]):
+  for blockNum, v in enumerate(a.read_data["topology"]):
     if not v.has_key("type") or v["type"] != "buffer":
       continue
     pathList = v["path"].split('.')
@@ -358,18 +358,18 @@ def initializeBuffers(a):
     #create variables
     out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList)+");"
     #get writer from buffer
-    for i,w in enumerate(v["connection"]["writeTo"]):
+    for i,w in enumerate(v["emit"]):
       out += "\n    reader "+v["name"]+"r"+str(i)+" = "+v["name"]+".getReader("+','.join(getRwArgs(i,w))+");"
       connectBufferToReader(a, blockNum, i, w)
     #get reader from buffer
-    for i,w in enumerate(v["connection"]["readFrom"]):
+    for i,w in enumerate(v["receive"]):
       out += "\n    writer "+v["name"]+"w"+str(i)+" = "+v["name"]+".getWriter("+','.join(getRwArgs(i,w))+");"
   return out
 
 def initializeKernels(a):
   out = ""
   #kernels
-  for i,v in enumerate(a.read_data["blocks"]):
+  for i,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     pathList = v["path"].split('.')
@@ -393,7 +393,7 @@ def initializeKernels(a):
 def runBlocks(a):
   out = ""
   #kernels
-  for i,v in enumerate(a.read_data["blocks"]):
+  for i,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     out += "\n    "+v["name"]+".run();"
@@ -402,7 +402,7 @@ def runBlocks(a):
 # def stopBlocks(a):
 #   out = ""
 #   #kernels
-#   for i,v in enumerate(a.read_data["blocks"]):
+#   for i,v in enumerate(a.read_data["topology"]):
 #     if v.has_key("type") and v["type"] == "buffer":
 #       continue
 #     out += "\n    "+v["name"]+".stop();"
@@ -423,9 +423,9 @@ def getDefaultRunParameters(a):
       argsList.append("null")
     else:
       argsList.append("0")
-  for v in a.read_data["connection"]["writeTo"]:
+  for v in a.read_data["emit"]:
     argsList.append("null")
-  for v in a.read_data["connection"]["readFrom"]:
+  for v in a.read_data["receive"]:
     argsList.append("null")
   return ','.join(argsList)
 
@@ -467,7 +467,7 @@ def getRunnables(a):
   sizeRunnables = "0"
   out = ""
 
-  for blockNum, v in enumerate(a.read_data["blocks"]):
+  for blockNum, v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
     if v.has_key("parallel"):
@@ -558,12 +558,12 @@ def fillConnectorsNames(a):
     if a.read_data.has_key("serializatorPath"):
       serializatorPath = a.read_data["serializatorPath"]
     else:
-      serializatorPath = "com.github.airutech.cnetsTransports.msgpack.msgPackSerializer"
+      serializatorPath = "com.github.osblinnikov.cnetsTransports.msgpack.msgPackSerializer"
 
     if a.read_data.has_key("deserializatorPath"):
       deserializatorPath = a.read_data["deserializatorPath"]
     else:
-      deserializatorPath = "com.github.airutech.cnetsTransports.msgpack.msgPackDeserializer"
+      deserializatorPath = "com.github.osblinnikov.cnetsTransports.msgpack.msgPackDeserializer"
 
     if a.read_data.has_key("serializePackagePostfix"):
       serializePackagePostfix = a.read_data["serializePackagePostfix"]
@@ -571,24 +571,24 @@ def fillConnectorsNames(a):
       serializePackagePostfix = ".msgpack.msgpack"
 
     out = ["/* +1 everywhere for repo receivers and senders*/"]
-    if len(a.read_data["connection"]["writeTo"]) - 1 > 0:
-        out.append("subscribedBuffersNames = new String["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
-        out.append("allWriters = new writer["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
-        out.append("allWriters_callbacks = new deserializeStreamCallback["+str(len(a.read_data["connection"]["writeTo"]) - 1 + 1)+"]"+";")
+    if len(a.read_data["emit"]) - 1 > 0:
+        out.append("subscribedBuffersNames = new String["+str(len(a.read_data["emit"]) - 1 + 1)+"]"+";")
+        out.append("allWriters = new writer["+str(len(a.read_data["emit"]) - 1 + 1)+"]"+";")
+        out.append("allWriters_callbacks = new deserializeStreamCallback["+str(len(a.read_data["emit"]) - 1 + 1)+"]"+";")
         out.append("subscribedBuffersNames[0] = \"nodeRepository\";")
-        out.append("allWriters_callbacks[0] = new "+deserializatorPath+"(new com.github.airutech.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
-        for i, v in enumerate(a.read_data["connection"]["writeTo"][1:]):
+        out.append("allWriters_callbacks[0] = new "+deserializatorPath+"(new com.github.osblinnikov.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
+        for i, v in enumerate(a.read_data["emit"][1:]):
             out.append("subscribedBuffersNames["+str(i + 1)+"] = \""+v["name"]+"\";")
             out.append("allWriters["+str(i+1)+"] = w"+str(i+1)+";")
             out.append("allWriters_callbacks["+str(i+1)+"] = new "+deserializatorPath+"(new "+".".join(v["type"].split(".")[:-1])+serializePackagePostfix+"());")
 
-    if len(a.read_data["connection"]["readFrom"]) - 1 > 0:
-        out.append("publishedBuffersNames = new String["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
-        out.append("allReaders = new reader["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
-        out.append("allReaders_callbacks = new serializeStreamCallback["+str(len(a.read_data["connection"]["readFrom"]) - 1 + 1)+"]"+";")
+    if len(a.read_data["receive"]) - 1 > 0:
+        out.append("publishedBuffersNames = new String["+str(len(a.read_data["receive"]) - 1 + 1)+"]"+";")
+        out.append("allReaders = new reader["+str(len(a.read_data["receive"]) - 1 + 1)+"]"+";")
+        out.append("allReaders_callbacks = new serializeStreamCallback["+str(len(a.read_data["receive"]) - 1 + 1)+"]"+";")
         out.append("publishedBuffersNames[0] = \"nodeRepository\";")
-        out.append("allReaders_callbacks[0] = new "+serializatorPath+"(new com.github.airutech.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
-        for i, v in enumerate(a.read_data["connection"]["readFrom"][1:]):
+        out.append("allReaders_callbacks[0] = new "+serializatorPath+"(new com.github.osblinnikov.cnetsTransports.nodeRepositoryProtocol"+serializePackagePostfix+"());")
+        for i, v in enumerate(a.read_data["receive"][1:]):
             out.append("publishedBuffersNames["+str(i + 1)+"] = \""+v["name"]+"\";")
             out.append("allReaders["+str(i+1)+"] = r"+str(i+1)+";")
             out.append("allReaders_callbacks["+str(i+1)+"] = new "+serializatorPath+"(new "+".".join(v["type"].split(".")[:-1])+serializePackagePostfix+"());")

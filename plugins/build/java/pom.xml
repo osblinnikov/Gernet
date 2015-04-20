@@ -13,7 +13,7 @@ p = reload(parsing_java)
 <modelVersion>4.0.0</modelVersion>
 <groupId>${a.domainName}</groupId>
 <artifactId>${a.className}</artifactId>
-<version>${a.version}</version>
+<version>0.0.0</version>
 <packaging>jar</packaging>
 
 
