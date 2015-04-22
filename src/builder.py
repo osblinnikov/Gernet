@@ -130,26 +130,156 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
             # print args
             cogapp.Cog().main(["cogging"]+args)
 
+def processFlatTopology(path, counter,pv, ftop):
+    if ftop == None or len(ftop["topology"]) == 0:
+        return False
+
+    suffix = "_".join( [] + [str(counter)] ) #ftop["path"].split(".") + 
+    logMsg = 'for parent '+path+" in kernel "+pv["path"]
+
+    if len(ftop["args"]) != len(pv["args"]):
+        raise Exception('len(ftop["args"]) != len(pv["args"]) '+logMsg)
+    if len(ftop["emit"]) != len(pv["emit"]):
+        raise Exception('len(kernel["emit"]) != len(parent["emit"]) '+logMsg)
+    if len(ftop["receive"]) != len(pv["receive"]):
+        raise Exception('len(kernel["receive"]) != len(parent["receive"]) '+logMsg)           
+    
+    renameChannels = dict()
+    for i, e in enumerate(ftop["emit"]):
+        if renameChannels.has_key(e["channel"]) and renameChannels[e["channel"]] != pv["emit"][i]["channel"]:
+            raise Exception('renameChannels.has_key(e["channel"]) and renameChannels[e["channel"]] != pv["emit"][i]["channel"] '+logMsg)
+        renameChannels[e["channel"]] = pv["emit"][i]["channel"]
+
+    for i, e in enumerate(ftop["receive"]):
+        if renameChannels.has_key(e["channel"]) and renameChannels[e["channel"]] != pv["receive"][i]["channel"]:
+            raise Exception('renameChannels.has_key(e["channel"]) and renameChannels[e["channel"]] != pv["receive"][i]["channel"] '+logMsg)
+        renameChannels[e["channel"]] = pv["receive"][i]["channel"]
+
+    internalPropsNames = []
+    for prop in ftop["props"]:
+        if prop["name"] in internalPropsNames:
+            raise Exception("in subtopology "+ftop["path"]+" there are two props with the same name "+prop["name"])
+        internalPropsNames.append(prop["name"])
+        prop["name"]+=suffix #rename prop with addition of suffix
+
+    renameArgs = dict()
+    for i, e in enumerate(ftop["args"]):
+        if renameArgs.has_key(e["name"]) and renameArgs[e["name"]] != pv["args"][i]["value"]:
+            raise Exception('renameArgs.has_key(e["name"]) and renameArgs[e["name"]] != pv["args"][i]["value"] '+logMsg)
+        renameArgs[e["name"]] = pv["args"][i]["value"]
+
+    internalChannelsNames = []
+    for c in ftop["channels"]:
+        if c["channel"] in internalChannelsNames:
+            raise Exception("in subtopology "+ftop["path"]+" there are two channels with the same name "+c["channel"])
+        internalChannelsNames.append(c["channel"])
+        c["channel"] += suffix #rename channel with addition of suffix
+        for e in c["args"]:
+            if str(e["value"])[0].isdigit():
+                continue
+            if renameArgs.has_key(e["value"]):
+                e["value"] = renameArgs[e["value"]] #rename arg to the parent arg name
+            elif e["value"] in internalPropsNames:
+                e["value"] += suffix #rename arg with addition of suffix
+            else:
+                raise Exception("in subtopology "+ftop["path"]+" channel '"+c["channel"]+"' the arg '"+e["value"]+"' is used but not defined neither in args nor props")
+
+    for t in ftop["topology"]:
+        t["parents"]=[ftop["path"]]+t["parents"]
+        #RENAME FLATTEN TOPOLOGY CHANNEL NAMES
+        for e in t["emit"]+t["receive"]:
+            if renameChannels.has_key(e["channel"]):
+                e["channel"] = renameChannels[e["channel"]] #rename channel to the parent channel name
+            elif e["channel"] in internalChannelsNames:
+                e["channel"] += suffix #rename channel with addition of suffix
+            else:
+                raise Exception("in subtopology "+ftop["path"]+" the channel '"+e["channel"]+"' is used but not defined neither in emit/receive nor channels")
+        #RENAME FLATTEN TOPOLOGY ARGUMENTS NAMES
+        for e in t["args"]:
+            if str(e["value"])[0].isdigit():
+                continue
+            if renameArgs.has_key(e["value"]):
+                e["value"] = renameArgs[e["value"]] #rename arg to the parent arg name
+            elif e["value"] in internalPropsNames:
+                e["value"] += suffix #rename arg with addition of suffix
+            else:
+                raise Exception("in subtopology "+ftop["path"]+" the arg '"+e["value"]+"' is used but not defined neither in args nor props")
+        #RENAME PARALLEL ARGUMENT
+        if not str(t["parallel"])[0].isdigit():
+            if renameArgs.has_key(t["parallel"]):
+                t["parallel"] = renameArgs[t["parallel"]] #rename arg to the parent arg name
+            elif t["parallel"] in internalPropsNames:
+                t["parallel"] += suffix #rename arg with addition of suffix
+            else:
+                raise Exception("in subtopology "+ftop["path"]+" the parallel argument '"+t["parallel"]+"' is used but not defined neither in args nor props")
+
+    return True
+    
+
+def generateFlatTopology(visitedPaths, topology_dir):
+    gernetFileName = join(topology_dir,"gernet")
+    read_data = readGernet(gernetFileName)
+    if read_data == None:
+        raise Exception("files "+gernetFileName+".json/.yaml are not found")
+
+    if len(read_data["topology"])==0 or read_data["hide"]:
+        if len(read_data["topology"])>0:
+            read_data["topology"] = []
+        return read_data
+
+    visitedPaths += [read_data["path"]]
+    sub_topologies = dict()
+    for counter, pv in enumerate(read_data["topology"]):
+        # run through the topology elements, detect cycles
+        if pv["path"] in visitedPaths:
+            raise Exception("Ring dependency detected: "+pv["path"]+" is included at least twice! Last inclusion from "+read_data["path"])
+
+        ftop = generateFlatTopology(visitedPaths, getPath(pv["path"]))
+        
+        if processFlatTopology(read_data["path"],counter,pv,ftop):
+            sub_topologies[counter] = ftop
+            read_data["topology"][counter] = "None"
+
+    #remove None elements from the topology
+    read_data["topology"] =  [value for value in read_data["topology"] if value != "None"]
+
+    for k, t in sub_topologies.iteritems():
+        if t == None:
+            continue
+        for kernel in t["topology"]:
+            #INJECT FLATTEN TOPOLOGY ELEMENT INTO THE PARENT TOPOLOGY
+            read_data["topology"].append(kernel)
+        for channel in t["channels"]:
+            #INJECT FLATTEN TOPOLOGY CHANNEL INTO THE PARENT CHANNELS
+            read_data["channels"].append(channel)
+        for prop in t["props"]:
+            read_data["props"].append(prop)
+
+    return read_data
+
 
 def runGernet(firstRealArgI, argv, topology_dir):
     Types = []
     extra_args = getArgs(firstRealArgI, argv, Types)
-    read_data = readYaml(join(topology_dir,"gernet.yaml"))
-    if read_data == None:
-        read_data = readJson(join(topology_dir,"gernet.json"))
+
+    read_data = generateFlatTopology([],topology_dir)
+
+    print json.dumps(read_data, indent=4, sort_keys=True)
+
+    return
+
     for p in read_data["gen"]:
         p0 = getPath(p)
-        print p0
         Types = getFilteredSubFolders(p0, Types)
         # if len(Types) == 0:
             # print ("No one generator was found")
             # return
         for i in range(0, len(Types)):
             generateMissedFiles(
-                topology_dir,
-                os.path.join(p0, Types[i]),
-                read_data["path"],
-                extra_args
+                topology_dir, #path to the directory with the topology
+                os.path.join(p0, Types[i]),#generator_directory
+                read_data["path"],#module full name
+                extra_args # extra arguments for the Cog
             )
 
 

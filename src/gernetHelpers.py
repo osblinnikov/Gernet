@@ -7,17 +7,29 @@ PROJECTS_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 
 DefaultMapBuffer = 'com.github.osblinnikov.cnets.mapBuffer'
 
+def readGernet(filename):
+    read_data = readYaml(filename+".yaml")
+    if read_data != None:
+        read_data['prefix'] = filename+".yaml"
+    else:
+        read_data = readJson(filename+".json")
+        if read_data != None:
+            read_data['prefix'] = filename+".json"
+
+    return read_data
+
 def readJson(filename):
     json_file_to_read = os.path.join(filename)
     read_data = None
     try:
         with open (json_file_to_read, "r") as jsonfile:
+            print "opened "+json_file_to_read
             pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
             json_data = re.sub(pat, '', jsonfile.read())
             read_data = json.loads(json_data)
             jsonfile.close()
     except:
-        # print json_file_to_read+" invalid"
+        # print json_file_to_read+" invalid or not found"
         try:
             jsonfile.close()
         except:
@@ -34,11 +46,12 @@ def readYaml(filename):
     read_data = None
     try:
         with open (file_to_read, "r") as infile:
+            print "opened "+file_to_read
             pat=re.compile(r'/\*.*?\*/',re.DOTALL|re.M)
             read_data = yaml.load(re.sub(pat, '', infile.read()))
             infile.close()
     except:
-        # print json_file_to_read+" invalid"
+        # print file_to_read+" invalid or not found"
         try:
             infile.close()
         except:
@@ -50,6 +63,9 @@ def readYaml(filename):
     return read_data
 
 def checkStructure(read_data):
+    if not read_data.has_key("parents"):
+        read_data["parents"] = []
+
     if not read_data.has_key("path"):
         read_data["path"] = ""
 
@@ -82,6 +98,9 @@ def checkStructure(read_data):
 
     if not read_data.has_key("receive"):
         read_data["receive"] = []
+
+    if not read_data.has_key("hide"):
+        read_data["hide"] = False
 
 
 def filterTypes_java(t):

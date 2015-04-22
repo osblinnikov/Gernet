@@ -1,7 +1,8 @@
 {
 "description": "it has emit, receive and topology -> it is meta-kernel -> no codegeneration. //in some cases of connecting kernel and emit/receive directly it is possible to generate code",
-"path": "com.github.osblinnikov.gernet.test.exampleMeta",
+"path": "com.github.osblinnikov.gernet.test.example3Meta",
 "gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
+"hide": true,
 "args": [{
   "name":"unsignedArr",
   "type":"unsigned[]"
@@ -81,22 +82,6 @@
 },{
   "parallel":"parallelBlock",
   "path": "com.github.osblinnikov.gernet.test.block4",
-  "receive": [{
-    "channel": "importChannel"
-  }]
-},{
-  "parallel":"parallelBlock",
-  "path": "com.github.osblinnikov.gernet.test.example2Meta",
-  "args": [{
-    "value":"unsignedArr",
-    "type":"unsigned[]"
-  },{
-    "value":"parallelBlock",
-    "type":"unsigned"
-  }],
-  "emit":[{
-    "channel": "exportChannel"
-  }],
   "receive": [{
     "channel": "importChannel"
   }]
