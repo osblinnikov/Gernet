@@ -1,6 +1,6 @@
 {
-"path":"${_JAVA_PATH_}.${_NAME_}",
-"gen":["com.github.osblinnikov.gernet.plugins.buffer","com.github.osblinnikov.gernet.plugins.build"],
+"name":"${_JAVA_PATH_}.${_NAME_}",
+"gen":["github.com/osblinnikov/gernet/plugins/buffer","github.com/osblinnikov/gernet/plugins/build"],
 "args": [{
   "name": "buffers",
   "type": "Object[]"
@@ -12,10 +12,10 @@
   "type": "int"
 }],
 "depends":[{
-  "path":"com.github.osblinnikov.cnets.readerWriter"
+  "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path":"com.github.osblinnikov.cnets.queue"
+  "name":"github.com/osblinnikov/cnets/queue"
 },{
-  "path":"com.github.osblinnikov.cnets.types"
+  "name":"github.com/osblinnikov/cnets/types"
 }]
 }

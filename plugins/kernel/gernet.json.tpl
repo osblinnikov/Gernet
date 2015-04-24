@@ -1,14 +1,14 @@
 {
-"path":"${_JAVA_PATH_}.${_NAME_}",
-"gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
+"name":"${_JAVA_PATH_}.${_NAME_}",
+"gen":["github.com/osblinnikov/gernet/plugins/kernel","github.com/osblinnikov/gernet/plugins/build"],
 "args": [],
 "blocks":[],
 "depends":[{
-  "path":"com.github.osblinnikov.cnets.runnablesContainer"
+  "name":"github.com/osblinnikov/cnets/runnablesContainer"
 },{
-  "path":"com.github.osblinnikov.cnets.readerWriter"
+  "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path":"com.github.osblinnikov.cnets.types"
+  "name":"github.com/osblinnikov/cnets/types"
 }],
 "connection":{
   "writeTo": [],

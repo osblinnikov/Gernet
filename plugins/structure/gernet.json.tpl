@@ -1,4 +1,4 @@
 {
 "path":"${_JAVA_PATH_}.${_NAME_}",
-"gen":["com.github.osblinnikov.gernet.plugins.structure","com.github.osblinnikov.gernet.plugins.build"]
+"gen":["github.com/osblinnikov/gernet/plugins/structure","github.com/osblinnikov/gernet/plugins/build"]
 }

@@ -86,7 +86,7 @@ def parsingGernet(a):
   a.read_data = None
   a.read_data = readJson(a.prefix)
 
-  fullName = a.read_data["path"]
+  fullName = a.read_data["name"]
   # a.version = a.read_data["ver"]
   fullNameList = fullName.split('.')
   a.fullName_ = '_'.join(fullNameList)

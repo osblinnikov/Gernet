@@ -7,7 +7,7 @@ p = reload(parsing_java)
 p.parsingGernet(a)
 
 %>
-package ${a.read_data["path"]};
+package ${a.package};
 import org.junit.Test;
 /*[[[cog
 import cogging as c

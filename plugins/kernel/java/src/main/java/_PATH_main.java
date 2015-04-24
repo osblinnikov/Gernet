@@ -7,8 +7,8 @@ p = reload(parsing_java)
 p.parsingGernet(a)
 
 %>
-package ${a.read_data["path"]};
-import ${a.read_data["path"]}.${a.className};
+package ${a.package};
+import ${a.package}.${a.className};
 /*[[[cog
 import cogging as c
 c.tpl(cog,templateFile,c.a(prefix=configFile))
