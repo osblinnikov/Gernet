@@ -1,0 +1,41 @@
+args:
+-   name: propsSize
+    type: int
+channels: []
+depends:
+-   name: github.com/osblinnikov/cnets/runnablesContainer
+-   name: github.com/osblinnikov/cnets/readerWriter
+-   name: github.com/osblinnikov/cnets/types
+emit:
+-   channel: unsignedEmit1
+    type: unsigned
+-   channel: longEmit2
+    type: long long
+-   channel: unsignedEmit2
+    type: unsigned
+gen:
+- github.com/osblinnikov/gernet/plugins/kernel
+- github.com/osblinnikov/gernet/plugins/build
+hide: false
+name: github.com/osblinnikov/gernet/test/block0
+prefix: block0/gernet.json
+props:
+-   name: prop1
+    size: propsSize
+    type: int[]
+    value: null
+-   name: prop2
+    size: 10
+    type: int[]
+    value: null
+-   name: prop3
+    size: null
+    type: int
+    value: '10'
+receive:
+-   channel: unsignedReceive1
+    type: unsigned
+-   channel: longReceive1
+    type: long long
+spawnMode: ''
+topology: []

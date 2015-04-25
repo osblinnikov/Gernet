@@ -72,7 +72,7 @@ def getFilteredSubFolders(folder, filters):
 def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
     fullName_ = getFullName_(classPath)
     className = getClassName(classPath)
-    json_file_to_read = join(topology_dir, "gernet.json")
+    json_file_to_read = join(topology_dir, "flat.gernet.yaml")
     for root, dirs, files in os.walk(generator_dir):
         for fileName in files:
             file = os.path.join(root,fileName)
@@ -132,10 +132,11 @@ def runGernet(firstRealArgI, argv, topology_dir):
 
     print " => created "+outputfn
 
-    return
+    # return
 
     for p in read_data["gen"]:
         p0 = getPath(p)
+        print p0
         Types = getFilteredSubFolders(p0, Types)
         # if len(Types) == 0:
             # print ("No one generator was found")

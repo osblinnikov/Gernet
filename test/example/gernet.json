@@ -1,6 +1,6 @@
 {
-"path": "com.github.osblinnikov.gernet.test.example",
-"gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
+"name": "github.com/osblinnikov/gernet/test/example",
+"gen":["github.com/osblinnikov/gernet/plugins/kernel","github.com/osblinnikov/gernet/plugins/build"],
 "args": [{
   "name":"unsignedArr",
   "type":"unsigned[]"
@@ -14,19 +14,19 @@
   "size":10
 }],
 "depends":[{
-  "path": "com.github.osblinnikov.cnets.mapBuffer"
+  "name": "github.com/osblinnikov/cnets/mapBuffer"
 },{
-  "path": "com.github.osblinnikov.cnets.queue"
+  "name": "github.com/osblinnikov/cnets/queue"
 },{
-  "path": "com.github.osblinnikov.cnets.runnablesContainer"
+  "name": "github.com/osblinnikov/cnets/runnablesContainer"
 },{
-  "path": "com.github.osblinnikov.cnets.readerWriter"
+  "name": "github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path": "com.github.osblinnikov.cnets.types"
+  "name": "github.com/osblinnikov/cnets/types"
 }],
 "channels": [{
   "channel":"mapBuffer1",
-  "path": "com.github.osblinnikov.cnets.mapBuffer",
+  "name": "github.com/osblinnikov/cnets/mapBuffer",
   "type": "unsigned",
   "args": [{
     "value":"unsignedArr",
@@ -38,7 +38,19 @@
   }]
 },{
   "channel": "mapBuffer2",
-  "path": "com.github.osblinnikov.cnets.mapBuffer",
+  "name": "github.com/osblinnikov/cnets/mapBuffer",
+  "type": "long long",
+  "args": [{
+    "value":"longArr",
+    "type":"Object[]"
+  },{
+    "value": "1000L"
+  },{
+    "value": 1
+  }]
+},{
+  "channel": "mapBuffer3Dummy",
+  "name": "github.com/osblinnikov/cnets/mapBuffer",
   "type": "long long",
   "args": [{
     "value":"longArr",
@@ -51,17 +63,16 @@
 }],
 "topology":[{
   "parallel":3,
-  "path": "com.github.osblinnikov.gernet.test.block0",
+  "name": "github.com/osblinnikov/gernet/test/block0",
   "emit": [{
     "channel": "mapBuffer1"
   }, {
     "channel": "mapBuffer2"
   }, {
-    "channel": "",
-    "description": "dummy"
+    "channel": "mapBuffer3Dummy"
   }]
 },{
-  "path": "com.github.osblinnikov.gernet.test.block3",
+  "name": "github.com/osblinnikov/gernet/test/block3",
   "receive": [{
     "channel": "mapBuffer1"
   }, {
@@ -70,7 +81,7 @@
 },{
   "parallel":"parallelBlock",
   "description": "this meta block should be expanded into the real flat.gernet.json during gernet execution",
-  "path": "com.github.osblinnikov.gernet.test.exampleMeta",
+  "name": "github.com/osblinnikov/gernet/test/exampleMeta",
   "args": [{
     "value":"unsignedArr",
     "type":"Object[]"

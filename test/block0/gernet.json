@@ -1,13 +1,21 @@
 {
-"path":"com.github.osblinnikov.gernet.test.block0",
-"gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
+"name":"github.com/osblinnikov/gernet/test/block0",
+"gen":["github.com/osblinnikov/gernet/plugins/kernel","github.com/osblinnikov/gernet/plugins/build"],
 "depends":[{
-  "path":"com.github.osblinnikov.cnets.runnablesContainer"
+  "name":"github.com/osblinnikov/cnets/runnablesContainer"
 },{
-  "path":"com.github.osblinnikov.cnets.readerWriter"
+  "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path":"com.github.osblinnikov.cnets.types"
+  "name":"github.com/osblinnikov/cnets/types"
 }],
+"args":[
+  "propsSize int"
+],
+"props":[
+  "prop1 int[propsSize]",
+  "prop2 int[10]",
+  "prop3 int 10"
+],
 "emit": [{
   "channel":"unsignedEmit1",
   "type": "unsigned"
@@ -17,5 +25,12 @@
 }, {
   "channel":"unsignedEmit2",
   "type": "unsigned"
+}],
+"receive":[{
+  "channel":"unsignedReceive1",
+  "type": "unsigned"
+}, {
+  "channel":"longReceive1",
+  "type": "long long"
 }]
 }

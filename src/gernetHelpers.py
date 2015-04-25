@@ -4,6 +4,7 @@ import re
 import os
 # from config import PROJECTS_ROOT_PATH
 from sets import Set
+import operator
 
 #PLEASE change it if you don't want the standard workspace root folder location
 PROJECTS_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
@@ -75,45 +76,6 @@ def checkStructure(read_data, isInTopology):
     if not read_data.has_key("name"):
         read_data["name"] = ""
 
-    #Channels
-    if isInTopology:
-        if not read_data.has_key("parallel"):
-            read_data["parallel"] = 1
-        if not read_data.has_key("parents"):
-            read_data["parents"] = []            
-    else:
-        if not read_data.has_key("depends"):
-            read_data["depends"] = []
-        for i,v in enumerate(read_data["depends"]):
-            read_data["depends"][i] = {'name': v}
-
-        if not read_data.has_key("spawnMode"):
-            read_data["spawnMode"] = ""
-        read_data["spawnMode"]="+".join([x for x in Set(read_data["spawnMode"].replace(" ","").split("+")) if (x != "blocking_api" and x != 'monitored')])
-
-        if not read_data.has_key("hide"):
-            read_data["hide"] = False        
-        if not read_data.has_key("channels"):
-            read_data["channels"] = []
-        for i,v in enumerate(read_data["channels"]):
-            read_data["channels"][i] = parseEmitRecv(v)
-
-        #TOPOLOGY
-        if not read_data.has_key("topology"):
-            read_data["topology"] = []
-        for t in read_data["topology"]:
-            checkStructure(t, True)
-        #PROPS
-        if not read_data.has_key("props"):
-            read_data["props"] = []
-        for i,v in enumerate(read_data["props"]):
-            read_data["props"][i] = parseProp(v)
-
-    #ARGS
-    if not read_data.has_key("args"):
-        read_data["args"] = []
-    for i,v in enumerate(read_data["args"]):
-        read_data["args"][i] = parseArg(v, isInTopology)
     #EMIT
     if not read_data.has_key("emit"):
         read_data["emit"] = []
@@ -130,6 +92,48 @@ def checkStructure(read_data, isInTopology):
         if not isInTopology and read_data["receive"][i]["type"] == None:
             raise Exception(read_data["name"]+" in receive of "+read_data["receive"][i]['channel']+" the type was not set")
 
+    #Channels
+    if isInTopology:
+        if not read_data.has_key("parallel"):
+            read_data["parallel"] = 1
+        if not read_data.has_key("parents"):
+            read_data["parents"] = []            
+    else:
+        if not read_data.has_key("depends"):
+            read_data["depends"] = []
+        for i,v in enumerate(read_data["depends"]):
+            if isinstance( v , basestring ):
+                read_data["depends"][i] = {'name': v}
+
+        if not read_data.has_key("spawnMode"):
+            read_data["spawnMode"] = ""
+        read_data["spawnMode"]="+".join([x for x in Set(read_data["spawnMode"].replace(" ","").split("+")) if (x != "blocking_api" and x != 'monitored')])
+
+        if not read_data.has_key("hide"):
+            read_data["hide"] = False        
+
+        #TOPOLOGY
+        if not read_data.has_key("topology"):
+            read_data["topology"] = []
+        for t in read_data["topology"]:
+            checkStructure(t, True)
+        #PROPS
+        if not read_data.has_key("props"):
+            read_data["props"] = []
+        for i,v in enumerate(read_data["props"]):
+            read_data["props"][i] = parseProp(v)
+
+        if not read_data.has_key("channels"):
+            read_data["channels"] = []
+        for i,v in enumerate(read_data["channels"]):
+            read_data["channels"][i] = parseEmitRecvChannels(read_data, v)
+
+    #ARGS
+    if not read_data.has_key("args"):
+        read_data["args"] = []
+    for i,v in enumerate(read_data["args"]):
+        read_data["args"][i] = parseArg(v, isInTopology)
+   
 def getPath(pathSrc):
     # path = pathSrc.split('.')
     # if len(path) < 3:
@@ -235,7 +239,7 @@ def generateFlatTopology(visitedPaths, topology_dir):
     if read_data == None:
         raise Exception("files "+gernetFileName+".json/.yaml are not found")
 
-    if len(read_data["topology"])==0 or read_data["hide"]:
+    if len(read_data["topology"])==0 or (read_data["hide"] and len(visitedPaths)>0):
         if len(read_data["topology"])>0:
             read_data["topology"] = []
         return read_data
@@ -271,6 +275,7 @@ def generateFlatTopology(visitedPaths, topology_dir):
     return read_data
 
 def verifyChannelsParameters(read_data):
+    return # SIZE AND TIMEOUT COULD NOT BE SET BECAUSE OF USE OF THE OLD API
     isHidden = read_data['hide']
     for t in read_data["topology"]:
         for e in t["emit"]:
@@ -307,8 +312,43 @@ def parseEmitRecv(v):
 
     return {'channel':s[0],'type':typeS,'size':size, 'timeout': timeout}
 
+
+def parseEmitRecvChannels(read_data, v):
+    if not isinstance(v, basestring):
+        return v
+    s = splitAndCheck(v,1)
+    v = dict()
+    v["channel"] = s[0]
+    v["type"] = s[1] if len(s) > 1 else None
+    v["size"] = s[2] if len(s) > 2 else None
+    v["timeout"] = s[3] if len(s) > 3 else None
+    v["name"] = DefaultMapBuffer
+
+    readers = 0
+
+    for e in read_data["emit"]:
+        if e["channel"] == v["channel"]:
+            readers += 1
+
+    for t in read_data["topology"]:
+        for e in t["receive"]:
+            if e["channel"] == v["channel"]:
+                readers += 1
+    if readers == 0:
+        raise Exception("There is 0 readers for the declared "+v["channel"]+" channel")
+    v["args"] = [{'value':readers}]
+    if len(s) > 2:
+        for arg in s[2:]:
+            v["args"].append({'value':arg})
+    
+    return v
+
 def parseProp(v):
     if not isinstance(v, basestring):
+        if not v.has_key("value"):
+            v["value"] = None
+        if not v.has_key("size"):
+            v["size"] = None
         return v
     s = splitAndCheck(v,2)
 
@@ -482,8 +522,6 @@ def getRootPath(path):
     rd = os.path.join(*rd)
     return rd
 
-
-
 def recurseDependencies(dependenciesDict):
   newDependenciesDict = dict()
   hasNewData = False
@@ -492,6 +530,7 @@ def recurseDependencies(dependenciesDict):
     if read_data == None:
       continue
     for v in read_data["topology"]+read_data["depends"]:
+      # print v
       if not dependenciesDict.has_key(v["name"]) and not newDependenciesDict.has_key(v["name"]):
         newDependenciesDict[v["name"]] = v
         hasNewData = True

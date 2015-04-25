@@ -1,7 +1,7 @@
 {
 "description": "it has emit, receive and topology -> it is meta-kernel -> no codegeneration. //in some cases of connecting kernel and emit/receive directly it is possible to generate code",
-"path": "com.github.osblinnikov.gernet.test.example3Meta",
-"gen":["com.github.osblinnikov.gernet.plugins.kernel","com.github.osblinnikov.gernet.plugins.build"],
+"name": "github.com/osblinnikov/gernet/test/example3Meta",
+"gen":["github.com/osblinnikov/gernet/plugins/kernel","github.com/osblinnikov/gernet/plugins/build"],
 "hide": true,
 "args": [{
   "name":"unsignedArr",
@@ -16,15 +16,15 @@
   "size":10
 }],
 "depends":[{
-  "path": "com.github.osblinnikov.cnets.mapBuffer"
+  "name": "github.com/osblinnikov/cnets/mapBuffer"
 },{
-  "path": "com.github.osblinnikov.cnets.queue"
+  "name": "github.com/osblinnikov/cnets/queue"
 },{
-  "path": "com.github.osblinnikov.cnets.runnablesContainer"
+  "name": "github.com/osblinnikov/cnets/runnablesContainer"
 },{
-  "path": "com.github.osblinnikov.cnets.readerWriter"
+  "name": "github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path": "com.github.osblinnikov.cnets.types"
+  "name": "github.com/osblinnikov/cnets/types"
 }],
 "emit": [{
   "type": "unsigned",
@@ -38,7 +38,7 @@
 }],
 "channels": [{
   "channel":"mapBuffer1",
-  "path": "com.github.osblinnikov.cnets.mapBuffer",
+  "name": "github.com/osblinnikov/cnets/mapBuffer",
   "type": "unsigned",
   "args": [{
     "value":"unsignedArr",
@@ -50,7 +50,7 @@
   }]
 },{
   "channel": "mapBuffer2",
-  "path": "com.github.osblinnikov.cnets.mapBuffer",
+  "name": "github.com/osblinnikov/cnets/mapBuffer",
   "type": "long long",
   "args": [{
     "value":"longArr",
@@ -63,7 +63,7 @@
 }],
 "topology":[{
   "parallel":3,
-  "path": "com.github.osblinnikov.gernet.test.block0",
+  "name": "github.com/osblinnikov/gernet/test/block0",
   "emit": [{
     "channel": "mapBuffer1"
   }, {
@@ -73,7 +73,7 @@
     "description": "export data from 0 block"
   }]
 },{
-  "path": "com.github.osblinnikov.gernet.test.block3",
+  "name": "github.com/osblinnikov/gernet/test/block3",
   "receive": [{
     "channel": "mapBuffer1"
   }, {
@@ -81,7 +81,7 @@
   }]
 },{
   "parallel":"parallelBlock",
-  "path": "com.github.osblinnikov.gernet.test.block4",
+  "name": "github.com/osblinnikov/gernet/test/block4",
   "receive": [{
     "channel": "importChannel"
   }]

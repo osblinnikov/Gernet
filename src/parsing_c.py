@@ -24,7 +24,7 @@ def getProps(a):
 
   for v in a.read_data["args"]+a.read_data["props"]:
     t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
-    if v["size"] != None:
+    if v.has_key("size") and v["size"] != None:
       if not isArray:
         raise Exception("getProps: size of property "+str(v["name"])+" was specified but type is not array!")    
     arr.append(getFullName_(t)+" "+v["name"])
@@ -42,30 +42,35 @@ def getProps(a):
     arr.append("reader rSelect")
     arr.append("com_github_osblinnikov_cnets_selector readersSelector")
 
-  out = "  "+';'.join(arr)+';\n' if len(arr)>0 else ''
+  out = "  "+';\n  '.join(arr)+';\n' if len(arr)>0 else ''
   return out
 
-def getConstructor(a):
+def getArgs(a):
   out = ""
-
-  argsArray = ["_NAME_"]
+  argsArray = ["struct "+a.fullName_+" *that"]
   for v in a.read_data["args"]:
     t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     # v["type"] = t
-    argsArray.append("_"+v["name"])
+    argsArray.append(v["type"]+" _"+v["name"])
 
   for i,v in enumerate(a.read_data["emit"]):
-    argsArray.append("_w"+v["channel"]+str(i))
+    argsArray.append("writer _w"+v["channel"]+str(i))#v["type"]
 
   for i,v in enumerate(a.read_data["receive"]):
-    argsArray.append("_r"+v["channel"]+str(i))
+    argsArray.append("reader _r"+v["channel"]+str(i))#
 
-  out += "#define "+a.fullName_+"_create("+','.join(argsArray)+")"
-  out += "\\\n    "+a.fullName_+" _NAME_;"
+  return ',\n    '.join(argsArray)
+
+def getInit(a):
+  out = ""
   for value in a.read_data["args"]:
-    out += "\\\n    _NAME_."+value["name"]+" = _"+value["name"]+";"
+    out += "\n  that->"+value["name"]+" = _"+value["name"]+";"
 
-  #SELECTABLE
+
+  for i,v in enumerate(a.read_data["emit"]):
+    out += "\n  that->w"+v["channel"]+str(i)+" = _w"+v["channel"]+str(i)+";"
+  for i,v in enumerate(a.read_data["receive"]):
+    out += "\n  that->r"+v["channel"]+str(i)+" = _r"+v["channel"]+str(i)+";"
 
   selectableArgs = []
   for i,v in enumerate(a.read_data["args"]):
@@ -82,55 +87,57 @@ def getConstructor(a):
     selectablesCount = str(len(a.read_data["receive"]))
     for i,v in enumerate(selectableArgs):
       selectablesCount += " + "+str(v["name"])+".length"
-    out += "\\\n    arrayObject_create(_NAME_##_arrReaders_, reader, "+selectablesCount+")"
+    out += "\n  struct arrayObject _arrReaders_ = arrayObject_init_dynamic(sizeof(reader), "+selectablesCount+");"
 
     lastId = 0
     for i,v in enumerate(a.read_data["receive"]):
-      out += "\\\n    ((reader*)_NAME_##_arrReaders_.array)["+str(i)+"] = _r"+str(i)+";"
+      out += "\n  ((reader*)_arrReaders_.array)["+str(i)+"] = _r"+v["channel"]+str(i)+";"
       lastId = i
     if len(selectableArgs)>0:
-      out += "\\\n    int totalLength = "+str(lastId + 1)+";"
+      out += "\n  int totalLength = "+str(lastId + 1)+";"
       for i,v in enumerate(selectableArgs):
-        out += "\\\n    for(int i=0;i<"+str(v["name"])+".length; i++){"
-        out += "\\\n      ((reader*)_NAME_##_arrReaders_.array)[totalLength + i] = "+v["name"]+"[i];"
-        out += "\\\n    }"
+        out += "\n  for(int i=0;i<"+str(v["name"])+".length; i++){"
+        out += "\n    ((reader*)_arrReaders_.array)[totalLength + i] = "+v["name"]+"[i];"
+        out += "\n  }"
         if i+1 != len(selectableArgs):
-          out += "\\\n    totalLength += "+str(v["name"])+".length;"
-    out += "\\\n    com_github_osblinnikov_cnets_selector_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
-    out += "\\\n    _NAME_.readersSelector = _NAME_##readersSelector;"
-    out += "\\\n    com_github_osblinnikov_cnets_selector_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
-    out += "\\\n    _NAME_.rSelect = _NAME_##_rSelect_;"
-
-  #END OF ARGS AND SELECTABLE ARG
-
-
-  out += "\\\n    "+a.fullName_+"_onCreateMacro(_NAME_)"
-
+          out += "\n  totalLength += "+str(v["name"])+".length;"
+    out += "\n  com_github_osblinnikov_cnets_selector_init(&that->readersSelector, _arrReaders_);"
+    out += "\n  com_github_osblinnikov_cnets_selector_createReader(&that->rSelect, &that->readersSelector, -1, 0)"
+  
   for value in a.read_data["props"]:
+    # print value
     t, isObject, isArray, isSerializable = filterTypes_c(value["type"])
     if value["value"]!=None:
-      out += "\\\n    _NAME_."+value["name"]+" = "+value["value"]+";"
+      out += "\n  that->"+value["name"]+" = "+value["value"]+";"
     elif isArray:
       arrItemType, itemIsObject, itemIsArray, itemisSerializable = filterTypes_c(value["type"][:-2])
       if isinstance(value["size"], basestring):
-        value["size"] = "_"+value["size"]
-      out += "\\\n    arrayObject_create(_NAME_##_"+value["name"]+"_, "+getFullName_(arrItemType)+", "+str(value["size"])+")"
-      out += "\\\n    _NAME_."+value["name"]+" = _NAME_##_"+value["name"]+"_;"
+        value["size"] = "that->"+value["size"]
+      out += "\n  that->"+value["name"]+" = arrayObject_init_dynamic(sizeof("+getFullName_(arrItemType)+"), "+str(value["size"])+");"
 
-
-  for i,v in enumerate(a.read_data["emit"]):
-    out += "\\\n    _NAME_.w"+v["channel"]+str(i)+" = _w"+v["channel"]+str(i)+";"
-  for i,v in enumerate(a.read_data["receive"]):
-    out += "\\\n    _NAME_.r"+v["channel"]+str(i)+" = _r"+v["channel"]+str(i)+";"
   
-  for i,v in enumerate(a.read_data["props"]):
-    if v["value"]!=None:
-      out += "\\\n    _NAME_."+v["name"]+" = "+v["value"]+";"  
-  out += "\\\n    "+a.fullName_+"_initialize(&_NAME_);"
+  # for i,v in enumerate(a.read_data["props"]):
+  #   if v["value"]!=None:
+  #     out += "\\\n    _NAME_."+v["name"]+" = "+v["value"]+";"  
+  # out += "\n  "+a.fullName_+"_initialize(&_NAME_);"
   out += initializeBuffers(a)
-  out += "\\\n    "+a.fullName_+"_onKernels(&_NAME_);"
+  out += "\n  "+a.fullName_+"_onKernels(that);"
   out += initializeKernels(a)
   return out
+
+def getReaderWriterArgumentsStrarrDel0(a):
+  readerWriterArgumentsStrArr = []
+
+  readerWriterArguments = a.rwArguments
+  if readerWriterArguments[0]["name"] != "gridId":
+    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
+  for value in readerWriterArguments:
+    if value["type"] == "unsigned":
+      value["type"] = "int"
+    readerWriterArgumentsStrArr.append(value["type"]+" "+value["name"])
+
+  del readerWriterArgumentsStrArr[0]
+  return readerWriterArgumentsStrArr
 
 def getContainerClass(a):
   arrDel0 = getReaderWriterArgumentsStrarrDel0(a)
@@ -198,7 +205,7 @@ def directoryFromBlockPath(path):
 def importBlocks(a):
   dependenciesDict = getDependenciesDict(a.read_data)
   out = ""
-  for k,v  in dependenciesDict.items():
+  for k,v  in dependenciesDict:
     out+="\n#include \""+directoryFromBlockPath(v["name"])+".h\""
   return out
 
@@ -207,14 +214,14 @@ def declareBlocks(a):
   hasParallel = False
   for i,v in enumerate(a.read_data["topology"]):
     # pathList = v["path"].split('.')
-    if v.has_key("parallel"):
+    if v["parallel"]!=None and v["parallel"] != 1:
       hasParallel = True
-      out += getFullName_(v["name"])+"* kernel"+str(i)+";"
+      out += getFullName_(v["name"])+"* kernel"+str(i)+";\n  "
     else:
-      out += getFullName_(v["name"])+" kernel"+str(i)+";"
+      out += getFullName_(v["name"])+" kernel"+str(i)+";\n  "
 
   for i,v in enumerate(a.read_data["channels"]):
-    out += getFullName_(v["name"])+" "+v["channel"]+";"
+    out += getFullName_(v["name"])+" "+v["channel"]+";\n  "
 
   a.sizeRunnables = 0
   for k,v in enumerate(a.read_data["topology"]):
@@ -224,9 +231,9 @@ def declareBlocks(a):
 
   if a.sizeRunnables > 0:
     if hasParallel:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer* arrContainers;"
+      out += "\ncom_github_osblinnikov_cnets_runnablesContainer* arrContainers;\n  "
     else:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];"
+      out += "\ncom_github_osblinnikov_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];\n  "
   return out
 
 def isChannelInStorage(w, storage):
@@ -237,23 +244,23 @@ def isChannelInStorage(w, storage):
   return False
 
 
-def getReadersWriters(a,v,i):
+def getReadersWriters(a,v,tid):
   arr = []
   #set writer to the buffer
   for i,w in enumerate(v["emit"]):
-    if isChannelInStorage(w, a["emit"]):
-      arr.append("_NAME_.w"+w["channel"]+str(w["pinId"]))
-    elif isChannelInStorage(w, a["channels"]):
-      arr.append("_NAME_##"+w["channel"]+"w"+str(w["pinId"]))
+    if isChannelInStorage(w, a.read_data["emit"]):
+      arr.append("that->w"+w["channel"]+str(w["pinId"]))
+    elif isChannelInStorage(w, a.read_data["channels"]):
+      arr.append(w["channel"]+"w"+str(w["pinId"])+"_"+str(tid))
     else:
       raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
 
   #TODO FINISH HERE WITH THE FOLLOWING 
   for i,w in enumerate(v["receive"]):
-    if isChannelInStorage(w, a["receive"]):
-      arr.append("_NAME_.w"+w["channel"]+str(w["pinId"]))
-    elif isChannelInStorage(w, a["channels"]):
-      arr.append("_NAME_##"+w["channel"]+"w"+str(w["pinId"]))
+    if isChannelInStorage(w, a.read_data["receive"]):
+      arr.append("that->r"+w["channel"]+str(w["pinId"]))
+    elif isChannelInStorage(w, a.read_data["channels"]):
+      arr.append(w["channel"]+"r"+str(w["pinId"])+"_"+str(tid))
     else:
       raise Exception("Channel "+w["channel"]+" was not found neither in receive nor channels fields")
   return arr
@@ -279,8 +286,7 @@ def getReadersWriters(a,v,i):
 #     pinObject.update({"blockId":blockNum})
 #     pinObject.update({"pinId":i})
 
-def getRwArgs(i,w):
-  gridId = i
+def getRwArgs(gridId,w):
   if w.has_key("gridId"):
     gridId = w["gridId"]
   rwArgs = []
@@ -303,7 +309,7 @@ def searchPropertyAndArgName(a, propName):
 def initializeBuffers(a):
   out = ""
   #buffers
-  for blockNum, v in enumerate(a.read_data["channels"]):
+  for v in a.read_data["channels"]:
     # if not v.has_key("type") or v["type"] != "buffer":
     #   continue
     # pathList = v["name"].split('.')
@@ -316,18 +322,53 @@ def initializeBuffers(a):
           castType = "("+t+")"
       argValue = str(d["value"])
       if searchPropertyAndArgName(a,d["value"]):
-        argValue = "_NAME_."+argValue
+        argValue = "that->"+argValue
       argsList.append(castType+argValue)
+
+    argsList = ["&that->"+v["channel"]]+argsList
     #create variables
-    out += "\\\n    "+getFullName_(v["name"])+"_create("+','.join([v["channel"]]+argsList)+")"
-    out += "\\\n    _NAME_."+v["channel"]+" = "+v["channel"]+";"
+    out += "\n  "+getFullName_(v["name"])+"_init("+','.join(argsList)+");"
+
+  for tid, v in enumerate(a.read_data["topology"]):
     #get writer from buffer
     for i,w in enumerate(v["emit"]):
-      out += "\\\n    "+getFullName_(v["name"])+"_createReader("+','.join([ "_NAME_##"+v["channel"]+"r"+str(i),  "&_NAME_."+v["channel"]] + getRwArgs(i,w))+")"
+      if isChannelInStorage(w, a.read_data["emit"]):
+        # arr.append(
+        out += ""
+        # out += "\n  that->w"+w["channel"]+str(w["pinId"])+" = _w"+w["channel"]+str(w["pinId"])
+      elif isChannelInStorage(w, a.read_data["channels"]):
+        chans = a.read_data["channels"]
+        if not chans[w["pinId"]].has_key("reader"):
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" READER SET 0"
+          chans[w["pinId"]]["reader"] = 0
+        else:
+          chans[w["pinId"]]["reader"]+= 1
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" READER SET "+str(chans[w["pinId"]]["reader"])
+        out += "\n  writer "+w["channel"]+"w"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(v["name"])+"_createReader("+','.join([ "&that->"+w["channel"]] + getRwArgs(chans[w["pinId"]]["reader"],w))+")"
+      else:
+        raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
+      
       # connectBufferToReader(a, blockNum, i, w)
     #get reader from buffer
     for i,w in enumerate(v["receive"]):
-      out += "\\\n    "+getFullName_(v["name"])+"_createWriter("+','.join([ "_NAME_##"+v["channel"]+"w"+str(i),  "&_NAME_."+v["channel"]] + getRwArgs(i,w))+")"
+      if isChannelInStorage(w, a.read_data["receive"]):
+        # arr.append(
+        out += ""
+        # out += "\n  that->r"+w["channel"]+str(w["pinId"])+" = _r"+w["channel"]+str(w["pinId"])
+      elif isChannelInStorage(w, a.read_data["channels"]):
+        chans = a.read_data["channels"]
+        if not chans[w["pinId"]].has_key("writer"):
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" WRITER SET 0"
+          chans[w["pinId"]]["writer"] = 0
+        else:
+          chans[w["pinId"]]["writer"]+= 1
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" WRITER SET "+str(chans[w["pinId"]]["writer"])
+          
+        out += "\n  reader "+w["channel"]+"r"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(v["name"])+"_createWriter("+','.join([ "&that->"+w["channel"]] + getRwArgs(chans[w["pinId"]]["writer"],w))+")"
+      else:
+        raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
+      
+      # out += "\n    "+getFullName_(v["name"])+"_createWriter("+','.join([ "_NAME_##"+v["channel"]+"w"+str(i),  "&_NAME_."+v["channel"]] + getRwArgs(i,w))+")"
   return out
 
 def initializeKernels(a):
@@ -347,27 +388,23 @@ def initializeKernels(a):
           castType = "("+t+")"
       argValue = str(d["value"])
       if searchPropertyAndArgName(a,d["value"]):
-        argValue = "_NAME_."+argValue
+        argValue = "that->"+argValue
       argsList.append(castType+argValue)
-    if v["parallel"] != None:
+    if v["parallel"] != None and v["parallel"] != 1:
       prefixParallel = ""
       if not isinstance(v["parallel"], int ):
-        prefixParallel = "_NAME_."
+        prefixParallel = "that->"
       hasParallel += "+"+prefixParallel+str(v["parallel"])
-      out += "\\\n    "+getFullName_(v["name"])+" _NAME_##_kernel"+str(i)+"_##Container["+prefixParallel+str(v["parallel"])+"];"
-      out += "\\\n    _NAME_.kernel"+str(i)+" = _NAME_##_kernel"+str(i)+"_##Container;"
-      out += "\\\n    int _NAME_##_kernel"+str(i)+"_##_i;"
-      out += "\\\n    for(_NAME_##_kernel"+str(i)+"_##_i=0;_NAME_##_kernel"+str(i)+"_##_i<(int)"+prefixParallel+str(v["parallel"])+";_NAME_##_kernel"+str(i)+"_##_i++){"
-      out += "\\\n      "+getFullName_(v["name"])+"_create("+','.join(["kernel"]+argsList+getReadersWriters(a,v,i))+");"
-      out += "\\\n      _NAME_.kernel"+str(i)+"[_NAME_##_kernel"+str(i)+"_##_i] = kernel;"
-      out += "\\\n    }"
+      out += "\n  that->kernel"+str(i)+" = ("+getFullName_(v["name"])+"*)arrayObject_init_dynamic(sizeof("+getFullName_(v["name"])+"),"+prefixParallel+str(v["parallel"])+");"
+      out += "\n  int _kernel"+str(i)+"_i;"
+      out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+str(v["parallel"])+";_kernel"+str(i)+"_i++){"
+      out += "\n    "+getFullName_(v["name"])+"_init("+','.join(["&that->kernel"+str(i)+"[_kernel"+str(i)+"_i]"]+argsList+getReadersWriters(a,v,i))+");"
+      out += "\n  }"
     else:
-      out += "\\\n    "+getFullName_(v["name"])+"_create("+','.join(["kernel"+str(i)]+argsList+getReadersWriters(a,v,i))+");"
-      out += "\\\n    _NAME_.kernel"+str(i)+" = kernel"+str(i)+";"
+      out += "\n  "+getFullName_(v["name"])+"_init("+','.join(["&that->kernel"+str(i)]+argsList+getReadersWriters(a,v,i))+");"
       hasParallel += "+1"
   if hasParallel != "0":
-    out += "\\\n    com_github_osblinnikov_cnets_runnablesContainer _NAME_##arrContainers["+evalSize(hasParallel)+"];"
-    out += "\\\n    _NAME_.arrContainers = _NAME_##arrContainers;"
+    out += "\n  that->arrContainers = arrayObject_init_dynamic(sizeof(com_github_osblinnikov_cnets_runnablesContainer),"+evalSize(hasParallel)+");"
   return out
 
 def runBlocks(a):
@@ -377,7 +414,7 @@ def runBlocks(a):
   for i,v in enumerate(a.read_data["topology"]):
     # if v.has_key("type") and v["type"] == "buffer":
     #   continue
-    if v["parallel"]!=None:
+    if v["parallel"]!=None and v["parallel"] != 1:
       prefixParallel = ""
       if not isinstance(v["parallel"], int ):
         prefixParallel = "that->"
@@ -456,7 +493,7 @@ def getRunnables(a):
   for i, v in enumerate(a.read_data["topology"]):
     # if v.has_key("type") and v["type"] == "buffer":
     #   continue
-    if v["parallel"]!=None:
+    if v["parallel"]!=None and v["parallel"] != 1:
       prefixParallel = ""
       if not isinstance(v["parallel"], int ):
         prefixParallel = "that->"

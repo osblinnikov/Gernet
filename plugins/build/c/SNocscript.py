@@ -1,13 +1,6 @@
-<%
-import sys
-sys.path.insert(0, a.parserPath)
-
-import parsing_c
+<%import parsing_c
 p = reload(parsing_c)
-p.parsingGernet(a)
-
-%>
-from helper import *
+p.parsingGernet(a)%>from helper import *
 #           Environment
 Import( 'env' )
 
