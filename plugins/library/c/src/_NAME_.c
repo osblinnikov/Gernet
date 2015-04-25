@@ -21,9 +21,3 @@ void ${a.fullName_}_onDestroy(${a.fullName_} *that){
   
   return;
 }
-
-
-void ${a.fullName_}_onKernels(${a.fullName_} *that){
-  
-  return;
-}

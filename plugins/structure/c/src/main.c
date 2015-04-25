@@ -13,6 +13,6 @@ c.tpl(cog,templateFile,c.a(prefix=configFile))
 ]]]*/
 /*[[[end]]]*/
 int main(int argc, char* argv[]){
-  ${p.startRunnables(a)}
+  /*${p.startRunnables(a)}*/
   return 0;
 }

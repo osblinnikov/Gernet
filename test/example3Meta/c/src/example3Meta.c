@@ -46,10 +46,10 @@ void com_github_osblinnikov_gernet_test_example3Meta_init(struct com_github_osbl
   that->longArr = arrayObject_init_dynamic(sizeof(int64_t), 10);
   com_github_osblinnikov_cnets_mapBuffer_init(&that->mapBuffer1,that->unsignedArr,1000L,1);
   com_github_osblinnikov_cnets_mapBuffer_init(&that->mapBuffer2,that->longArr,1000L,1);
-  writer mapBuffer1w0_0 = com_github_osblinnikov_gernet_test_block0_createReader(&that->mapBuffer1,0)
-  writer mapBuffer2w1_0 = com_github_osblinnikov_gernet_test_block0_createReader(&that->mapBuffer2,0)
-  reader mapBuffer1r0_1 = com_github_osblinnikov_gernet_test_block3_createWriter(&that->mapBuffer1,0)
-  reader mapBuffer2r1_1 = com_github_osblinnikov_gernet_test_block3_createWriter(&that->mapBuffer2,0)
+  writer mapBuffer1w0_0 = com_github_osblinnikov_cnets_mapBuffer_createReader(&that->mapBuffer1,0)
+  writer mapBuffer2w1_0 = com_github_osblinnikov_cnets_mapBuffer_createReader(&that->mapBuffer2,0)
+  reader mapBuffer1r0_1 = com_github_osblinnikov_cnets_mapBuffer_createWriter(&that->mapBuffer1,0)
+  reader mapBuffer2r1_1 = com_github_osblinnikov_cnets_mapBuffer_createWriter(&that->mapBuffer2,0)
   com_github_osblinnikov_gernet_test_example3Meta_onKernels(that);
   that->kernel0 = (com_github_osblinnikov_gernet_test_block0*)arrayObject_init_dynamic(sizeof(com_github_osblinnikov_gernet_test_block0),3);
   int _kernel0_i;
@@ -71,7 +71,7 @@ void com_github_osblinnikov_gernet_test_example3Meta_deinit(struct com_github_os
   com_github_osblinnikov_gernet_test_example3Meta_onDestroy(that);
 }
 
-/*[[[end]]] (checksum: 3e11d2f347cdfe2b3b3238db4e7f6c77)*/
+/*[[[end]]] (checksum: 529dcef97397a8816573a2fcb4095d7d)*/
 
 void com_github_osblinnikov_gernet_test_example3Meta_run(void *t){
   /*struct com_github_osblinnikov_gernet_test_example3Meta *that = (struct com_github_osblinnikov_gernet_test_example3Meta*)t;*/

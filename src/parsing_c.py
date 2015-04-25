@@ -102,7 +102,7 @@ def getInit(a):
         if i+1 != len(selectableArgs):
           out += "\n  totalLength += "+str(v["name"])+".length;"
     out += "\n  com_github_osblinnikov_cnets_selector_init(&that->readersSelector, _arrReaders_);"
-    out += "\n  com_github_osblinnikov_cnets_selector_createReader(&that->rSelect, &that->readersSelector, -1, 0)"
+    out += "\n  that->rSelect = com_github_osblinnikov_cnets_selector_createReader(&that->readersSelector, 0);"
   
   for value in a.read_data["props"]:
     # print value
@@ -240,6 +240,8 @@ def isChannelInStorage(w, storage):
   for i, v in enumerate(storage):
     if v["channel"] == w["channel"]:
       w["pinId"] = i
+      if not v.has_key("name") or v["name"] == None:
+        v["name"] = DefaultMapBuffer
       return True
   return False
 
@@ -337,14 +339,14 @@ def initializeBuffers(a):
         out += ""
         # out += "\n  that->w"+w["channel"]+str(w["pinId"])+" = _w"+w["channel"]+str(w["pinId"])
       elif isChannelInStorage(w, a.read_data["channels"]):
-        chans = a.read_data["channels"]
-        if not chans[w["pinId"]].has_key("reader"):
-          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" READER SET 0"
-          chans[w["pinId"]]["reader"] = 0
+        chan = a.read_data["channels"][w["pinId"]]
+        if not chan.has_key("reader"):
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" READER SET 0"
+          chan["reader"] = 0
         else:
-          chans[w["pinId"]]["reader"]+= 1
-          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" READER SET "+str(chans[w["pinId"]]["reader"])
-        out += "\n  writer "+w["channel"]+"w"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(v["name"])+"_createReader("+','.join([ "&that->"+w["channel"]] + getRwArgs(chans[w["pinId"]]["reader"],w))+")"
+          chan["reader"]+= 1
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" READER SET "+str(chan["reader"])
+        out += "\n  writer "+w["channel"]+"w"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createReader("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["reader"],w))+")"
       else:
         raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
       
@@ -356,15 +358,15 @@ def initializeBuffers(a):
         out += ""
         # out += "\n  that->r"+w["channel"]+str(w["pinId"])+" = _r"+w["channel"]+str(w["pinId"])
       elif isChannelInStorage(w, a.read_data["channels"]):
-        chans = a.read_data["channels"]
-        if not chans[w["pinId"]].has_key("writer"):
-          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" WRITER SET 0"
-          chans[w["pinId"]]["writer"] = 0
+        chan = a.read_data["channels"][w["pinId"]]
+        if not chan.has_key("writer"):
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" WRITER SET 0"
+          chan["writer"] = 0
         else:
-          chans[w["pinId"]]["writer"]+= 1
-          # print "CHANNEL ======> "+str(w["pinId"])+": "+chans[w["pinId"]]["channel"]+" WRITER SET "+str(chans[w["pinId"]]["writer"])
+          chan["writer"]+= 1
+          # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" WRITER SET "+str(chan["writer"])
           
-        out += "\n  reader "+w["channel"]+"r"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(v["name"])+"_createWriter("+','.join([ "&that->"+w["channel"]] + getRwArgs(chans[w["pinId"]]["writer"],w))+")"
+        out += "\n  reader "+w["channel"]+"r"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createWriter("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["writer"],w))+")"
       else:
         raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
       

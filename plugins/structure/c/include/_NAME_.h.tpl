@@ -16,24 +16,11 @@ p.parsingGernet(a)%>${p.importBlocks(a)}
 struct ${a.fullName_};
 
 ${a.fullName_}_EXPORT_API
-void ${a.fullName_}_initialize(struct ${a.fullName_} *that);
+void ${a.fullName_}_init(${p.getArgs(a)});
 
 ${a.fullName_}_EXPORT_API
-void ${a.fullName_}_deinitialize(struct ${a.fullName_} *that);
-
-${a.fullName_}_EXPORT_API
-void ${a.fullName_}_onKernels(struct ${a.fullName_} *that);
-
-${a.fullName_}_EXPORT_API
-com_github_osblinnikov_cnets_runnablesContainer ${a.fullName_}_getRunnables(struct ${a.fullName_} *that);
-
-#undef ${a.fullName_}_onCreateMacro
-#define ${a.fullName_}_onCreateMacro(_NAME_) /**/
-
-${p.getConstructor(a)}
+void ${a.fullName_}_deinit(struct ${a.fullName_} *that);
 
 typedef struct ${a.fullName_}{
   ${p.getProps(a)}
   ${p.declareBlocks(a)}
-  com_github_osblinnikov_cnets_runnablesContainer (*getRunnables)(struct ${a.fullName_} *that);
-  void (*run)(void *that);

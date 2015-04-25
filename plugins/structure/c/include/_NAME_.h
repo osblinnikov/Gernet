@@ -19,7 +19,4 @@ c.tpl(cog,templateFile,c.a(prefix=configFile))
 
 }${a.fullName_};
 
-#undef ${a.fullName_}_onCreateMacro
-#define ${a.fullName_}_onCreateMacro(_NAME_) /**/
-
 #endif /* ${a.fullName_}_H */
