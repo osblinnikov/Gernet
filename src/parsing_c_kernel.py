@@ -102,7 +102,7 @@ def getFieldsArrStr(a):
       noSelectors = a.read_data["noSelectors"]
   if len(a.read_data["receive"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
-    arr.append("com_github_osblinnikov_cnets_selector readersSelector")
+    arr.append("selector_cnets_osblinnikov_github_com readersSelector")
 
   return arr
 
@@ -222,9 +222,9 @@ def getConstructor(a):
         out += "\\\n    }"
         if i+1 != len(selectableArgs):
           out += "\\\n    totalLength += "+str(v["name"])+".length;"
-    out += "\\\n    com_github_osblinnikov_cnets_selector_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
+    out += "\\\n    selector_cnets_osblinnikov_github_com_create(_NAME_##readersSelector, _NAME_##_arrReaders_);"
     out += "\\\n    _NAME_.readersSelector = _NAME_##readersSelector;"
-    out += "\\\n    com_github_osblinnikov_cnets_selector_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
+    out += "\\\n    selector_cnets_osblinnikov_github_com_createReader(_NAME_##_rSelect_,&_NAME_.readersSelector,-1,0)"
     out += "\\\n    _NAME_.rSelect = _NAME_##_rSelect_;"
 
   #END OF ARGS AND SELECTABLE ARG
@@ -337,9 +337,9 @@ def declareBlocks(a):
 
   if a.sizeRunnables > 0:
     if hasParallel:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer* arrContainers;"
+      out += "\nrunnablesContainer_cnets_osblinnikov_github_com* arrContainers;"
     else:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];"
+      out += "\nrunnablesContainer_cnets_osblinnikov_github_com arrContainers["+str(a.sizeRunnables)+"];"
   return out
 
 def checkPinId(arrPins, pinId):
@@ -507,7 +507,7 @@ def initializeKernels(a):
       out += "\\\n    _NAME_."+v["name"]+" = "+v["name"]+";"
       hasParallel += "+1"
   if hasParallel != "0":
-    out += "\\\n    com_github_osblinnikov_cnets_runnablesContainer _NAME_##arrContainers["+evalSize(hasParallel)+"];"
+    out += "\\\n    runnablesContainer_cnets_osblinnikov_github_com _NAME_##arrContainers["+evalSize(hasParallel)+"];"
     out += "\\\n    _NAME_.arrContainers = _NAME_##arrContainers;"
   return out
 
@@ -563,7 +563,7 @@ def startRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,TRUE);
     '''
   return out
@@ -576,7 +576,7 @@ def testRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,FALSE);
     runnables.stop(&runnables);
     '''
@@ -614,17 +614,17 @@ def getRunnables(a):
 
   if sizeRunnables == "0":
     return '''
-    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
     runnables.setCore(&runnables,runnableStoppableObj);
     return runnables;'''
   else:
     return  '''
-    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)&that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
-    arr.itemSize = sizeof(com_github_osblinnikov_cnets_runnablesContainer);
+    arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
     runnables.setContainers(&runnables,arr);
     return runnables;'''

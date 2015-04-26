@@ -24,4 +24,4 @@ void ${a.fullName_}_deinit(struct ${a.fullName_} *that);
 typedef struct ${a.fullName_}{
   ${p.getProps(a)}
   ${p.declareBlocks(a)}
-  struct com_github_osblinnikov_cnets_runnablesContainer (*getRunnables)(struct ${a.fullName_} *that);
+  struct runnablesContainer_cnets_osblinnikov_github_com (*getRunnables)(struct ${a.fullName_} *that);

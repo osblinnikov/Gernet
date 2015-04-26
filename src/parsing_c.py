@@ -40,7 +40,7 @@ def getProps(a):
       noSelectors = a.read_data["noSelectors"]
   if len(a.read_data["receive"]) > 1 and not noSelectors:
     arr.append("reader rSelect")
-    arr.append("com_github_osblinnikov_cnets_selector readersSelector")
+    arr.append("selector_cnets_osblinnikov_github_com readersSelector")
 
   out = "  "+';\n  '.join(arr)+';\n' if len(arr)>0 else ''
   return out
@@ -101,8 +101,8 @@ def getInit(a):
         out += "\n  }"
         if i+1 != len(selectableArgs):
           out += "\n  totalLength += "+str(v["name"])+".length;"
-    out += "\n  com_github_osblinnikov_cnets_selector_init(&that->readersSelector, _arrReaders_);"
-    out += "\n  that->rSelect = com_github_osblinnikov_cnets_selector_createReader(&that->readersSelector, 0);"
+    out += "\n  selector_cnets_osblinnikov_github_com_init(&that->readersSelector, _arrReaders_);"
+    out += "\n  that->rSelect = selector_cnets_osblinnikov_github_com_createReader(&that->readersSelector, 0);"
   
   for value in a.read_data["props"]:
     # print value
@@ -198,7 +198,7 @@ def directoryFromBlockPath(path):
   del pathList[0]
   fileName = pathList[-1]
   # del pathList[-1]
-  return '/'.join([domain]+pathList+["c","include",fileName])
+  return '/'.join([domain]+pathList+[fileName])
 
 def importBlocks(a):
   dependenciesDict = getDependenciesDict(a.read_data)
@@ -229,9 +229,9 @@ def declareBlocks(a):
 
   if a.sizeRunnables > 0:
     if hasParallel:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer* arrContainers;\n  "
+      out += "\nrunnablesContainer_cnets_osblinnikov_github_com* arrContainers;\n  "
     else:
-      out += "\ncom_github_osblinnikov_cnets_runnablesContainer arrContainers["+str(a.sizeRunnables)+"];\n  "
+      out += "\nrunnablesContainer_cnets_osblinnikov_github_com arrContainers["+str(a.sizeRunnables)+"];\n  "
   return out
 
 def isChannelInStorage(w, storage):
@@ -404,7 +404,7 @@ def initializeKernels(a):
       out += "\n  "+getFullName_(v["name"])+"_init("+','.join(["&that->kernel"+str(i)]+argsList+getReadersWriters(a,v,i))+");"
       hasParallel += "+1"
   if hasParallel != "0":
-    out += "\n  that->arrContainers = arrayObject_init_dynamic(sizeof(com_github_osblinnikov_cnets_runnablesContainer),"+evalSize(hasParallel)+");"
+    out += "\n  that->arrContainers = arrayObject_init_dynamic(sizeof(runnablesContainer_cnets_osblinnikov_github_com),"+evalSize(hasParallel)+");"
   return out
 
 def runBlocks(a):
@@ -459,7 +459,7 @@ def startRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,TRUE);
     '''
   return out
@@ -472,7 +472,7 @@ def testRunnables(a):
   out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
-    com_github_osblinnikov_cnets_runnablesContainer runnables = classObj.getRunnables(&classObj);
+    runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,FALSE);
     runnables.stop(&runnables);
     '''
@@ -510,17 +510,17 @@ def getRunnables(a):
 
   if sizeRunnables == "0":
     return '''
-    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
     runnables.setCore(&runnables,runnableStoppableObj);
     return runnables;'''
   else:
     return  '''
-    com_github_osblinnikov_cnets_runnablesContainer_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)&that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
-    arr.itemSize = sizeof(com_github_osblinnikov_cnets_runnablesContainer);
+    arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
     runnables.setContainers(&runnables,arr);
     return runnables;'''
