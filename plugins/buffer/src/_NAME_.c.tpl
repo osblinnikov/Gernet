@@ -36,4 +36,5 @@ void ${a.fullName_}_init(${p.getArgs(a)}){
 
 void ${a.fullName_}_deinit(struct ${a.fullName_} *that){
   ${a.fullName_}_onDestroy(that);
+  ${p.getDeinit(a)}
 }
