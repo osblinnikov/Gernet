@@ -51,7 +51,7 @@ def getArgs(a):
   for v in a.read_data["args"]:
     t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     # v["type"] = t
-    argsArray.append(v["type"]+" _"+v["name"])
+    argsArray.append(getFullName_(t)+" _"+v["name"])
 
   for i,v in enumerate(a.read_data["emit"]):
     argsArray.append("writer _w"+v["channel"]+str(i))#v["type"]
@@ -120,9 +120,7 @@ def getInit(a):
   #   if v["value"]!=None:
   #     out += "\\\n    _NAME_."+v["name"]+" = "+v["value"]+";"  
   # out += "\n  "+a.fullName_+"_initialize(&_NAME_);"
-  out += initializeBuffers(a)
-  out += "\n  "+a.fullName_+"_onKernels(that);"
-  out += initializeKernels(a)
+
   return out
 
 def getReaderWriterArgumentsStrarrDel0(a):
@@ -321,7 +319,7 @@ def initializeBuffers(a):
       if d.has_key("type"):
         t, isObject, isArray ,isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
-          castType = "("+t+")"
+          castType = "("+getFullName_(t)+")"
       argValue = str(d["value"])
       if searchPropertyAndArgName(a,d["value"]):
         argValue = "that->"+argValue
@@ -387,7 +385,7 @@ def initializeKernels(a):
       if d.has_key("type"):
         t, isObject, isArray, isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
-          castType = "("+t+")"
+          castType = "("+getFullName_(t)+")"
       argValue = str(d["value"])
       if searchPropertyAndArgName(a,d["value"]):
         argValue = "that->"+argValue

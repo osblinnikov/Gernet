@@ -137,17 +137,17 @@ def runGernet(firstRealArgI, argv, topology_dir):
     for p in read_data["gen"]:
         p0 = getPath(p)
         print p0
-        Types = getFilteredSubFolders(p0, Types)
+        # Types = getFilteredSubFolders(p0, Types)
         # if len(Types) == 0:
             # print ("No one generator was found")
             # return
-        for i in range(0, len(Types)):
-            generateMissedFiles(
-                topology_dir, #path to the directory with the topology
-                os.path.join(p0, Types[i]),#generator_directory
-                read_data["name"],#module full name
-                extra_args # extra arguments for the Cog
-            )
+        # for i in range(0, len(Types)):
+        generateMissedFiles(
+            topology_dir, #path to the directory with the topology
+            p0 #, Types[i]),#generator_directory
+            read_data["name"],#module full name
+            extra_args # extra arguments for the Cog
+        )
 
 
 def checkDir(directory):

@@ -34,7 +34,7 @@ or
         
 Enjoy your crossplatform usage of the gernet!
 
-    gernet test -g java
+    gernet test
 
 
 Usage
@@ -45,19 +45,18 @@ gernet [GernetFilePath] [options]
 GernetFilePath can be absolute or relative to current path or 
 relative to workspace sources root directory e.g.:
 
-    gernet github.com/osblinnikov/gernet/test/example -g java
+    gernet github.com/osblinnikov/gernet/test/example
 
 Available Gernet options:
 
-    -g {generator folder name e.g java, js, c, connector}
     -c        # execute cleaning only for chosen Topology
 
 Other options can be Cog specific.
 
 Examples:
 
-    gernet .. -g java -c
-    gernet test/example -g java
+    gernet .. -c
+    gernet test/example
     
 TODO
 ---
