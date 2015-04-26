@@ -86,7 +86,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
                 .replace("_FULLNAMEDIR_", os.path.join(*[fullName_, ""])) \
                 .replace("_PATH_", os.path.join(*(splitClassPath(classPath)+[""]))) \
                 .replace("_GERNET_","gernet")
-            absDstFilePath = os.path.join(topology_dir, os.path.split(generator_dir)[1], relativeFilePath)
+            absDstFilePath = os.path.join(topology_dir, relativeFilePath)
             if not os.path.exists(absDstFilePath):
                 checkDir(absDstFilePath)
 
@@ -144,7 +144,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
         # for i in range(0, len(Types)):
         generateMissedFiles(
             topology_dir, #path to the directory with the topology
-            p0 #, Types[i]),#generator_directory
+            p0 , #Types[i]),#generator_directory
             read_data["name"],#module full name
             extra_args # extra arguments for the Cog
         )

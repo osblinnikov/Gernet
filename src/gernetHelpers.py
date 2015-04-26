@@ -508,7 +508,7 @@ def getFullName(path):
     return '.'.join(splitClassPath(path))
 
 def getFullName_(path):
-    return '_'.join(splitClassPath(path)).replace("-","_")
+    return '_'.join(reversed(splitClassPath(path))).replace("-","_")
 
 def getRootPath(path):
     countstepsup = len(splitClassPath(path)) -3
