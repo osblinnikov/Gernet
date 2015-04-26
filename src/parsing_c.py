@@ -98,12 +98,12 @@ def getDeinit(a):
       out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+str(v["parallel"])+";_kernel"+str(i)+"_i++){"
       out += "\n    "+getFullName_(v["name"])+"_deinit(&that->kernel"+str(i)+"[_kernel"+str(i)+"_i]);"
       out += "\n  }"
-      out += "\n  free(that->kernel"+str(i)+");"
+      out += "\n  free((void*)that->kernel"+str(i)+");"
     else:
       out += "\n  "+getFullName_(v["name"])+"_deinit(&that->kernel"+str(i)+");"
       hasParallel += "+1"
   if hasParallel != "0":
-    out += "\n  free(that->arrContainers);"
+    out += "\n  free((void*)that->arrContainers);"
 
   return out
 
@@ -169,72 +169,72 @@ def getInit(a):
 
   return out
 
-def getReaderWriterArgumentsStrarrDel0(a):
-  readerWriterArgumentsStrArr = []
+# def getReaderWriterArgumentsStrarrDel0(a):
+#   readerWriterArgumentsStrArr = []
 
-  readerWriterArguments = a.rwArguments
-  if readerWriterArguments[0]["name"] != "gridId":
-    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
-  for value in readerWriterArguments:
-    if value["type"] == "unsigned":
-      value["type"] = "int"
-    readerWriterArgumentsStrArr.append(value["type"]+" "+value["name"])
+#   readerWriterArguments = a.rwArguments
+#   if readerWriterArguments[0]["name"] != "gridId":
+#     raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
+#   for value in readerWriterArguments:
+#     if value["type"] == "unsigned":
+#       value["type"] = "int"
+#     readerWriterArgumentsStrArr.append(value["type"]+" "+value["name"])
 
-  del readerWriterArgumentsStrArr[0]
-  return readerWriterArgumentsStrArr
+#   del readerWriterArgumentsStrArr[0]
+#   return readerWriterArgumentsStrArr
 
-def getContainerClass(a):
-  arrDel0 = getReaderWriterArgumentsStrarrDel0(a)
-  out = ""
-  if len(arrDel0)>0:
-    out += "\ntypedef struct "+a.fullName_+"_container{"
-    for rwArg in arrDel0:
-      out += "\n  "+rwArg+";"
-    out += "\n}"+a.fullName_+"_container;"
-  return out
+# def getContainerClass(a):
+#   arrDel0 = getReaderWriterArgumentsStrarrDel0(a)
+#   out = ""
+#   if len(arrDel0)>0:
+#     out += "\ntypedef struct "+a.fullName_+"_container{"
+#     for rwArg in arrDel0:
+#       out += "\n  "+rwArg+";"
+#     out += "\n}"+a.fullName_+"_container;"
+#   return out
 
 
-def getReaderWriterArgumentsStr(a):
-  readerWriterArgumentsStrArr = ["_NAME_","_that"]
+# def getReaderWriterArgumentsStr(a):
+#   readerWriterArgumentsStrArr = ["_NAME_","_that"]
 
-  readerWriterArguments = a.rwArguments
-  if readerWriterArguments[0]["name"] != "gridId":
-    raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
-  for value in readerWriterArguments:
-    if value["type"] == "unsigned":
-      value["type"] = "int"
-    readerWriterArgumentsStrArr.append("_"+value["name"])
+#   readerWriterArguments = a.rwArguments
+#   if readerWriterArguments[0]["name"] != "gridId":
+#     raise Exception("getReaderWriterArgumentsStrArr: readerWriterArguments[0][\"name\"]!=\"gridId\"")
+#   for value in readerWriterArguments:
+#     if value["type"] == "unsigned":
+#       value["type"] = "int"
+#     readerWriterArgumentsStrArr.append("_"+value["name"])
 
-  return ','.join(readerWriterArgumentsStrArr)
+#   return ','.join(readerWriterArgumentsStrArr)
 
-def getReaderWriter(a):
-  out = ""
-  out += "#define "+a.fullName_+"_createReader("+getReaderWriterArgumentsStr(a)+")"
-  if len(a.rwArguments) == 0:
-    raise Exception("len(a.rwArguments) == 0")
-  elif len(a.rwArguments) > 1:
-    out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
-    for value in a.rwArguments:
-      if value['name'] != "gridId":
-        out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
-    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,(void*)&_NAME_##_container,_gridId);"
-  else:
-    out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,NULL,_gridId);"
+# def getReaderWriter(a):
+#   out = ""
+#   out += "#define "+a.fullName_+"_createReader("+getReaderWriterArgumentsStr(a)+")"
+#   if len(a.rwArguments) == 0:
+#     raise Exception("len(a.rwArguments) == 0")
+#   elif len(a.rwArguments) > 1:
+#     out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
+#     for value in a.rwArguments:
+#       if value['name'] != "gridId":
+#         out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
+#     out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,(void*)&_NAME_##_container,_gridId);"
+#   else:
+#     out += "\\\n  reader _NAME_ = "+a.fullName_+"_getReader(_that,NULL,_gridId);"
   
 
-  out += "\n\n#define "+a.fullName_+"_createWriter("+getReaderWriterArgumentsStr(a)+")"
-  if len(a.rwArguments) == 0:
-    raise Exception("len(a.rwArguments) == 0")
-  elif len(a.rwArguments) > 1:
-    out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
-    for value in a.rwArguments:
-      if value['name'] != "gridId":
-        out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
-    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,(void*)&_NAME_##_container,_gridId);"
-  else:
-    out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,NULL,_gridId);"
+#   out += "\n\n#define "+a.fullName_+"_createWriter("+getReaderWriterArgumentsStr(a)+")"
+#   if len(a.rwArguments) == 0:
+#     raise Exception("len(a.rwArguments) == 0")
+#   elif len(a.rwArguments) > 1:
+#     out += "\\\n  "+a.fullName_+"_container _NAME_##_container;"
+#     for value in a.rwArguments:
+#       if value['name'] != "gridId":
+#         out += "\\\n  _NAME_##_container."+value['name']+" = _"+value["name"]+";"
+#     out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,(void*)&_NAME_##_container,_gridId);"
+#   else:
+#     out += "\\\n  writer _NAME_ = "+a.fullName_+"_getWriter(_that,NULL,_gridId);"
 
-  return out
+#   return out
 
 def directoryFromBlockPath(path):
   pathList = splitClassPath(path)
@@ -249,7 +249,7 @@ def directoryFromBlockPath(path):
 def importBlocks(a):
   dependenciesDict = getDependenciesDict(a.read_data)
   out = ""
-  for k,v  in dependenciesDict:
+  for v  in dependenciesDict:
     out+="\n#include \""+directoryFromBlockPath(v["name"])+".h\""
   return out
 
@@ -477,7 +477,7 @@ def runBlocks(a):
   return ''
 
 def getDefaultRunParameters(a):
-  argsList = ["classObj"]
+  argsList = ["&classObj"]
   for v in a.read_data["args"]:
     t, isObject, isArray, isSerializable = filterTypes_c(v["type"])
     if v.has_key("value_java"):
@@ -502,7 +502,8 @@ def startRunnables(a):
   if a.read_data.has_key("type"):
     typeOfBlock = a.read_data["type"]
 
-  out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
+  out = a.fullName_+" classObj;"
+  out += a.fullName_+"_init("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
     runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
@@ -515,7 +516,8 @@ def testRunnables(a):
   if a.read_data.has_key("type"):
     typeOfBlock = a.read_data["type"]
 
-  out = a.fullName_+"_create("+getDefaultRunParameters(a)+");"
+  out = a.fullName_+" classObj;"
+  out += a.fullName_+"_init("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
     runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);

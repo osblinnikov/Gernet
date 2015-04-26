@@ -19,7 +19,7 @@ def readGernet(filename):
         read_data = readJson(filename+".json")
         if read_data != None:
             read_data['prefix'] = filename+".json"
-    print filename
+    # print filename
     # print read_data
     return read_data
 
@@ -525,13 +525,17 @@ def getRootPath(path):
 def recurseDependencies(dependenciesDict):
   newDependenciesDict = dict()
   hasNewData = False
-  for k,v in dependenciesDict.items():
-    read_data = readGernet(os.path.join( getPath(v["name"]), 'gernet' ) )
+  for k,d in dependenciesDict.items():
+    fileToRead = os.path.join( getPath(d["name"]), 'gernet' )
+    # print "===> recurseDependencies: "+fileToRead
+    read_data = readGernet(fileToRead)
     if read_data == None:
+      # print "No Read Data"
       continue
+    d["_depends"] = read_data["topology"]+read_data["depends"]
     for v in read_data["topology"]+read_data["depends"]:
-      # print v
       if not dependenciesDict.has_key(v["name"]) and not newDependenciesDict.has_key(v["name"]):
+        # print v["name"]+" not in dependenciesDict and not in newDependenciesDict"
         newDependenciesDict[v["name"]] = v
         hasNewData = True
   if hasNewData:
@@ -561,4 +565,20 @@ def getDependenciesDict(read_data):
   for k,v in dependenciesDict.items():
     dictToSort[v["_order"]] = v
   
-  return sorted(dictToSort.items(), key=operator.itemgetter(0))
+  srt = sorted(dictToSort.items(), key=operator.itemgetter(0))
+
+  dependenciesList = []
+  for k, v in srt:
+    minIndexToInsert = len(dependenciesList)
+    for d in v["_depends"]: #foreach dependency
+        #if there is interdependency within our project
+        # if dependenciesDict.has_key(d["name"]):
+        indxInList = -1
+        for i, dl in enumerate(dependenciesList):
+            if dl["name"] == d["name"]:
+                indxInList = i
+                break
+        if indxInList >= 0 and indxInList < minIndexToInsert:
+            minIndexToInsert = indxInList
+    dependenciesList.insert(minIndexToInsert, v)
+  return dependenciesList

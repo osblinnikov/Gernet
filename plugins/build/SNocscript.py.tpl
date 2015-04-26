@@ -5,6 +5,6 @@ p = reload(parsing_c)
 p.parsingGernet(a)
 dependencies = h.getDependenciesDict(a.read_data)
 %>
-  %for k,v in dependencies:
+  %for v in dependencies:
   AddDependency(env,'${h.getFullName_(v["name"])}','${v["name"]}')
   %endfor 

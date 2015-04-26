@@ -16,7 +16,7 @@ def add_dependencies(env):
 c = {}
 c['PROG_NAME'] = '${a.fullName_}'
 # c['sourceFiles'] = ['${a.className}.c']
-# c['testFiles'] = ['${a.className}Test.c']
+c['testFiles'] = ['${a.className}Test.c']
 # c['runFiles'] = ['main.c']
 # c['defines'] = []
 c['inclDeps'] = add_dependencies

@@ -7,7 +7,7 @@ dependencies = h.getDependenciesDict(a.read_data)
 
 %>
 
-        %for k,v in dependencies:
+        %for v in dependencies:
         <dependency>
             <groupId>${p.groupId(v["name"])}</groupId>
             <artifactId>${p.artifactId(v["name"])}</artifactId>
