@@ -1,5 +1,11 @@
 test/example/*
 !test/example/gernet.json
+test/exampleMeta/*
+!test/exampleMeta/gernet.json
+test/example2Meta/*
+!test/example2Meta/gernet.json
+test/example3Meta/*
+!test/example3Meta/gernet.json
 test/block0/*
 !test/block0/gernet.json
 test/block3/*
