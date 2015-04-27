@@ -569,7 +569,7 @@ def getRunnables(a):
     runnablesContainer_cnets_osblinnikov_github_com_init(&runnables);
     '''+out+'''
     arrayObject arr;
-    arr.array = (void*)&that->arrContainers;
+    arr.array = (void*)that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
     arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
     runnables.setContainers(&runnables,arr);
