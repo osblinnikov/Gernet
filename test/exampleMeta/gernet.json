@@ -63,6 +63,7 @@
 "topology":[{
   "parallel":3,
   "name": "github.com/osblinnikov/gernet/test/block0",
+  "args":[11],
   "emit": [{
     "channel": "mapBuffer1"
   }, {
@@ -70,7 +71,12 @@
   }, {
     "channel": "exportChannel",
     "description": "export data from 0 block"
-  }]
+  }],
+  "receive": [{
+    "channel": "mapBuffer1"
+  }, {
+    "channel": "mapBuffer2"
+  }]  
 },{
   "name": "github.com/osblinnikov/gernet/test/block3",
   "receive": [{

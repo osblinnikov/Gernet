@@ -20,3 +20,4 @@ test/struct/*
 !test/struct/gernet.json
 *.pyc
 *.iml
+.sconsign.dblite

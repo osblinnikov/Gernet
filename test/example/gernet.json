@@ -64,12 +64,18 @@
 "topology":[{
   "parallel":3,
   "name": "github.com/osblinnikov/gernet/test/block0",
+  "args":["10"],
   "emit": [{
     "channel": "mapBuffer1"
   }, {
     "channel": "mapBuffer2"
   }, {
     "channel": "mapBuffer3Dummy"
+  }],
+  "receive": [{
+    "channel": "mapBuffer1"
+  }, {
+    "channel": "mapBuffer2"
   }]
 },{
   "name": "github.com/osblinnikov/gernet/test/block3",

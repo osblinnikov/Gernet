@@ -147,18 +147,21 @@ def getPath(pathSrc):
     return os.path.join(PROJECTS_ROOT_PATH, pathSrc)
 
 def processFlatTopology(path, counter,pv, ftop):
-    if ftop == None or len(ftop["topology"]) == 0:
+    if ftop == None:
         return False
 
-    suffix = "_"+str(counter) #ftop["name"].split(".") + 
-    logMsg = 'for parent '+path+" in kernel "+pv["name"]
-
+    logMsg = 'for parent '+path+" in kernel "+pv["name"]        
     if len(ftop["args"]) != len(pv["args"]):
         raise Exception('len(ftop["args"]) != len(pv["args"]) '+logMsg)
     if len(ftop["emit"]) != len(pv["emit"]):
         raise Exception('len(kernel["emit"]) != len(parent["emit"]) '+logMsg)
     if len(ftop["receive"]) != len(pv["receive"]):
-        raise Exception('len(kernel["receive"]) != len(parent["receive"]) '+logMsg)           
+        raise Exception('len(kernel["receive"]) != len(parent["receive"]) '+logMsg)   
+
+    if len(ftop["topology"]) == 0:
+        return False
+
+    suffix = "_"+str(counter) #ftop["name"].split(".") + 
     
     renameChannels = dict()
     for i, e in enumerate(ftop["emit"]):
@@ -303,6 +306,8 @@ def splitAndCheck(v, length):
     return s
 
 def parseEmitRecv(v):
+    if isinstance(v, int):
+        v = str(v)
     if not isinstance(v, basestring):
         return v
     s = splitAndCheck(v,1)
@@ -314,6 +319,8 @@ def parseEmitRecv(v):
 
 
 def parseEmitRecvChannels(read_data, v):
+    if isinstance(v, int):
+        v = str(v)
     if not isinstance(v, basestring):
         return v
     s = splitAndCheck(v,1)
@@ -344,6 +351,8 @@ def parseEmitRecvChannels(read_data, v):
     return v
 
 def parseProp(v):
+    if isinstance(v, int):
+        v = str(v)
     if not isinstance(v, basestring):
         if not v.has_key("value"):
             v["value"] = None
@@ -367,6 +376,8 @@ def parseProp(v):
     return {'name':s[0], 'type':s[1], 'size': size, 'value': value}
 
 def parseArg(v, isInTopology):
+    if isinstance(v, int):
+        v = str(v)
     if not isinstance(v, basestring):
         return v
 
