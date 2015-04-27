@@ -22,15 +22,15 @@ endfunction(addDeps)
 file(GLOB ${a.fullName_.upper()}_HDRS "*.h")
 
 set (${a.fullName_.upper()}_SRCS
-    src/${a.className}.cpp
+    src/${a.className}.c
     )
 set(${a.fullName_.upper()}_TEST
-    tests/${a.className}Test.cpp
+    tests/${a.className}Test.c
     )
 
 add_custom_target(${a.fullName_})
 
-if (NOT CAF_BUILD_STATIC_ONLY)
+if (NOT BUILD_STATIC_ONLY)
     add_library(${a.fullName_}_shared SHARED ${'${'+a.fullName_.upper()}_SRCS} ${'${'+a.fullName_.upper()}_HDRS})
     add_dependencies(${a.fullName_}_shared ${a.fullName_})
     target_link_libraries(${a.fullName_}_shared ${'${'}LD_FLAGS} )
