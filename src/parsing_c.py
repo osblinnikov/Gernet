@@ -81,8 +81,8 @@ def getDeinit(a):
     noSelectors = a.read_data["noSelectors"]
 
   if not noSelectors and (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0):
+    out += "\n  arrayObject_free_dynamic(that->readersSelector.reducableReaders);"
     out += "\n  selector_cnets_osblinnikov_github_com_deinit(&that->readersSelector);"
-    out += "\n  arrayObject_free_dynamic(that->readersSelector->reducableReaders);"
 
   for v in a.read_data["channels"]:
     out += "\n  "+getFullName_(v["name"])+"_deinit(&that->"+v["channel"]+");"
@@ -362,7 +362,7 @@ def initializeBuffers(a):
     argsList = []
     for d in v["args"]:
       castType = ""
-      if d.has_key("type"):
+      if d.has_key("type") and d["type"] != None:
         t, isObject, isArray ,isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+getFullName_(t)+")"
@@ -390,7 +390,7 @@ def initializeBuffers(a):
         else:
           chan["reader"]+= 1
           # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" READER SET "+str(chan["reader"])
-        out += "\n  writer "+w["channel"]+"w"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createReader("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["reader"],w))+")"
+        out += "\n  writer "+w["channel"]+"w"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createWriter("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["reader"],w))+");"
       else:
         raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
       
@@ -410,7 +410,7 @@ def initializeBuffers(a):
           chan["writer"]+= 1
           # print "CHANNEL ======> "+str(w["pinId"])+": "+chan["channel"]+" WRITER SET "+str(chan["writer"])
           
-        out += "\n  reader "+w["channel"]+"r"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createWriter("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["writer"],w))+")"
+        out += "\n  reader "+w["channel"]+"r"+str(w["pinId"])+"_"+str(tid)+" = "+getFullName_(chan["name"])+"_createReader("+','.join([ "&that->"+w["channel"]] + getRwArgs(chan["writer"],w))+");"
       else:
         raise Exception("Channel "+w["channel"]+" was not found neither in emit nor channels fields")
       
@@ -428,7 +428,7 @@ def initializeKernels(a):
     argsList = []
     for d in v["args"]:
       castType = ""
-      if d.has_key("type"):
+      if d.has_key("type") and d["type"] != None:
         t, isObject, isArray, isSerializable = filterTypes_c(d["type"])
         if t != "arrayObject":
           castType = "("+getFullName_(t)+")"
@@ -502,7 +502,7 @@ def startRunnables(a):
   if a.read_data.has_key("type"):
     typeOfBlock = a.read_data["type"]
 
-  out = a.fullName_+" classObj;"
+  out = a.fullName_+" classObj;\n  "
   out += a.fullName_+"_init("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
@@ -516,7 +516,7 @@ def testRunnables(a):
   if a.read_data.has_key("type"):
     typeOfBlock = a.read_data["type"]
 
-  out = a.fullName_+" classObj;"
+  out = a.fullName_+" classObj;\n  "
   out += a.fullName_+"_init("+getDefaultRunParameters(a)+");"
   if typeOfBlock == "kernel":
     out += '''
@@ -558,13 +558,15 @@ def getRunnables(a):
 
   if sizeRunnables == "0":
     return '''
-    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com runnables;
+    runnablesContainer_cnets_osblinnikov_github_com_init(&runnables);
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
     runnables.setCore(&runnables,runnableStoppableObj);
     return runnables;'''
   else:
     return  '''
-    runnablesContainer_cnets_osblinnikov_github_com_create(runnables)
+    runnablesContainer_cnets_osblinnikov_github_com runnables;
+    runnablesContainer_cnets_osblinnikov_github_com_init(&runnables);
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)&that->arrContainers;

@@ -4,6 +4,8 @@
 "depends":[{
   "name":"github.com/osblinnikov/cnets/runnablesContainer"
 },{
+  "name":"github.com/osblinnikov/cnets/selector"
+},{
   "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
   "name":"github.com/osblinnikov/cnets/types"

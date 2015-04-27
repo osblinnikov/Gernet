@@ -1,0 +1,138 @@
+args:
+-   name: unsignedArr
+    type: unsigned[]
+-   name: parallelBlock
+    type: unsigned
+channels:
+-   args:
+    -   type: Object[]
+        value: unsignedArr
+    -   value: 1000L
+    -   value: 1
+    channel: mapBuffer1
+    name: github.com/osblinnikov/cnets/mapBuffer
+    type: unsigned
+-   args:
+    -   type: Object[]
+        value: longArr
+    -   value: 1000L
+    -   value: 1
+    channel: mapBuffer2
+    name: github.com/osblinnikov/cnets/mapBuffer
+    type: long long
+-   args:
+    -   type: Object[]
+        value: unsignedArr
+    -   value: 1000L
+    -   value: 1
+    channel: mapBuffer1_3
+    name: github.com/osblinnikov/cnets/mapBuffer
+    type: unsigned
+-   args:
+    -   type: Object[]
+        value: longArr_3
+    -   value: 1000L
+    -   value: 1
+    channel: mapBuffer2_3
+    name: github.com/osblinnikov/cnets/mapBuffer
+    type: long long
+depends:
+-   name: github.com/osblinnikov/cnets/mapBuffer
+-   name: github.com/osblinnikov/cnets/queue
+-   name: github.com/osblinnikov/cnets/runnablesContainer
+-   name: github.com/osblinnikov/cnets/readerWriter
+-   name: github.com/osblinnikov/cnets/types
+description: it has emit, receive and topology -> it is meta-kernel -> no codegeneration.
+    //in some cases of connecting kernel and emit/receive directly it is possible
+    to generate code
+emit:
+-   channel: exportChannel
+    description: exported connector
+    type: unsigned
+gen:
+- github.com/osblinnikov/gernet/plugins/kernel
+- github.com/osblinnikov/gernet/plugins/build
+hide: false
+name: github.com/osblinnikov/gernet/test/exampleMeta
+prefix: /home/oleg/Projects/src/github.com/osblinnikov/cnets-workspace/github.com/osblinnikov/gernet/test/./exampleMeta/gernet.json
+props:
+-   name: longArr
+    size: 10
+    type: long[]
+    value: null
+-   name: longArr_3
+    size: 10
+    type: long[]
+    value: null
+receive:
+-   channel: importChannel
+    description: imported connector
+    type: unsigned
+spawnMode: ''
+topology:
+-   args: []
+    emit:
+    -   channel: mapBuffer1
+    -   channel: mapBuffer2
+    -   channel: exportChannel
+        description: export data from 0 block
+    name: github.com/osblinnikov/gernet/test/block0
+    parallel: 3
+    parents: []
+    receive: []
+-   args: []
+    emit: []
+    name: github.com/osblinnikov/gernet/test/block3
+    parallel: 1
+    parents: []
+    receive:
+    -   channel: mapBuffer1
+    -   channel: mapBuffer2
+-   args: []
+    emit: []
+    name: github.com/osblinnikov/gernet/test/block4
+    parallel: parallelBlock
+    parents: []
+    receive:
+    -   channel: importChannel
+-   args: []
+    emit:
+    -   channel: mapBuffer1_3
+    -   channel: mapBuffer2_3
+    -   channel: exportChannel
+        description: export data from 0 block
+    name: github.com/osblinnikov/gernet/test/block0
+    parallel: 3
+    parents:
+    - github.com/osblinnikov/gernet/test/example2Meta
+    receive: []
+-   args: []
+    emit: []
+    name: github.com/osblinnikov/gernet/test/block3
+    parallel: 1
+    parents:
+    - github.com/osblinnikov/gernet/test/example2Meta
+    receive:
+    -   channel: mapBuffer1_3
+    -   channel: mapBuffer2_3
+-   args: []
+    emit: []
+    name: github.com/osblinnikov/gernet/test/block4
+    parallel: parallelBlock
+    parents:
+    - github.com/osblinnikov/gernet/test/example2Meta
+    receive:
+    -   channel: importChannel
+-   args:
+    -   type: unsigned[]
+        value: unsignedArr
+    -   type: unsigned
+        value: parallelBlock
+    emit:
+    -   channel: exportChannel
+    name: github.com/osblinnikov/gernet/test/example3Meta
+    parallel: parallelBlock
+    parents:
+    - github.com/osblinnikov/gernet/test/example2Meta
+    receive:
+    -   channel: importChannel
