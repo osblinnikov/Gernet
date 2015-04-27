@@ -1,14 +1,14 @@
 {
-"path":"com.github.osblinnikov.gernet.test.lib",
-"gen":["com.github.osblinnikov.gernet.plugins.library","com.github.osblinnikov.gernet.plugins.build"],
+"name":"github.com/osblinnikov/gernet/test/lib",
+"gen":["github.com/osblinnikov/gernet/plugins/library","github.com/osblinnikov/gernet/plugins/build"],
 "args": [],
 "blocks":[],
 "depends":[{
-  "path":"com.github.osblinnikov.cnets.runnablesContainer"
+  "name":"github.com/osblinnikov/cnets/runnablesContainer"
 },{
-  "path":"com.github.osblinnikov.cnets.readerWriter"
+  "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path":"com.github.osblinnikov.cnets.types"
+  "name":"github.com/osblinnikov/cnets/types"
 }],
   "emit": [],
   "receive": []

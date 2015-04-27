@@ -123,6 +123,13 @@ def runGernet(firstRealArgI, argv, topology_dir):
 
     read_data = generateFlatTopology([],topology_dir)
 
+    if read_data == None:
+        return
+    
+    hasTopologyAndExports = len(read_data['topology']) > 0 and len(read_data['emit']+read_data['receive']) > 0
+    if not read_data['hide'] and hasTopologyAndExports:
+        return
+
     verifyChannelsParameters(read_data)
 
     outputfn = os.path.join(topology_dir,"flat.gernet.yaml")

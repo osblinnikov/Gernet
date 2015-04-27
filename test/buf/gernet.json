@@ -1,6 +1,6 @@
 {
-"path":"com.github.osblinnikov.gernet.test.buf",
-"gen":["com.github.osblinnikov.gernet.plugins.buffer","com.github.osblinnikov.gernet.plugins.build"],
+"name":"github.com/osblinnikov/gernet/test/buf",
+"gen":["github.com/osblinnikov/gernet/plugins/buffer","github.com/osblinnikov/gernet/plugins/build"],
 "args": [{
   "name": "buffers",
   "type": "Object[]"
@@ -17,15 +17,11 @@
   "name": "statsInterval",
   "type": "int"
 }],
-"props":[],
 "depends":[{
-  "path":"com.github.osblinnikov.cnets.types"
+  "name":"github.com/osblinnikov/cnets/types"
 },{
-  "path":"com.github.osblinnikov.cnets.readerWriter"
+  "name":"github.com/osblinnikov/cnets/readerWriter"
 },{
-  "path":"com.github.osblinnikov.cnets.queue"
-}],
-"blocks":[],
-  "emit": [],
-  "receive": []
+  "name":"github.com/osblinnikov/cnets/queue"
+}]
 }
