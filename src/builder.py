@@ -134,6 +134,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
 
     outputfn = os.path.join(topology_dir,"flat.gernet.yaml")
     f = open(outputfn,"w")
+    read_data.pop('prefix', None)
     f.write(yaml.safe_dump(read_data, default_flow_style=False, indent=4))
     f.close()
 
