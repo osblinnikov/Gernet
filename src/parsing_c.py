@@ -509,6 +509,7 @@ def startRunnables(a):
     runnablesContainer_cnets_osblinnikov_github_com runnables = classObj.getRunnables(&classObj);
     runnables.launch(&runnables,TRUE);
     '''
+  out += a.fullName_+"_deinit(&classObj);"
   return out
 
 def testRunnables(a):
@@ -524,6 +525,7 @@ def testRunnables(a):
     runnables.launch(&runnables,FALSE);
     runnables.stop(&runnables);
     '''
+  out += a.fullName_+"_deinit(&classObj);"
   return out
 
 def evalSize(sizeRunnables):
@@ -558,19 +560,15 @@ def getRunnables(a):
 
   if sizeRunnables == "0":
     return '''
-    runnablesContainer_cnets_osblinnikov_github_com runnables;
-    runnablesContainer_cnets_osblinnikov_github_com_init(&runnables);
+    runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
-    runnables.setCore(&runnables,runnableStoppableObj);
-    return runnables;'''
+    that->_runnables.setCore(&that->_runnables,runnableStoppableObj);'''
   else:
     return  '''
-    runnablesContainer_cnets_osblinnikov_github_com runnables;
-    runnablesContainer_cnets_osblinnikov_github_com_init(&runnables);
+    runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);
     '''+out+'''
     arrayObject arr;
     arr.array = (void*)that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
     arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
-    runnables.setContainers(&runnables,arr);
-    return runnables;'''
+    that->_runnables.setContainers(&that->_runnables,arr);'''

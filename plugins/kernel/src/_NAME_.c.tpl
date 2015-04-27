@@ -12,7 +12,7 @@ void ${a.fullName_}_onDestroy(struct ${a.fullName_} *that);
 void ${a.fullName_}_onKernels(struct ${a.fullName_} *that);
 
 struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnables(struct ${a.fullName_} *that){
-  ${p.getRunnables(a)}
+  return that->_runnables;
 }
 
 void ${a.fullName_}_init(${p.getArgs(a)}){
@@ -21,6 +21,7 @@ void ${a.fullName_}_init(${p.getArgs(a)}){
   ${a.fullName_}_onKernels(that);
   ${p.initializeKernels(a)}
   that->getRunnables = ${a.fullName_}_getRunnables;
+  ${p.getRunnables(a)}
   ${a.fullName_}_onCreate(that);
 }
 

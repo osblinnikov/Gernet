@@ -25,3 +25,4 @@ typedef struct ${a.fullName_}{
   ${p.getProps(a)}
   ${p.declareBlocks(a)}
   struct runnablesContainer_cnets_osblinnikov_github_com (*getRunnables)(struct ${a.fullName_} *that);
+  struct runnablesContainer_cnets_osblinnikov_github_com _runnables;
