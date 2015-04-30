@@ -52,7 +52,7 @@ def Gernet(argv):
             pPr = argv[firstRealArgI]
         if pPr != None:
             for root, dirs, files in os.walk(pPr):
-                if os.path.exists(os.path.join(pPr,root,jsonFile)):
+                if os.path.exists(os.path.join(pPr,root,jsonFile)) or os.path.exists(os.path.join(pPr,root,yamlFile)):
                     TopologyDirs.append(os.path.join(pPr,root))
 
     if len(TopologyDirs) == 0 and os.path.exists(os.path.join(os.getcwd(),jsonFile)):
