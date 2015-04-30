@@ -159,7 +159,12 @@ def getInit(a):
       arrItemType, itemIsObject, itemIsArray, itemisSerializable = filterTypes_c(value["type"][:-2])
       if isinstance(value["size"], basestring):
         value["size"] = "that->"+value["size"]
-      out += "\n  that->"+value["name"]+" = arrayObject_init_dynamic(sizeof("+getFullName_(arrItemType)+"), "+str(value["size"])+");"
+      arrTypeFN = getFullName_(arrItemType)
+      out += "\n  that->"+value["name"]+" = arrayObject_init_dynamic(sizeof("+arrTypeFN+"), "+str(value["size"])+");"
+      out += "\n  int "+value["name"]+"_i_ = 0;"
+      out += "\n  for("+value["name"]+"_i_=0;"+value["name"]+"_i_<"+str(value["size"])+";"+value["name"]+"_i_++){"
+      out += "\n    "+arrTypeFN+"_init(&(("+arrTypeFN+"*)that->"+value["name"]+".array)["+value["name"]+"_i_]);"
+      out += "\n  }"
 
   
   # for i,v in enumerate(a.read_data["props"]):
