@@ -323,31 +323,41 @@ def parseEmitRecvChannels(read_data, v):
         v = str(v)
     if not isinstance(v, basestring):
         return v
-    s = splitAndCheck(v,1)
-    v = dict()
-    v["channel"] = s[0]
-    v["type"] = s[1] if len(s) > 1 else None
-    v["size"] = s[2] if len(s) > 2 else None
-    v["timeout"] = s[3] if len(s) > 3 else None
-    v["name"] = DefaultMapBuffer
+    s = splitAndCheck(v,4)
 
     readers = 0
 
     for e in read_data["emit"]:
-        if e["channel"] == v["channel"]:
+        if e["channel"] == s[0]:
             readers += 1
 
     for t in read_data["topology"]:
         for e in t["receive"]:
-            if e["channel"] == v["channel"]:
+            if e["channel"] == s[0]:
                 readers += 1
+
     if readers == 0:
         raise Exception("There is 0 readers for the declared "+v["channel"]+" channel")
-    v["args"] = [{'value':readers}]
-    if len(s) > 2:
-        for arg in s[2:]:
-            v["args"].append({'value':arg})
-    
+
+    v = dict()
+    v["channel"] = s[0]
+    v["type"] = s[1]
+    v["size"] = s[2]
+    v["timeout"] = s[3]
+    v["name"] = s[4] if len(s) > 4 else DefaultMapBuffer
+    v["args"] = [{'value':v["channel"]+"ArrBuf_"},{'value':v["timeout"]},{'value':readers}]
+
+    try:
+        v["size"] = int(str(v["size"]))
+    except:
+        #nothing
+        v["size"] = str(v["size"])
+
+    read_data["props"].append({
+        "name": v["channel"]+"ArrBuf_",
+        "type": v["type"]+"[]",
+        "size": v["size"]
+    })
     return v
 
 def parseProp(v):

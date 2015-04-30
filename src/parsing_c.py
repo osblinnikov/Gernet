@@ -274,10 +274,10 @@ def declareBlocks(a):
     a.sizeRunnables += 1
 
   if a.sizeRunnables > 0:
-    if hasParallel:
-      out += "\nrunnablesContainer_cnets_osblinnikov_github_com* arrContainers;\n  "
-    else:
-      out += "\nrunnablesContainer_cnets_osblinnikov_github_com arrContainers["+str(a.sizeRunnables)+"];\n  "
+#    if hasParallel:
+    out += "\nrunnablesContainer_cnets_osblinnikov_github_com* arrContainers;\n  "
+#    else:
+#      out += "\nrunnablesContainer_cnets_osblinnikov_github_com arrContainers["+str(a.sizeRunnables)+"];\n  "
   return out
 
 def isChannelInStorage(w, storage):
