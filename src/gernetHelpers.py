@@ -299,7 +299,12 @@ def verifyChannelsParameters(read_data):
                         raise Exception(read_data["name"]+" : channels,emit,receive do not have "+e['channel']+" or size/timeout was not set")
 
 def splitAndCheck(v, length):
-    v = v.replace("  "," ")
+    while True:
+      l = len(v)
+      v = v.replace("  "," ")
+      if l == len(v):
+        break
+
     s = v.split(" ")
     if len(s) < length:
       raise Exception("splitAndCheck: len(s) < "+str(length)+" in "+v)

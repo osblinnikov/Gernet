@@ -560,7 +560,7 @@ def getRunnables(a):
       out += "    }\n"
       sizeRunnables += "+"+prefixParallel+str(v["parallel"])
     else:
-      out += "    that->arrContainers["+str(sizeRunnables)+"] = that->kernel"+str(i)+".getRunnables(&that->kernel"+str(i)+");\n"
+      out += "    that->arrContainers["+str(evalSize(sizeRunnables))+"] = that->kernel"+str(i)+".getRunnables(&that->kernel"+str(i)+");\n"
       sizeRunnables += "+1"
 
   if sizeRunnables == "0":
