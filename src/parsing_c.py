@@ -165,6 +165,8 @@ def getInit(a):
       out += "\n  for("+value["name"]+"_i_=0;"+value["name"]+"_i_<"+str(value["size"])+";"+value["name"]+"_i_++){"
       out += "\n    "+arrTypeFN+"_init(&(("+arrTypeFN+"*)that->"+value["name"]+".array)["+value["name"]+"_i_]);"
       out += "\n  }"
+    elif isObject:
+      out += "\n  "+getFullName_(value["type"])+"_init(&that->"+value["name"]+");"
 
   
   # for i,v in enumerate(a.read_data["props"]):
