@@ -254,7 +254,7 @@ def generateFlatTopology(visitedPaths, topology_dir):
         if pv["name"] in visitedPaths:
             raise Exception("Ring dependency detected: "+pv["name"]+" is included at least twice! Last inclusion from "+read_data["name"])
 
-        ftop = generateFlatTopology(visitedPaths, getPath(pv["name"]))
+        ftop = generateFlatTopology(list(visitedPaths), getPath(pv["name"]))
         
         if processFlatTopology(read_data["name"],counter,pv,ftop):
             sub_topologies[counter] = ftop
