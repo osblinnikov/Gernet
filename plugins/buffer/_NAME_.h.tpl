@@ -27,8 +27,8 @@ reader ${a.fullName_}_createReader(struct ${a.fullName_} *that, int gridId);
 ${a.fullName_}_EXPORT_API
 writer ${a.fullName_}_createWriter(struct ${a.fullName_} *that, int gridId);
 
-
-
 typedef struct ${a.fullName_}{
-  ${p.getProps(a)}
+  void* _ids_;
+  void (*idsDestructor)(void*);
+${p.getProps(a)}
   ${p.declareBlocks(a)}
