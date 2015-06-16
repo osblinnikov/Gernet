@@ -28,7 +28,8 @@ ${a.fullName_}_EXPORT_API
 writer ${a.fullName_}_createWriter(struct ${a.fullName_} *that, int gridId);
 
 typedef struct ${a.fullName_}{
-  void* _ids_;
-  void (*idsDestructor)(void*);
+  void *_readerIds_, *_writerIds_;
+  void (*readerIdsDestructor)(void*);
+  void (*writerIdsDestructor)(void*);
 ${p.getProps(a)}
   ${p.declareBlocks(a)}
