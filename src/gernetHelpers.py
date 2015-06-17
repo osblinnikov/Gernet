@@ -425,7 +425,7 @@ def filterTypes_java(t):
         t = "int" if isArray else "int"
         isObject = False
         serializableType = True
-    if t in ["unsigned","long"]:
+    if t in ["unsigned","long","unsigned-long"]:
         t = "long" if isArray else "long"
         isObject = False
         serializableType = True
@@ -468,6 +468,10 @@ def filterTypes_c(t):
         serializableType = True
     if t in ["unsigned"]:
         t = "uint32_t"
+        isObject = False
+        serializableType = True
+    if t  in ["unsigned-long"]:
+        t = "uint64_t"
         isObject = False
         serializableType = True
     if t  in ["long"]:

@@ -53,12 +53,12 @@ void ${a.fullName_}_deinit(struct ${a.fullName_} *that){
 
 void ${a.fullName_}_setKernelIds(bufferKernelParams *params, short isReader, void* ids, void (*idsDestructor)(void*)) {
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} setKernelIds: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} setKernelIds: params is NULL\n");
     return;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} setKernelIds: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} setKernelIds: Some Input parameters are wrong\n");
     return;
   };
   if(isReader){
@@ -72,12 +72,12 @@ void ${a.fullName_}_setKernelIds(bufferKernelParams *params, short isReader, voi
 
 void* ${a.fullName_}_getKernelIds(bufferKernelParams *params, short isReader) {
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} setKernelIds: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} setKernelIds: params is NULL\n");
     return 0;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} setKernelIds: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} setKernelIds: Some Input parameters are wrong\n");
     return 0;
   };
   if(isReader){

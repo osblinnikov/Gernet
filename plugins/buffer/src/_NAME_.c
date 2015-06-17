@@ -31,12 +31,12 @@ bufferReadData ${a.fullName_}_readNextWithMeta(bufferKernelParams *params, int w
   bufferReadData res;
   res.data = NULL;
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} readNextWithMeta: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} readNextWithMeta: params is NULL\n");
     return res;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} readNextWithMeta: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} readNextWithMeta: Some Input parameters are wrong\n");
     return res;
   }
   /*TODO:IMPLEMENTATION GOES HERE*/
@@ -45,12 +45,12 @@ bufferReadData ${a.fullName_}_readNextWithMeta(bufferKernelParams *params, int w
 
 int ${a.fullName_}_readFinished(bufferKernelParams *params) {
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} readFinished: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} readFinished: params is NULL\n");
     return -1;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} readFinished: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} readFinished: Some Input parameters are wrong\n");
     return -1;
   }
   /*TODO:IMPLEMENTATION GOES HERE*/
@@ -59,13 +59,13 @@ int ${a.fullName_}_readFinished(bufferKernelParams *params) {
 
 void* ${a.fullName_}_writeNext(bufferKernelParams *params, int waitTimeout) {
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} writeNext: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} writeNext: params is NULL\n");
     return NULL;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   void* res = NULL;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} writeNext: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} writeNext: Some Input parameters are wrong\n");
     return res;
   }
   /*TODO:IMPLEMENTATION GOES HERE*/
@@ -74,12 +74,12 @@ void* ${a.fullName_}_writeNext(bufferKernelParams *params, int waitTimeout) {
 
 int ${a.fullName_}_writeFinished(bufferKernelParams *params) {
   if(params == NULL){
-    printf("ERROR: ${a.fullName_} writeFinished: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} writeFinished: params is NULL\n");
     return -1;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    printf("ERROR: ${a.fullName_} writeFinished: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_} writeFinished: Some Input parameters are wrong\n");
     return -1;
   };
   /*TODO:IMPLEMENTATION GOES HERE*/
