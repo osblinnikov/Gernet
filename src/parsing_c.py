@@ -567,10 +567,12 @@ def getRunnables(a):
       sizeRunnables += "+1"
 
   if sizeRunnables == "0":
+    if len(str(a.read_data["spawnMode"])) == 0:
+      a.read_data["spawnMode"] = 1
     return '''
     runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
-    that->_runnables.setCore(&that->_runnables,runnableStoppableObj);'''
+    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, dispatcherCollector_getNextLocalId(), '''+str(a.read_data["spawnMode"])+''');'''
   else:
     return  '''
     runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);

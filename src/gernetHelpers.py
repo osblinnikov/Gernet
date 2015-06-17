@@ -68,8 +68,10 @@ def readYaml(filename):
         except:
             return read_data
 
-    # print filename
-    checkStructure(read_data, False)
+    if read_data == None:
+        raise Exception(filename+" was not read")
+    else:
+        checkStructure(read_data, False)
     return read_data
 
 def checkStructure(read_data, isInTopology):
@@ -106,7 +108,7 @@ def checkStructure(read_data, isInTopology):
                 read_data["depends"][i] = {'name': v}
 
         if not read_data.has_key("spawnMode"):
-            read_data["spawnMode"] = ""
+            read_data["spawnMode"] = "1"
         read_data["spawnMode"]="+".join([x for x in Set(read_data["spawnMode"].replace(" ","").split("+")) if (x != "blocking_api" and x != 'monitored')])
 
         if not read_data.has_key("hide"):
