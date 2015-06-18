@@ -19,6 +19,16 @@ def parsingGernet(a):
   if a.read_data.has_key("rwArgs"):
     a.rwArguments+=a.read_data["rwArgs"]
 
+  if len(a.read_data["topology"]) == 0 and (len(str(a.read_data["spawnMode"])) == 0 or int(str(a.read_data["spawnMode"])) == 0):
+    hasKernelId = False
+    for v in a.read_data["args"]+a.read_data["props"]:
+      if v["name"] == "_kernelId":
+        hasKernelId = True
+        break
+    if not hasKernelId:
+      a.read_data["props"].insert(0,{"name":"_kernelId","type":"unsigned","value":"dispatcherCollector_getNextLocalId()"})
+
+
 def getProps(a):
   arr = []
 
@@ -112,12 +122,6 @@ def getInit(a):
   for value in a.read_data["args"]:
     out += "\n  that->"+value["name"]+" = _"+value["name"]+";"
 
-
-  for i,v in enumerate(a.read_data["emit"]):
-    out += "\n  that->w"+v["channel"]+str(i)+" = _w"+v["channel"]+str(i)+";"
-  for i,v in enumerate(a.read_data["receive"]):
-    out += "\n  that->r"+v["channel"]+str(i)+" = _r"+v["channel"]+str(i)+";"
-
   selectableArgs = []
   for i,v in enumerate(a.read_data["args"]):
     if v.has_key("selectable") and v["selectable"] == True:
@@ -169,6 +173,14 @@ def getInit(a):
     elif isObject:
       out += "\n  "+getFullName_(value["type"])+"_init(&that->"+value["name"]+");"
 
+  for i,v in enumerate(a.read_data["emit"]):
+    out += "\n  that->w"+v["channel"]+str(i)+" = _w"+v["channel"]+str(i)+";"
+    if len(a.read_data["topology"]) == 0 and (len(str(a.read_data["spawnMode"])) == 0 or int(str(a.read_data["spawnMode"])) == 0):
+      out += "\n  that->w"+v["channel"]+str(i)+".setKernelId(&that->w"+v["channel"]+str(i)+", that->_kernelId);"
+  for i,v in enumerate(a.read_data["receive"]):
+    out += "\n  that->r"+v["channel"]+str(i)+" = _r"+v["channel"]+str(i)+";"
+    if len(a.read_data["topology"]) == 0 and (len(str(a.read_data["spawnMode"])) == 0 or int(str(a.read_data["spawnMode"])) == 0):
+      out += "\n  that->r"+v["channel"]+str(i)+".setKernelId(&that->r"+v["channel"]+str(i)+", that->_kernelId);"
   
   # for i,v in enumerate(a.read_data["props"]):
   #   if v["value"]!=None:
@@ -567,12 +579,12 @@ def getRunnables(a):
       sizeRunnables += "+1"
 
   if sizeRunnables == "0":
-    if len(str(a.read_data["spawnMode"])) == 0:
-      a.read_data["spawnMode"] = 1
+    if len(str(a.read_data["spawnMode"])) == 0 or int(str(a.read_data["spawnMode"])) == 0:
+      a.read_data["spawnMode"] = 0
     return '''
     runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);
     RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
-    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, dispatcherCollector_getNextLocalId(), '''+str(a.read_data["spawnMode"])+''');'''
+    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, that->_kernelId, '''+str(a.read_data["spawnMode"])+''');'''
   else:
     return  '''
     runnablesContainer_cnets_osblinnikov_github_com_init(&that->_runnables);
@@ -581,4 +593,7 @@ def getRunnables(a):
     arr.array = (void*)that->arrContainers;
     arr.length = '''+str(evalSize(sizeRunnables))+''';
     arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
-    that->_runnables.setContainers(&that->_runnables,arr);'''
+    that->_runnables.setContainers(&that->_runnables,arr);
+    /*set core to call onStart/onStop from runnablesContainer*/
+    RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
+    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, (unsigned)-1, -1);'''

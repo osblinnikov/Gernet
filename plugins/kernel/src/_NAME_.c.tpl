@@ -15,6 +15,11 @@ struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnabl
   return that->_runnables;
 }
 
+struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnablesForInterface(struct RunnablesInterface *ptr){
+  struct ${a.fullName_} *that = (struct ${a.fullName_}*)ptr->target;
+  return that->_runnables;
+}
+
 void ${a.fullName_}_init(${p.getArgs(a)}){
   ${p.getInit(a)}
   ${p.initializeBuffers(a)}
