@@ -163,7 +163,7 @@ def getInit(a):
     # print value
     t, isObject, isArray, isSerializable = filterTypes_c(value["type"])
     if value["value"]!=None:
-      out += "\n  that->"+value["name"]+" = "+value["value"]+";"
+      out += "\n  that->"+value["name"]+" = "+str(value["value"])+";"
     elif isArray:
       arrItemType, itemIsObject, itemIsArray, itemisSerializable = filterTypes_c(value["type"][:-2])
       if isinstance(value["size"], basestring):

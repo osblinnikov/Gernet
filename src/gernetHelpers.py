@@ -509,6 +509,8 @@ def splitClassPath(classPath):
         domainPrefix = [domainSplit[0]]
     del classPathList[0]
     classPathList = domainPrefix+classPathList
+    while len(classPathList) < 2:
+        classPathList.append("")
     return classPathList
 
 def getClassName(path):
