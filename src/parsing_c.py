@@ -455,10 +455,12 @@ def initializeKernels(a):
     argsList = []
     for d in v["args"]:
       if v["parallel"] != None and v["parallel"] != 1:
-        if v["name"] == "_parallel_":
-          v["name"] = prefixParallel
-        if v["name"] == "_parallelId_":
-          v["name"] = "_kernel"+str(i)+"_i"
+        if str(d["value"]) == "_parallel_":
+          d["value"] = prefixParallel
+        if str(d["value"]) == "_parallelId_":
+          d["value"] = "_kernel"+str(i)+"_i"
+      if str(d["value"]) == "_runnables_":
+        d["value"] = "&that->_runnables"
       castType = ""
       if d.has_key("type") and d["type"] != None:
         t, isObject, isArray, isSerializable = filterTypes_c(d["type"])
