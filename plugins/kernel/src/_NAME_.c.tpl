@@ -19,26 +19,22 @@ struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnabl
 
 struct arrayObject ${a.fullName_}_getReaders(void *t){
   struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;
-  %if len(a.read_data["receive"]) == 0:
-  return arrayObjectNULL();
-  %else:
+  %if p.hasReceive(a):
   return that->_arrReaders_;
+  %else:
+  return arrayObjectNULL();
   %endif
 }
 
 
 void ${a.fullName_}_setReadData(void *t, bufferReadData *readData){
-%if a.read_data["spawnMode"] == "0":
   struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;
   that->_readData = readData;
-%endif
 }
 
 
 void ${a.fullName_}_init(${p.getArgs(a)}){
-%if a.read_data["spawnMode"] == "0":
   that->_readData = NULL;
-%endif
   ${p.getInit(a)}
   ${p.initializeBuffers(a)}
   ${a.fullName_}_onKernels(that);

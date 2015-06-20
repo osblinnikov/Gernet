@@ -38,7 +38,7 @@ def getProps(a):
   noSelectors = False
   if a.read_data.has_key("noSelectors"):
       noSelectors = a.read_data["noSelectors"]
-  if len(a.read_data["receive"]) > 1:
+  if hasReceive(a):
     arr.append("arrayObject _arrReaders_")
     if not noSelectors:
         arr.append("reader rSelect")
@@ -82,7 +82,7 @@ def getDeinit(a):
   if a.read_data.has_key("noSelectors"):
     noSelectors = a.read_data["noSelectors"]
 
-  if not noSelectors and (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0):
+  if not noSelectors and hasReceive(a):
     out += "\n  arrayObject_free_dynamic(that->readersSelector.reducableReaders);"
     out += "\n  selector_cnets_osblinnikov_github_com_deinit(&that->readersSelector);"
 
@@ -91,13 +91,16 @@ def getDeinit(a):
 
   hasParallel = "0"
   for i,v in enumerate(a.read_data["topology"]):
+    prefixParallel = ""
     if v["parallel"] != None and v["parallel"] != 1:
-      prefixParallel = ""
       if not isinstance(v["parallel"], int ):
-        prefixParallel = "that->"
-      hasParallel += "+"+prefixParallel+str(v["parallel"])
+        prefixParallel = "that->"+str(v["parallel"])
+      else:
+        prefixParallel = str(v["parallel"])
+
+      hasParallel += "+"+prefixParallel
       out += "\n  int _kernel"+str(i)+"_i;"
-      out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+str(v["parallel"])+";_kernel"+str(i)+"_i++){"
+      out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+";_kernel"+str(i)+"_i++){"
       out += "\n    "+getFullName_(v["name"])+"_deinit(&that->kernel"+str(i)+"[_kernel"+str(i)+"_i]);"
       out += "\n  }"
       out += "\n  free((void*)that->kernel"+str(i)+");"
@@ -108,6 +111,15 @@ def getDeinit(a):
     out += "\n  free((void*)that->arrContainers);"
 
   return out
+
+def hasReceive(a):
+    selectableArgs = []
+    for i,v in enumerate(a.read_data["args"]):
+      if v.has_key("selectable") and v["selectable"] == True:
+        if v["type"] != 'reader[]':
+          raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
+        selectableArgs.append(v)
+    return (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0)
 
 def getInit(a):
   out = ""
@@ -125,7 +137,7 @@ def getInit(a):
   if a.read_data.has_key("noSelectors"):
     noSelectors = a.read_data["noSelectors"]
 
-  if (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0):
+  if hasReceive(a):
     selectablesCount = str(len(a.read_data["receive"]))
     for i,v in enumerate(selectableArgs):
       selectablesCount += " + "+str(v["name"])+".length"
@@ -170,7 +182,7 @@ def getInit(a):
     out += "\n  that->w"+v["channel"]+str(i)+" = _w"+v["channel"]+str(i)+";"
   for i,v in enumerate(a.read_data["receive"]):
     out += "\n  that->r"+v["channel"]+str(i)+" = _r"+v["channel"]+str(i)+";"
-  
+
   # for i,v in enumerate(a.read_data["props"]):
   #   if v["value"]!=None:
   #     out += "\\\n    _NAME_."+v["name"]+" = "+v["value"]+";"  
@@ -431,11 +443,22 @@ def initializeKernels(a):
   #kernels
   hasParallel = "0"
   for i,v in enumerate(a.read_data["topology"]):
+    prefixParallel = ""
+    if v["parallel"] != None and v["parallel"] != 1:
+      if not isinstance(v["parallel"], int ):
+        prefixParallel = "that->"+str(v["parallel"])
+      else:
+        prefixParallel = str(v["parallel"])
     # if v.has_key("type") and v["type"] == "buffer":
     #   continue
     # pathList = v["path"].split('.')
     argsList = []
     for d in v["args"]:
+      if v["parallel"] != None and v["parallel"] != 1:
+        if v["name"] == "_parallel_":
+          v["name"] = prefixParallel
+        if v["name"] == "_parallelId_":
+          v["name"] = "_kernel"+str(i)+"_i"
       castType = ""
       if d.has_key("type") and d["type"] != None:
         t, isObject, isArray, isSerializable = filterTypes_c(d["type"])
@@ -445,14 +468,12 @@ def initializeKernels(a):
       if searchPropertyAndArgName(a,d["value"]):
         argValue = "that->"+argValue
       argsList.append(castType+argValue)
+
     if v["parallel"] != None and v["parallel"] != 1:
-      prefixParallel = ""
-      if not isinstance(v["parallel"], int ):
-        prefixParallel = "that->"
-      hasParallel += "+"+prefixParallel+str(v["parallel"])
-      out += "\n  that->kernel"+str(i)+" = ("+getFullName_(v["name"])+"*)malloc(sizeof("+getFullName_(v["name"])+")*"+prefixParallel+str(v["parallel"])+");"
+      hasParallel += "+"+prefixParallel
+      out += "\n  that->kernel"+str(i)+" = ("+getFullName_(v["name"])+"*)malloc(sizeof("+getFullName_(v["name"])+")*"+prefixParallel+");"
       out += "\n  int _kernel"+str(i)+"_i;"
-      out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+str(v["parallel"])+";_kernel"+str(i)+"_i++){"
+      out += "\n  for(_kernel"+str(i)+"_i=0;_kernel"+str(i)+"_i<(int)"+prefixParallel+";_kernel"+str(i)+"_i++){"
       out += "\n    "+getFullName_(v["name"])+"_init("+','.join(["&that->kernel"+str(i)+"[_kernel"+str(i)+"_i]"]+argsList+getReadersWriters(a,v,i))+");"
       out += "\n  }"
     else:
@@ -470,13 +491,13 @@ def runBlocks(a):
     # if v.has_key("type") and v["type"] == "buffer":
     #   continue
     if v["parallel"]!=None and v["parallel"] != 1:
-      prefixParallel = ""
+      prefixParallel = str(v["parallel"])
       if not isinstance(v["parallel"], int ):
-        prefixParallel = "that->"
+        prefixParallel = "that->"+str(v["parallel"])
       if not hasParallel:
         hasParallel = True
         out.append("    int j;")
-      out.append("    for(j=0;j<(int)"+prefixParallel+str(v["parallel"])+";j++){")
+      out.append("    for(j=0;j<(int)"+prefixParallel+";j++){")
       out.append("      that->kernel"+str(i)+"[j].run(&that->kernel"+str(i)+");")
       out.append("    }")
     else:
@@ -553,16 +574,16 @@ def getRunnables(a):
     # if v.has_key("type") and v["type"] == "buffer":
     #   continue
     if v["parallel"]!=None and v["parallel"] != 1:
-      prefixParallel = ""
+      prefixParallel = str(v["parallel"])
       if not isinstance(v["parallel"], int ):
-        prefixParallel = "that->"
+        prefixParallel = "that->"+str(v["parallel"])
       if not hasParallel:
         out += "    int j;\n"
         hasParallel = True
-      out += "    for(j=0;j<(int)"+prefixParallel+str(v["parallel"])+";j++){\n"
+      out += "    for(j=0;j<(int)"+prefixParallel+";j++){\n"
       out += "      that->arrContainers["+str(evalSize(sizeRunnables))+"+j] = that->kernel"+str(i)+"[j].getRunnables(&that->kernel"+str(i)+"[j]);\n"
       out += "    }\n"
-      sizeRunnables += "+"+prefixParallel+str(v["parallel"])
+      sizeRunnables += "+"+prefixParallel
     else:
       out += "    that->arrContainers["+str(evalSize(sizeRunnables))+"] = that->kernel"+str(i)+".getRunnables(&that->kernel"+str(i)+");\n"
       sizeRunnables += "+1"
@@ -582,5 +603,5 @@ def getRunnables(a):
     arr.itemSize = sizeof(runnablesContainer_cnets_osblinnikov_github_com);
     that->_runnables.setContainers(&that->_runnables,arr);
     /*set core to call onStart/onStop from runnablesContainer*/
-    RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+'''_)
-    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, (unsigned)-1, -1);'''
+    RunnableStoppable_create(runnableStoppableObj,that, '''+a.fullName_+''')
+    that->_runnables.setCore(&that->_runnables,runnableStoppableObj, (unsigned)-1);'''
