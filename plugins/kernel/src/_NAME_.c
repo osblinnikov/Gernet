@@ -14,7 +14,7 @@ void ${a.fullName_}_onStart(void *t){
   /*struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;*/
 }
 
-void ${a.fullName_}_onStop(void *that){
+void ${a.fullName_}_onStop(void *t){
   /*struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;*/
 }
 

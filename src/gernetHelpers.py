@@ -107,9 +107,9 @@ def checkStructure(read_data, isInTopology):
             if isinstance( v , basestring ):
                 read_data["depends"][i] = {'name': v}
 
-        if not read_data.has_key("spawnMode"):
+        if not read_data.has_key("spawnMode") or len(str(read_data["spawnMode"])) == 0:
             read_data["spawnMode"] = "0"
-        read_data["spawnMode"]="+".join([x for x in Set(read_data["spawnMode"].replace(" ","").split("+")) if (x != "blocking_api" and x != 'monitored')])
+        read_data["spawnMode"]="+".join([x for x in Set(str(read_data["spawnMode"]).replace(" ","").split("+")) if (x != "blocking_api" and x != 'monitored')])
 
         if not read_data.has_key("hide"):
             read_data["hide"] = False        
@@ -540,7 +540,10 @@ def getFullName(path):
     return '.'.join(splitClassPath(path))
 
 def getFullName_(path):
-    return '_'.join(reversed(splitClassPath(path))).replace("-","_")
+    res = '_'.join(reversed(splitClassPath(path))).replace("-","_")
+    if '*' in res:
+      res = res.replace("*","")+"*";
+    return res
 
 def getRootPath(path):
     countstepsup = len(splitClassPath(path)) -3
