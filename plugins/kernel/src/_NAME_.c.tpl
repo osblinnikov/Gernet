@@ -28,13 +28,13 @@ struct arrayObject ${a.fullName_}_getReaders(void *t){
 
 
 void ${a.fullName_}_setReadData(void *t, bufferReadData *readData){
+  if(t == NULL || readData == NULL){return;}
   struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;
-  that->_readData = readData;
+  ${p.getReadDataSetup(a)}
 }
 
 
 void ${a.fullName_}_init(${p.getArgs(a)}){
-  that->_readData = NULL;
   ${p.getInit(a)}
   ${p.initializeBuffers(a)}
   ${a.fullName_}_onKernels(that);

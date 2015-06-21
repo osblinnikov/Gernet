@@ -35,12 +35,9 @@ def getProps(a):
   for i,v in enumerate(a.read_data["receive"]):
     arr.append("reader r"+v["channel"]+str(i))
 
-  noSelectors = False
-  if a.read_data.has_key("noSelectors"):
-      noSelectors = a.read_data["noSelectors"]
   if hasReceive(a):
     arr.append("arrayObject _arrReaders_")
-    if not noSelectors:
+    if hasRSelector(a):
         arr.append("reader rSelect")
         arr.append("selector_cnets_osblinnikov_github_com readersSelector")
 
@@ -78,11 +75,7 @@ def getDeinit(a):
         raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
       selectableArgs.append(v)
 
-  noSelectors = False
-  if a.read_data.has_key("noSelectors"):
-    noSelectors = a.read_data["noSelectors"]
-
-  if not noSelectors and hasReceive(a):
+  if hasRSelector(a):
     out += "\n  arrayObject_free_dynamic(that->readersSelector.reducableReaders);"
     out += "\n  selector_cnets_osblinnikov_github_com_deinit(&that->readersSelector);"
 
@@ -113,29 +106,55 @@ def getDeinit(a):
   return out
 
 def hasReceive(a):
+    selectableArgs = getSelectableArgs(a)
+    return len(a.read_data["topology"]) == 0 and (len(a.read_data["receive"]) > 0 or len(selectableArgs)>0)
+
+def hasRSelector(a):
+    noSelectors = False
+    if a.read_data.has_key("noSelectors"):
+      noSelectors = a.read_data["noSelectors"]
+    return not noSelectors and hasReceive(a)
+
+def getSelectableArgs(a):
     selectableArgs = []
     for i,v in enumerate(a.read_data["args"]):
       if v.has_key("selectable") and v["selectable"] == True:
         if v["type"] != 'reader[]':
           raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
         selectableArgs.append(v)
-    return (len(a.read_data["receive"]) > 1 or len(selectableArgs)>0)
+    return selectableArgs
+
+def getReadDataSetup(a):
+    out = ""
+    if hasRSelector(a):
+      out += "\n  that->rSelect.setReadData(&that->rSelect,readData);"
+    elif hasReceive(a):
+      for i,v in enumerate(a.read_data["receive"]):
+        out += "\n  if(readData->nested_buffer_id == "+i+"){"
+        out += "\n    readData->nested_buffer_id = 0;"
+        out += "\n    _r"+v["channel"]+str(i)+".setReadData(&_r"+v["channel"]+str(i)+",readData);"
+        out += "\n    return;"
+        out += "\n  }"
+      selectableArgs = getSelectableArgs(a)
+      if len(selectableArgs)>0:
+        out += "\n  int totalLength = "+str(len(a.read_data["receive"]))+";"
+        for i,v in enumerate(selectableArgs):
+          out += "\n  if(readData->nested_buffer_id >= totalLength && totalLength+"+str(v["name"])+".length > readData->nested_buffer_id){"
+          out += "\n    reader* r = &((reader*)that->_arrReaders_.array)[readData->nested_buffer_id - totalLength];"
+          out += "\n    readData->nested_buffer_id = 0;"
+          out += "\n    r->setReadData(r,readData);"
+          out += "\n    return;"
+          out += "\n  }"
+          if i+1 != len(selectableArgs):
+            out += "\n  totalLength += "+str(v["name"])+".length;"
+    return out
 
 def getInit(a):
   out = ""
   for value in a.read_data["args"]:
     out += "\n  that->"+value["name"]+" = _"+value["name"]+";"
 
-  selectableArgs = []
-  for i,v in enumerate(a.read_data["args"]):
-    if v.has_key("selectable") and v["selectable"] == True:
-      if v["type"] != 'reader[]':
-        raise Exception("every selectable argument should have reader[] type, but we have "+v["type"]+" "+v["name"])
-      selectableArgs.append(v)
-
-  noSelectors = False
-  if a.read_data.has_key("noSelectors"):
-    noSelectors = a.read_data["noSelectors"]
+  selectableArgs = getSelectableArgs(a)
 
   if hasReceive(a):
     selectablesCount = str(len(a.read_data["receive"]))
@@ -143,19 +162,17 @@ def getInit(a):
       selectablesCount += " + "+str(v["name"])+".length"
     out += "\n  that->_arrReaders_ = arrayObject_init_dynamic(sizeof(reader), "+selectablesCount+");"
 
-    lastId = 0
     for i,v in enumerate(a.read_data["receive"]):
       out += "\n  ((reader*)that->_arrReaders_.array)["+str(i)+"] = _r"+v["channel"]+str(i)+";"
-      lastId = i
     if len(selectableArgs)>0:
-      out += "\n  int totalLength = "+str(lastId + 1)+";"
+      out += "\n  int totalLength = "+str(len(a.read_data["receive"]))+";"
       for i,v in enumerate(selectableArgs):
         out += "\n  for(int i=0;i<"+str(v["name"])+".length; i++){"
         out += "\n    ((reader*)that->_arrReaders_.array)[totalLength + i] = "+v["name"]+"[i];"
         out += "\n  }"
         if i+1 != len(selectableArgs):
           out += "\n  totalLength += "+str(v["name"])+".length;"
-    if not noSelectors:
+    if hasRSelector(a):
         out += "\n  selector_cnets_osblinnikov_github_com_init(&that->readersSelector, that->_arrReaders_);"
         out += "\n  that->rSelect = selector_cnets_osblinnikov_github_com_createReader(&that->readersSelector, 0);"
   
