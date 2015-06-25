@@ -11,7 +11,6 @@ void ${a.fullName_}_onCreate(struct ${a.fullName_} *that);
 void ${a.fullName_}_onDestroy(struct ${a.fullName_} *that);
 void ${a.fullName_}_onKernels(struct ${a.fullName_} *that);
 struct arrayObject ${a.fullName_}_getReaders(void *t);
-void ${a.fullName_}_setReadData(void *t, bufferReadData *readData);
 
 struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnables(struct ${a.fullName_} *that){
   return that->_runnables;
@@ -24,13 +23,6 @@ struct arrayObject ${a.fullName_}_getReaders(void *t){
   %else:
   return arrayObjectNULL();
   %endif
-}
-
-
-void ${a.fullName_}_setReadData(void *t, bufferReadData *readData){
-  if(t == NULL || readData == NULL){return;}
-  struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;
-  ${p.getReadDataSetup(a)}
 }
 
 

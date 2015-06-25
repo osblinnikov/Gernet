@@ -175,6 +175,7 @@ def getInit(a):
     if hasRSelector(a):
         out += "\n  selector_cnets_osblinnikov_github_com_init(&that->readersSelector, that->_arrReaders_);"
         out += "\n  that->rSelect = selector_cnets_osblinnikov_github_com_createReader(&that->readersSelector, 0);"
+        out += "\n  that->_arrReaders_.length = 1;\n  ((reader*)that->_arrReaders_.array)[0] = that->rSelect;/*hack to return only a single selector instead of group of readers*/"
   
   for value in a.read_data["props"]:
     # print value
