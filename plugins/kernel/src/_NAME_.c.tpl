@@ -18,7 +18,13 @@ struct runnablesContainer_cnets_osblinnikov_github_com ${a.fullName_}_getRunnabl
 
 struct arrayObject ${a.fullName_}_getReaders(void *t){
   struct ${a.fullName_} *that = (struct ${a.fullName_}*)t;
-  %if p.hasReceive(a):
+  %if p.hasRSelector(a):
+  arrayObject arr;
+  arr.length = 1;
+  arr.itemSize = sizeof(reader);
+  arr.array = (void*)&that->rSelect;
+  return arr;
+  %elif p.hasReceive(a):
   return that->_arrReaders_;
   %else:
   return arrayObjectNULL();

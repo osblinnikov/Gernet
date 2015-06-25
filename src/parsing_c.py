@@ -175,7 +175,6 @@ def getInit(a):
     if hasRSelector(a):
         out += "\n  selector_cnets_osblinnikov_github_com_init(&that->readersSelector, that->_arrReaders_);"
         out += "\n  that->rSelect = selector_cnets_osblinnikov_github_com_createReader(&that->readersSelector, 0);"
-        out += "\n  that->_arrReaders_.length = 1;\n  ((reader*)that->_arrReaders_.array)[0] = that->rSelect;/*hack to return only a single selector instead of group of readers*/"
   
   for value in a.read_data["props"]:
     # print value
@@ -471,12 +470,18 @@ def initializeKernels(a):
     #   continue
     # pathList = v["path"].split('.')
     argsList = []
+#    print v["args"]
     for d in v["args"]:
       if v["parallel"] != None and v["parallel"] != 1:
         if str(d["value"]) == "_parallel_":
           d["value"] = prefixParallel
         if str(d["value"]) == "_parallelId_":
           d["value"] = "_kernel"+str(i)+"_i"
+      else:
+        if str(d["value"]) == "_parallel_":
+          d["value"] = 1
+        if str(d["value"]) == "_parallelId_":
+          d["value"] = 0
       if str(d["value"]) == "_runnables_":
         d["value"] = "&that->_runnables"
       castType = ""
