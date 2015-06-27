@@ -68,11 +68,5 @@ endif ()
 link_directories(${'${'}LD_DIRS})
 include_directories(. ${'${'}INCLUDE_DIRS})
 
-# install includes
-if(NOT WIN32)
-  install(DIRECTORY / DESTINATION include/ FILES_MATCHING PATTERN "*.h")
-  install(DIRECTORY / DESTINATION include/ FILES_MATCHING PATTERN "*.h")
-endif()
-
 
 
