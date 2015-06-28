@@ -28,6 +28,12 @@ ${a.fullName_}_EXPORT_API
 writer ${a.fullName_}_createWriter(struct ${a.fullName_} *that, int gridId);
 
 typedef struct ${a.fullName_}{
+//  void* context;
+//  char* (*serialize)(void* that, void* target, unsigned *data_len);
+//  void (*deserialize)(void* that, char* data, unsigned data_len);
+//  void (*sendData)(void* that, char* data, unsigned data_len);
+//  void (*sendReply)(void* that);
+
   void *_readerIds_, *_writerIds_;
   void (*readerIdsDestructor)(void*);
   void (*writerIdsDestructor)(void*);

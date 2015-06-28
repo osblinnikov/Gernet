@@ -8,6 +8,7 @@ bufferReadData ${a.fullName_}_readNextWithMeta(bufferKernelParams *params, int w
 int ${a.fullName_}_readFinished(bufferKernelParams *params);
 void* ${a.fullName_}_writeNext(bufferKernelParams *params, int waitThreshold);
 int ${a.fullName_}_writeFinished(bufferKernelParams *params);
+int ${a.fullName_}_writeFinishedWithMeta(bufferKernelParams *params, bufferWriteData writeData);
 int ${a.fullName_}_size(bufferKernelParams *params);
 int64_t ${a.fullName_}_timeout(bufferKernelParams *params);
 int ${a.fullName_}_gridSize(bufferKernelParams *params);
@@ -17,6 +18,7 @@ void ${a.fullName_}_onCreate(${a.fullName_} *that);
 void ${a.fullName_}_onDestroy(${a.fullName_} *that);
 void ${a.fullName_}_setKernelIds(bufferKernelParams *params, short isReader, void* ids, void (*idsDestructor)(void*));
 void* ${a.fullName_}_getKernelIds(bufferKernelParams *params, short isReader);
+void ${a.fullName_}_enable(bufferKernelParams *params, short isEnabled);
 
 reader ${a.fullName_}_createReader(${a.fullName_} *that, int gridId){
   bufferKernelParams_create(params, that, gridId, ${a.fullName_}_)

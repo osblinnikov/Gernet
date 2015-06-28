@@ -73,13 +73,19 @@ void* ${a.fullName_}_writeNext(bufferKernelParams *params, int waitTimeout) {
 }
 
 int ${a.fullName_}_writeFinished(bufferKernelParams *params) {
+  bufferWriteData writeData;
+  writeData.grid_ids = 0;
+  return ${a.fullName_}_writeFinishedWithMeta(params, writeData);
+}
+
+int ${a.fullName_}_writeFinishedWithMeta(bufferKernelParams *params, bufferWriteData writeData){
   if(params == NULL){
-    fprintf(stderr,"ERROR: ${a.fullName_} writeFinished: params is NULL\n");
+    fprintf(stderr,"ERROR: ${a.fullName_}_writeFinishedWithMeta: params is NULL\n");
     return -1;
   }
   ${a.fullName_} *that = (${a.fullName_}*)params->target;
   if(that == NULL){
-    fprintf(stderr,"ERROR: ${a.fullName_} writeFinished: Some Input parameters are wrong\n");
+    fprintf(stderr,"ERROR: ${a.fullName_}_writeFinishedWithMeta: Some Input parameters are wrong\n");
     return -1;
   };
   /*TODO:IMPLEMENTATION GOES HERE*/
@@ -104,4 +110,18 @@ int ${a.fullName_}_uniqueId(bufferKernelParams *params){
 
 int ${a.fullName_}_addSelector(bufferKernelParams *params, void* selectorContainer) {
   return 0;
+}
+
+
+void ${a.fullName_}_enable(bufferKernelParams *params, short isEnabled){
+  if(params == NULL){
+    fprintf(stderr,"ERROR: ${a.fullName_} enable: params is NULL\n");
+    return;
+  }
+  ${a.fullName_} *that = (${a.fullName_}*)params->target;
+  if(that == NULL){
+    fprintf(stderr,"ERROR: ${a.fullName_} enable: Some Input parameters are wrong\n");
+    return;
+  };
+  /*IMPLEMENT HERE*/
 }
