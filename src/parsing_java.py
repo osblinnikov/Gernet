@@ -2,6 +2,28 @@ import json
 import re
 from gernetHelpers import *
 
+def parsingGernet(a):
+
+  a.read_data = None
+  a.read_data = readYaml(a.prefix, a.module)
+
+  fullName = a.read_data["name"]
+  fullName = fullName.replace("-","").replace("_","")
+
+  a.fullName_ = getFullName_(fullName)
+  a.className = getClassName(fullName)
+  a.companyDomain = getCompanyDomain(fullName)
+  a.company = getCompany(fullName)
+  a.domainName = getDomainName(fullName)
+  a.package = a.domainName+"."+a.className
+  a.domainPath = getDomainPath(fullName)
+  a.defaulRwArguments = [{"name":"gridId","type":"unsigned"}]
+  a.rwArguments = [{"name":"gridId","type":"unsigned"}]
+  if a.read_data.has_key("rwArgs"):
+    a.rwArguments+=a.read_data["rwArgs"]
+  a.arrDel0 = getReaderWriterArgumentsStrarrDel0(a.rwArguments)
+  a.rwArgumentsStr = getReaderWriterArgumentsStr(a.rwArguments)
+
 def getReaderWriterArgumentsStrArr(readerWriterArguments):
   readerWriterArgumentsStrArr = []
   if readerWriterArguments[0]["name"] != "gridId":
@@ -29,7 +51,7 @@ def getFieldsArrStr(a):
       v["type"] = t
       if v.has_key("size"):
         if not isArray:
-          raise Exception("getFieldsArrStr: size of property "+str(i)+" was specified but type is not array!")
+          raise Exception("getFieldsArrStr: size of property "+str(i)+" was specified but type is not array! "+t)
         arr.append(t+" "+v["name"])
       elif isArray:
         raise Exception("getFieldsArrStr: failed because type of property "+str(i)+" is Array but `size` was not specified")
@@ -80,46 +102,6 @@ def groupId(path):
 def artifactId(path):
   path = path.split(".")
   return path[-1]
-
-def parsingGernet(a):
-
-  a.read_data = None
-  a.read_data = readJson(a.prefix)
-
-  fullName = a.read_data["name"]
-  # a.version = a.read_data["ver"]
-  fullNameList = fullName.split('.')
-  a.fullName_ = '_'.join(fullNameList)
-  a.className = fullNameList[-1]
-  a.targetClassName = ".".join(fullNameList[:-1])
-  a.targetClassName = ".".join([a.targetClassName]+[fullNameList[-2]])
-  a.companyDomain = fullNameList[1]+'.'+fullNameList[0]
-  a.company = fullNameList[1]
-
-  del fullNameList[-1]
-  a.domainName = '.'.join(fullNameList)
-
-  fullNameList = fullName.split('.')
-  to_delete = [0,1]
-  for offset, index in enumerate(to_delete):
-    index -= offset
-    del fullNameList[index]
-  a.domainPath = a.companyDomain+'/'+('/'.join(fullNameList))
-
-  if not a.read_data.has_key("type") or a.read_data["type"]!="buffer":
-    if len(a.read_data["topology"])==0:
-      a.classImplements = "Runnable"
-    else:
-      a.classImplements = "" #GetRunnables
-  else:
-    a.classImplements = "readerWriterInterface"
-
-  a.defaulRwArguments = [{"name":"gridId","type":"unsigned"}]
-  a.rwArguments = [{"name":"gridId","type":"unsigned"}]
-  if a.read_data.has_key("rwArgs"):
-    a.rwArguments+=a.read_data["rwArgs"]
-  a.arrDel0 = getReaderWriterArgumentsStrarrDel0(a.rwArguments)
-  a.rwArgumentsStr = getReaderWriterArgumentsStr(a.rwArguments)
 
 def getProps(a):
   fieldsArray = getFieldsArrStr(a)
@@ -230,7 +212,9 @@ def importBlocks(a):
   out = ""
   dependenciesList = []
   for v in a.read_data["topology"]+a.read_data["depends"]:
-    dependenciesList.append(v["path"])
+    print v
+    path = v["name"].replace("-","").replace("_","")
+    dependenciesList.append(path)
   for v in set(dependenciesList):
     out+="\nimport "+v+".*;"
   return out
@@ -238,8 +222,9 @@ def importBlocks(a):
 def declareBlocks(a):
   out = ""
   for v in a.read_data["topology"]:
-    pathList = v["path"].split('.')
-    out += v["path"]+"."+pathList[-1]+" "+v["name"]
+    path = v["name"].replace("-","").replace("_","")
+    pathList = path.split('.')
+    out += path+"."+pathList[-1]+" "+v["name"]
     if v.has_key("parallel"):
       out += "[]"
     out += ";"
@@ -348,7 +333,8 @@ def initializeBuffers(a):
   for blockNum, v in enumerate(a.read_data["topology"]):
     if not v.has_key("type") or v["type"] != "buffer":
       continue
-    pathList = v["path"].split('.')
+    path = v["name"].replace("-","").replace("_","")
+    pathList = path.split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -356,7 +342,7 @@ def initializeBuffers(a):
         castType = "("+d["type"]+")"
       argsList.append(castType+str(d["value"]))
     #create variables
-    out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList)+");"
+    out += "\n    "+v["name"]+" = new "+path+"."+pathList[-1]+"("+','.join(argsList)+");"
     #get writer from buffer
     for i,w in enumerate(v["emit"]):
       out += "\n    reader "+v["name"]+"r"+str(i)+" = "+v["name"]+".getReader("+','.join(getRwArgs(i,w))+");"
@@ -372,7 +358,8 @@ def initializeKernels(a):
   for i,v in enumerate(a.read_data["topology"]):
     if v.has_key("type") and v["type"] == "buffer":
       continue
-    pathList = v["path"].split('.')
+    path = v["name"].replace("-","").replace("_","")
+    pathList = path.split('.')
     argsList = []
     for d in v["args"]:
       castType = ""
@@ -381,12 +368,12 @@ def initializeKernels(a):
       argsList.append(castType+str(d["value"]))
 
     if v.has_key("parallel"):
-        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"["+str(v["parallel"])+"];"
+        out += "\n    "+v["name"]+" = new "+path+"."+pathList[-1]+"["+str(v["parallel"])+"];"
         out += "\n    for(int j=0;j<"+str(v["parallel"])+";j++){"
-        out += "\n      "+v["name"]+"[j] = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,True))+");"
+        out += "\n      "+v["name"]+"[j] = new "+path+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,True))+");"
         out += "\n    }"
     else:
-        out += "\n    "+v["name"]+" = new "+v["path"]+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,False))+");"
+        out += "\n    "+v["name"]+" = new "+path+"."+pathList[-1]+"("+','.join(argsList+getReadersWriters(a,v,False))+");"
 
   return out
 

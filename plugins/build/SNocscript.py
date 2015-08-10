@@ -7,7 +7,7 @@ Import( 'env' )
 def add_dependencies(env):
   '''[[[cog
   import cogging as c
-  c.tpl(cog,templateFile,c.a(prefix=configFile))
+  c.tpl(cog,templateFile,c.a(prefix=configFile,module=configModule))
   ]]]'''
   '''[[[end]]]'''
   AddPthreads(env)

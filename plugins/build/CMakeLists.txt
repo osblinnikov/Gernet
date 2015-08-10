@@ -14,7 +14,7 @@ include_directories(.)
 function(addDeps buildType dstBuildType)
 # [[[cog
 # import cogging as c
-# c.tpl(cog,templateFile,c.a(prefix=configFile))
+# c.tpl(cog,templateFile,c.a(prefix=configFile,module=configModule))
 # ]]]
 # [[[end]]]
 endfunction(addDeps)
