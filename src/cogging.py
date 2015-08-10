@@ -18,4 +18,4 @@ def tpl(cog, strfile, args):
     os.path.abspath(os.path.join(os.getcwd(),'..','..','..','..','..'))
   ])
   tplFromFile = mako.template.Template(filename=strfile, lookup=mylookup, imports=['from attrs import attrs'])
-  cog.out(tplFromFile.render(a=args,p=args.prefix))
+  cog.out(tplFromFile.render(a=args,p=args.prefix,m=args.module))

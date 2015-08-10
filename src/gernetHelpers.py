@@ -12,11 +12,11 @@ PROJECTS_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 DefaultMapBuffer = 'github.com/osblinnikov/cnets/mapBuffer'
 
 def readGernet(filename):
-    read_data = readYaml(filename+".yaml")
+    read_data = readYaml(filename+".yaml",".")
     if read_data != None:
         read_data['prefix'] = filename+".yaml"
     else:
-        read_data = readJson(filename+".json")
+        read_data = readJson(filename+".json",".")
         if read_data != None:
             read_data['prefix'] = filename+".json"
     # print filename
@@ -24,7 +24,15 @@ def readGernet(filename):
     return read_data
 
 
-def readJson(filename):
+def findModule(read_data, module):
+    print "findModule: "+module
+    for m in read_data["modules"]:
+        if m["name"] == module:
+            m["name"] = read_data["name"]+"/"+m["name"]
+            return m
+    return None
+
+def readJson(filename, module):
     json_file_to_read = os.path.join(filename)
     read_data = None
     try:
@@ -47,10 +55,12 @@ def readJson(filename):
         return read_data
 
     # print filename
+    if module != ".":
+        read_data = findModule(read_data, module)    
     checkStructure(read_data, False)
     return read_data
 
-def readYaml(filename):
+def readYaml(filename, module):
     file_to_read = os.path.join(filename)
     read_data = None
     try:
@@ -71,6 +81,8 @@ def readYaml(filename):
     if read_data == None:
         raise Exception(filename+" was not read")
     else:
+        if module != ".":
+            read_data = findModule(read_data, module)    
         checkStructure(read_data, False)
     return read_data
 

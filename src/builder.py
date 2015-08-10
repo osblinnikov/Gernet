@@ -31,7 +31,7 @@ def tpl(strfile, args):
     mylookup = mako.lookup.TemplateLookup(directories=[
         os.path.abspath(os.getcwd())
     ])
-    tplFromFile = mako.template.Template(filename=strfile, lookup=mylookup, imports=['from src.attrs import attrs'])
+    tplFromFile = mako.template.Template(filename=strfile, lookup=mylookup, imports=['from attrs import attrs'])
     return tplFromFile.render(a=args)
 
 
@@ -69,10 +69,12 @@ def getFilteredSubFolders(folder, filters):
             res.append(i)
     return res
 
-def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
+def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args, json_file_module):
     fullName_ = getFullName_(classPath)
     className = getClassName(classPath)
     json_file_to_read = join(topology_dir, "flat.gernet.yaml")
+    print json_file_module
+    print generator_dir
     for root, dirs, files in os.walk(generator_dir):
         for fileName in files:
             file = os.path.join(root,fileName)
@@ -84,7 +86,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
                 .replace("_NAME_", className) \
                 .replace("_FULLNAME_", fullName_) \
                 .replace("_FULLNAMEDIR_", os.path.join(*[fullName_, ""])) \
-                .replace("_PATH_", os.path.join(*(splitClassPath(classPath)+[""]))) \
+                .replace("_PATH_", os.path.join(*(splitClassPath(classPath.replace("_","").replace("-",""))+[""]))) \
                 .replace("_GERNET_","gernet")
             absDstFilePath = os.path.join(topology_dir, relativeFilePath)
             if not os.path.exists(absDstFilePath):
@@ -97,6 +99,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
                 f.write(tpl(
                     file,#input template
                     attrs(
+                        module=json_file_module,
                         prefix=json_file_to_read,#required for parser of json file
                         parserPath=generator_dir
                     )#args
@@ -112,6 +115,7 @@ def generateMissedFiles(topology_dir, generator_dir, classPath, extra_args):
                 generator_dir,
                 '-r',#replace in file
                 "-D","configFile="+json_file_to_read, #specify config as global variable
+                "-D","configModule="+json_file_module, #specify config module name
                 "-D","templateFile="+file+'.tpl', #specify config as global variable
                 absDstFilePath
             ]
@@ -144,7 +148,7 @@ def runGernet(firstRealArgI, argv, topology_dir):
 
     for p in read_data["gen"]:
         p0 = getPath(p)
-        print p0
+        # print p0
         # Types = getFilteredSubFolders(p0, Types)
         # if len(Types) == 0:
             # print ("No one generator was found")
@@ -154,8 +158,28 @@ def runGernet(firstRealArgI, argv, topology_dir):
             topology_dir, #path to the directory with the topology
             p0 , #Types[i]),#generator_directory
             read_data["name"],#module full name
-            extra_args # extra arguments for the Cog
+            extra_args, # extra arguments for the Cog,
+            "."#root module
         )
+
+    if read_data.has_key('modules'):
+        for mod in read_data["modules"]:
+            for p in mod["gen"]:
+                p0 = getPath(p)
+                # print p0
+                # Types = getFilteredSubFolders(p0, Types)
+                # if len(Types) == 0:
+                    # print ("No one generator was found")
+                    # return
+                # for i in range(0, len(Types)):
+                generateMissedFiles(
+                    topology_dir, #path to the directory with the topology
+                    p0 , #Types[i]),#generator_directory
+                    read_data["name"]+"/"+mod["name"],#module full name
+                    extra_args, # extra arguments for the Cog,
+                    mod["name"]#root module
+                )
+
 
 
 def checkDir(directory):

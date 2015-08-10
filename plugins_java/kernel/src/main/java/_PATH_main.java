@@ -11,7 +11,7 @@ package ${a.package};
 import ${a.package}.${a.className};
 /*[[[cog
 import cogging as c
-c.tpl(cog,templateFile,c.a(prefix=configFile))
+c.tpl(cog,templateFile,c.a(prefix=configFile,module=configModule))
 ]]]*/
 /*[[[end]]]*/
 public class main{

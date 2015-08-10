@@ -11,7 +11,7 @@ package ${a.package};
 
 /*[[[cog
 import cogging as c
-c.tpl(cog,templateFile,c.a(prefix=configFile))
+c.tpl(cog,templateFile,c.a(prefix=configFile,module=configModule))
 ]]]*/
 /*[[[end]]]*/
 

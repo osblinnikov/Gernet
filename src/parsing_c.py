@@ -5,7 +5,7 @@ from gernetHelpers import *
 def parsingGernet(a):
 
   a.read_data = None
-  a.read_data = readYaml(a.prefix)
+  a.read_data = readYaml(a.prefix, a.module)
 
   fullName = a.read_data["name"]
   a.fullName_ = getFullName_(fullName)

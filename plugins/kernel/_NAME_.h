@@ -5,7 +5,7 @@ p.parsingGernet(a)%>#ifndef ${a.fullName_}_H
 
 /*[[[cog
 import cogging as c
-c.tpl(cog,templateFile,c.a(prefix=configFile))
+c.tpl(cog,templateFile,c.a(prefix=configFile,module=configModule))
 ]]]*/
 /*[[[end]]]*/
 
